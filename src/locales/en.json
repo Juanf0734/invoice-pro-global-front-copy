@@ -206,5 +206,30 @@
     "currency": "Currency",
     "productsDetail": "Detail/Products",
     "summary": "Summary"
+  },
+  "onboarding": {
+    "welcome": "Welcome to eBill Pro!",
+    "welcomeDesc": "We'll show you how to use the platform in a few simple steps",
+    "skip": "Skip tour",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "step1Title": "Dashboard - Your Control Center",
+    "step1Desc": "Here you can see all your real-time statistics: monthly revenue, issued invoices, active clients and billing charts.",
+    "step2Title": "Create New Invoice",
+    "step2Desc": "Click here to create a new electronic invoice. The process is simple and guided step by step.",
+    "step3Title": "Manage Invoices",
+    "step3Desc": "Access all your issued invoices, search, download or duplicate them as needed.",
+    "step4Title": "Client Base",
+    "step4Desc": "Manage your client portfolio, add new ones and keep all their information updated.",
+    "step5Title": "Product Catalog",
+    "step5Desc": "Manage all your products and services to invoice faster.",
+    "step6Title": "Your Company Data",
+    "step6Desc": "Configure your company information that will appear on invoices.",
+    "step7Title": "Change Language",
+    "step7Desc": "You can change the platform language between Spanish and English at any time.",
+    "step8Title": "Settings",
+    "step8Desc": "Customize your profile, preferences and security settings from here.",
+    "gotIt": "Got it!"
   }
 }

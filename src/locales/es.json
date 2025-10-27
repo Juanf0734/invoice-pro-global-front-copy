@@ -206,5 +206,30 @@
     "currency": "Moneda",
     "productsDetail": "Detalle/Productos",
     "summary": "Resumen"
+  },
+  "onboarding": {
+    "welcome": "¡Bienvenido a eBill Pro!",
+    "welcomeDesc": "Te mostraremos cómo usar la plataforma en unos simples pasos",
+    "skip": "Saltar tour",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "finish": "Finalizar",
+    "step1Title": "Dashboard - Tu Centro de Control",
+    "step1Desc": "Aquí puedes ver todas tus estadísticas en tiempo real: ingresos del mes, facturas emitidas, clientes activos y gráficos de facturación.",
+    "step2Title": "Crear Nueva Factura",
+    "step2Desc": "Haz clic aquí para crear una nueva factura electrónica. El proceso es simple y guiado paso a paso.",
+    "step3Title": "Gestionar Facturas",
+    "step3Desc": "Accede a todas tus facturas emitidas, búscalas, descárgalas o duplícalas según necesites.",
+    "step4Title": "Base de Clientes",
+    "step4Desc": "Gestiona tu cartera de clientes, añade nuevos y mantén toda su información actualizada.",
+    "step5Title": "Catálogo de Productos",
+    "step5Desc": "Administra todos tus productos y servicios para facturar más rápido.",
+    "step6Title": "Datos de tu Empresa",
+    "step6Desc": "Configura la información de tu empresa que aparecerá en las facturas.",
+    "step7Title": "Cambiar Idioma",
+    "step7Desc": "Puedes cambiar el idioma de la plataforma entre español e inglés en cualquier momento.",
+    "step8Title": "Configuración",
+    "step8Desc": "Personaliza tu perfil, preferencias y configuración de seguridad desde aquí.",
+    "gotIt": "¡Entendido!"
   }
 }

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Bell, LogOut, User, Languages } from "lucide-react";
@@ -13,11 +14,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ebillLogo from "@/assets/ebill-logo.png";
+import { OnboardingTour } from "./OnboardingTour";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    // Check if user should see onboarding on mount
+    const checkOnboarding = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${user.id}`);
+        if (!hasSeenOnboarding) {
+          setShowOnboarding(true);
+        }
+      }
+    };
+    checkOnboarding();
+  }, []);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -51,7 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex-1" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" data-tour="language">
                   <Languages className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -86,6 +103,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </header>
           <main className="flex-1 overflow-auto bg-muted/30 p-6">{children}</main>
         </div>
+        {showOnboarding && <OnboardingTour />}
       </div>
     </SidebarProvider>
   );

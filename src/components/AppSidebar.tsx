@@ -39,7 +39,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="bg-accent hover:bg-accent-hover">
+                <SidebarMenuButton asChild className="bg-accent hover:bg-accent-hover" data-tour="new-invoice">
                   <NavLink to="/invoices/new">
                     <PlusCircle className="h-4 w-4" />
                     <span className="font-medium">{t("nav.newInvoice")}</span>
@@ -54,12 +54,21 @@ export function AppSidebar() {
           <SidebarGroupLabel>{t("common.search")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {menuItems.map((item, index) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
+                      data-tour={
+                        index === 0 ? "dashboard" :
+                        index === 1 ? "invoices" :
+                        index === 2 ? "clients" :
+                        index === 3 ? "products" :
+                        index === 4 ? "company" :
+                        index === 5 ? "settings" :
+                        undefined
+                      }
                       className={({ isActive }) =>
                         isActive
                           ? "bg-sidebar-accent text-sidebar-primary font-medium"
