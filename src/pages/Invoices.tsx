@@ -162,7 +162,7 @@ const Invoices = () => {
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 bg-background" align="start">
                       <Calendar
                         initialFocus
                         mode="range"
@@ -171,7 +171,6 @@ const Invoices = () => {
                         onSelect={setDateRange}
                         numberOfMonths={2}
                         locale={locale}
-                        className="pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
