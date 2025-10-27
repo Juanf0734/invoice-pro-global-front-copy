@@ -35,14 +35,14 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>{t("nav.dashboard")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm">{t("nav.dashboard")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="bg-accent hover:bg-accent-hover" data-tour="new-invoice">
+                <SidebarMenuButton asChild className="bg-accent hover:bg-accent-hover h-11" data-tour="new-invoice">
                   <NavLink to="/invoices/new">
-                    <PlusCircle className="h-4 w-4" />
-                    <span className="font-medium">{t("nav.newInvoice")}</span>
+                    <PlusCircle className="h-5 w-5" />
+                    <span className="font-medium text-base">{t("nav.newInvoice")}</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -51,12 +51,12 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>{t("common.search")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm">{t("common.search")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item, index) => (
+              {menuItems.slice(0, -1).map((item, index) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-11">
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
@@ -66,7 +66,6 @@ export function AppSidebar() {
                         index === 2 ? "clients" :
                         index === 3 ? "products" :
                         index === 4 ? "company" :
-                        index === 5 ? "settings" :
                         undefined
                       }
                       className={({ isActive }) =>
@@ -75,12 +74,35 @@ export function AppSidebar() {
                           : "hover:bg-sidebar-accent/50"
                       }
                     >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-5 w-5" />
+                      <span className="text-base">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-11">
+                  <NavLink
+                    to={menuItems[menuItems.length - 1].url}
+                    data-tour="settings"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                        : "hover:bg-sidebar-accent/50"
+                    }
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span className="text-base">{menuItems[menuItems.length - 1].title}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
