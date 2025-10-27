@@ -11,6 +11,7 @@ import NewInvoice from "./pages/NewInvoice";
 import Clients from "./pages/Clients";
 import Products from "./pages/Products";
 import Company from "./pages/Company";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -80,6 +81,16 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Company />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Settings />
                 </Layout>
               </ProtectedRoute>
             }
