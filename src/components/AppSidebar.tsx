@@ -34,8 +34,8 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
+        {/* Nueva Factura - Acción destacada */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sm">{t("nav.dashboard")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -50,47 +50,117 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Operaciones principales */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sm">{t("common.search")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.slice(0, -1).map((item, index) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-11">
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      data-tour={
-                        index === 0 ? "dashboard" :
-                        index === 1 ? "invoices" :
-                        index === 2 ? "clients" :
-                        index === 3 ? "products" :
-                        index === 4 ? "company" :
-                        undefined
-                      }
-                      className={({ isActive }) =>
-                        isActive
-                          ? "bg-sidebar-accent text-sidebar-primary font-medium"
-                          : "hover:bg-sidebar-accent/50"
-                      }
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span className="text-base">{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-auto">
+          <SidebarGroupLabel className="text-sm">Operaciones</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="h-11">
                   <NavLink
-                    to={menuItems[menuItems.length - 1].url}
+                    to="/"
+                    end
+                    data-tour="dashboard"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                        : "hover:bg-sidebar-accent/50"
+                    }
+                  >
+                    <LayoutDashboard className="h-5 w-5" />
+                    <span className="text-base">{t("nav.dashboard")}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-11">
+                  <NavLink
+                    to="/invoices"
+                    data-tour="invoices"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                        : "hover:bg-sidebar-accent/50"
+                    }
+                  >
+                    <FileText className="h-5 w-5" />
+                    <span className="text-base">{t("nav.invoices")}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Gestión de datos */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sm">Gestión</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-11">
+                  <NavLink
+                    to="/clients"
+                    data-tour="clients"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                        : "hover:bg-sidebar-accent/50"
+                    }
+                  >
+                    <Users className="h-5 w-5" />
+                    <span className="text-base">{t("nav.clients")}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-11">
+                  <NavLink
+                    to="/products"
+                    data-tour="products"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                        : "hover:bg-sidebar-accent/50"
+                    }
+                  >
+                    <Package className="h-5 w-5" />
+                    <span className="text-base">{t("nav.products")}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Configuración - Al final */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupLabel className="text-sm">Ajustes</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-11">
+                  <NavLink
+                    to="/company"
+                    data-tour="company"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                        : "hover:bg-sidebar-accent/50"
+                    }
+                  >
+                    <Building2 className="h-5 w-5" />
+                    <span className="text-base">{t("nav.company")}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-11">
+                  <NavLink
+                    to="/settings"
                     data-tour="settings"
                     className={({ isActive }) =>
                       isActive
@@ -99,7 +169,7 @@ export function AppSidebar() {
                     }
                   >
                     <Settings className="h-5 w-5" />
-                    <span className="text-base">{menuItems[menuItems.length - 1].title}</span>
+                    <span className="text-base">{t("nav.settings")}</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
