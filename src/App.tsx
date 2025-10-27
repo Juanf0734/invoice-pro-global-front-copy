@@ -4,12 +4,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
 import Clients from "./pages/Clients";
 import Products from "./pages/Products";
 import Company from "./pages/Company";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,52 +23,65 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/auth" element={<Auth />} />
           <Route
             path="/"
             element={
-              <Layout>
-                <Dashboard />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/invoices"
             element={
-              <Layout>
-                <Invoices />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Invoices />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/invoices/new"
             element={
-              <Layout>
-                <NewInvoice />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <NewInvoice />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/clients"
             element={
-              <Layout>
-                <Clients />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Clients />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/products"
             element={
-              <Layout>
-                <Products />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Products />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/company"
             element={
-              <Layout>
-                <Company />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Company />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route path="*" element={<NotFound />} />
