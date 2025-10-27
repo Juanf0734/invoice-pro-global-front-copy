@@ -11,7 +11,9 @@
     "previous": "Previous",
     "close": "Close",
     "error": "Error",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "spanish": "Spanish",
+    "english": "English"
   },
   "nav": {
     "dashboard": "Dashboard",

@@ -18,9 +18,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
 } from "@/components/ui/sidebar";
-import ebillLogo from "@/assets/ebill-logo.png";
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -35,15 +33,6 @@ export function AppSidebar() {
   ];
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
-        <div className="flex items-center gap-3">
-          <img src={ebillLogo} alt="eBill Pro" className="h-8 w-auto" />
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-xs text-muted-foreground">PYMES</span>
-          </div>
-        </div>
-      </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{t("nav.dashboard")}</SidebarGroupLabel>

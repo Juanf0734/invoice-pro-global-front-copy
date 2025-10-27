@@ -11,7 +11,9 @@
     "previous": "Anterior",
     "close": "Cerrar",
     "error": "Error",
-    "unexpectedError": "Ocurrió un error inesperado"
+    "unexpectedError": "Ocurrió un error inesperado",
+    "spanish": "Español",
+    "english": "Inglés"
   },
   "nav": {
     "dashboard": "Dashboard",
