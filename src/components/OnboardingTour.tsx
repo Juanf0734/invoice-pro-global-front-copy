@@ -145,35 +145,107 @@ export function OnboardingTour() {
     const position = steps[currentStep].position;
     
     const offset = 20;
+    const cardWidth = 320; // w-80 = 320px
+    const cardHeight = 280; // estimated height
+    
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    let top = 0;
+    let left = 0;
+    let transform = "";
     
     switch (position) {
       case "bottom":
-        return {
-          top: `${rect.bottom + offset}px`,
-          left: `${rect.left + rect.width / 2}px`,
-          transform: "translateX(-50%)",
-        };
+        top = rect.bottom + offset;
+        left = rect.left + rect.width / 2;
+        transform = "translateX(-50%)";
+        
+        // Check if card goes off right edge
+        if (left + cardWidth / 2 > viewportWidth) {
+          left = viewportWidth - cardWidth - 10;
+          transform = "none";
+        }
+        // Check if card goes off left edge
+        if (left - cardWidth / 2 < 0) {
+          left = 10;
+          transform = "none";
+        }
+        // Check if card goes off bottom edge
+        if (top + cardHeight > viewportHeight) {
+          top = rect.top - cardHeight - offset;
+        }
+        break;
+        
       case "top":
-        return {
-          top: `${rect.top - offset}px`,
-          left: `${rect.left + rect.width / 2}px`,
-          transform: "translate(-50%, -100%)",
-        };
+        top = rect.top - cardHeight - offset;
+        left = rect.left + rect.width / 2;
+        transform = "translateX(-50%)";
+        
+        // Check if card goes off right edge
+        if (left + cardWidth / 2 > viewportWidth) {
+          left = viewportWidth - cardWidth - 10;
+          transform = "none";
+        }
+        // Check if card goes off left edge
+        if (left - cardWidth / 2 < 0) {
+          left = 10;
+          transform = "none";
+        }
+        // Check if card goes off top edge
+        if (top < 0) {
+          top = rect.bottom + offset;
+        }
+        break;
+        
       case "right":
-        return {
-          top: `${rect.top + rect.height / 2}px`,
-          left: `${rect.right + offset}px`,
-          transform: "translateY(-50%)",
-        };
+        top = rect.top + rect.height / 2;
+        left = rect.right + offset;
+        transform = "translateY(-50%)";
+        
+        // Check if card goes off right edge
+        if (left + cardWidth > viewportWidth) {
+          left = rect.left - cardWidth - offset;
+        }
+        // Check if card goes off bottom edge
+        if (top + cardHeight / 2 > viewportHeight) {
+          top = viewportHeight - cardHeight - 10;
+          transform = "none";
+        }
+        // Check if card goes off top edge
+        if (top - cardHeight / 2 < 0) {
+          top = 10;
+          transform = "none";
+        }
+        break;
+        
       case "left":
-        return {
-          top: `${rect.top + rect.height / 2}px`,
-          left: `${rect.left - offset}px`,
-          transform: "translate(-100%, -50%)",
-        };
-      default:
-        return {};
+        top = rect.top + rect.height / 2;
+        left = rect.left - cardWidth - offset;
+        transform = "translateY(-50%)";
+        
+        // Check if card goes off left edge
+        if (left < 0) {
+          left = rect.right + offset;
+        }
+        // Check if card goes off bottom edge
+        if (top + cardHeight / 2 > viewportHeight) {
+          top = viewportHeight - cardHeight - 10;
+          transform = "none";
+        }
+        // Check if card goes off top edge
+        if (top - cardHeight / 2 < 0) {
+          top = 10;
+          transform = "none";
+        }
+        break;
     }
+
+    return {
+      top: `${top}px`,
+      left: `${left}px`,
+      transform,
+    };
   };
 
   if (!isVisible) return null;
@@ -181,11 +253,11 @@ export function OnboardingTour() {
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/50 z-40 animate-fade-in" />
+      <div className="fixed inset-0 bg-black/50 z-40 animate-fade-in pointer-events-none" />
       
       {/* Tour Card */}
       <Card 
-        className="fixed z-50 w-80 shadow-2xl animate-scale-in"
+        className="fixed z-50 w-80 shadow-2xl animate-scale-in max-h-[90vh] overflow-auto"
         style={getCardPosition()}
       >
         <CardHeader>
