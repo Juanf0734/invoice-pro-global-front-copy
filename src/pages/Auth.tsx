@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -239,12 +239,23 @@ const Auth = () => {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          {t("auth.termsPrivacy")}
-        </p>
+        <div className="mt-6 space-y-3">
+          <p className="text-center text-xs text-muted-foreground">
+            {t("auth.termsPrivacy")}
+          </p>
+          <div className="text-center">
+            <Link 
+              to="/pricing" 
+              className="text-sm text-primary hover:underline font-medium"
+            >
+              Ver planes y precios →
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Auth;
+

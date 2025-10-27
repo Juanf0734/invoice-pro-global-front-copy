@@ -14,6 +14,7 @@ import Products from "./pages/Products";
 import Company from "./pages/Company";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,9 +25,10 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-      <BrowserRouter>
+        <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route
             path="/"
             element={
