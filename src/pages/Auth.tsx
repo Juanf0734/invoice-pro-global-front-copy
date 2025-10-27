@@ -8,11 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import ebillLogo from "@/assets/ebill-logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,20 +53,20 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Error al iniciar sesión",
+          title: t("auth.signInError"),
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "¡Bienvenido!",
-          description: "Has iniciado sesión correctamente",
+          title: t("auth.welcome"),
+          description: t("auth.signInSuccess"),
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Ocurrió un error inesperado",
+        title: t("common.error"),
+        description: t("common.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -91,14 +93,14 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Error al registrarse",
+          title: t("auth.signUpError"),
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "¡Cuenta creada!",
-          description: "Tu cuenta ha sido creada exitosamente. Puedes iniciar sesión ahora.",
+          title: t("auth.createAccount"),
+          description: t("auth.signUpSuccess"),
         });
         // Switch to login tab after successful signup
         const loginTab = document.querySelector('[value="login"]') as HTMLElement;
@@ -106,8 +108,8 @@ const Auth = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Ocurrió un error inesperado",
+        title: t("common.error"),
+        description: t("common.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -120,27 +122,27 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <img src={ebillLogo} alt="eBill Pro" className="mx-auto mb-4 h-16 w-auto" />
-          <p className="text-muted-foreground">Plataforma de Facturación Electrónica</p>
+          <p className="text-muted-foreground">{t("auth.platformSubtitle")}</p>
         </div>
 
         <Card className="shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-center text-2xl">Acceso a la Plataforma</CardTitle>
+            <CardTitle className="text-center text-2xl">{t("auth.accessPlatform")}</CardTitle>
             <CardDescription className="text-center">
-              Inicia sesión o crea una cuenta para comenzar
+              {t("auth.accessDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
-                <TabsTrigger value="signup">Registrarse</TabsTrigger>
+                <TabsTrigger value="login">{t("auth.signIn")}</TabsTrigger>
+                <TabsTrigger value="signup">{t("auth.signUp")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email">{t("auth.email")}</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -151,7 +153,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Contraseña</Label>
+                    <Label htmlFor="login-password">{t("auth.password")}</Label>
                     <Input
                       id="login-password"
                       type="password"
@@ -165,10 +167,10 @@ const Auth = () => {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Iniciando sesión...
+                        {t("common.loading")}
                       </>
                     ) : (
-                      "Iniciar Sesión"
+                      t("auth.signIn")
                     )}
                   </Button>
                 </form>
@@ -177,7 +179,7 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nombre Completo</Label>
+                    <Label htmlFor="signup-name">{t("auth.fullName")}</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -188,7 +190,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-company">Empresa</Label>
+                    <Label htmlFor="signup-company">{t("auth.companyName")}</Label>
                     <Input
                       id="signup-company"
                       type="text"
@@ -198,7 +200,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">{t("auth.email")}</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -209,7 +211,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Contraseña</Label>
+                    <Label htmlFor="signup-password">{t("auth.password")}</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -219,16 +221,16 @@ const Auth = () => {
                       required
                       minLength={6}
                     />
-                    <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
+                    <p className="text-xs text-muted-foreground">{t("auth.minPasswordLength")}</p>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creando cuenta...
+                        {t("common.loading")}
                       </>
                     ) : (
-                      "Crear Cuenta"
+                      t("auth.createAccount")
                     )}
                   </Button>
                 </form>
@@ -238,7 +240,7 @@ const Auth = () => {
         </Card>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Al continuar, aceptas nuestros Términos de Servicio y Política de Privacidad
+          {t("auth.termsPrivacy")}
         </p>
       </div>
     </div>

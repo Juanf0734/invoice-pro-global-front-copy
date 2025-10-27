@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,19 +16,20 @@ import {
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
-        title: "Error",
-        description: "No se pudo cerrar sesión",
+        title: t("common.error"),
+        description: t("auth.signOutError"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
+        title: t("auth.sessionClosed"),
+        description: t("auth.sessionClosedDesc"),
       });
       navigate("/auth");
     }
@@ -55,7 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  Cerrar Sesión
+                  {t("auth.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

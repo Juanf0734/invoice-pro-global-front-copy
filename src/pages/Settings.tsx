@@ -10,9 +10,12 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Save, User, Bell, Shield, Globe, Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState({
@@ -83,12 +86,12 @@ const Settings = () => {
       if (error) throw error;
 
       toast({
-        title: "Perfil actualizado",
-        description: "Tus datos se han guardado correctamente",
+        title: t("settings.profileUpdated"),
+        description: t("settings.profileUpdatedDesc"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -100,8 +103,8 @@ const Settings = () => {
   const handleUpdatePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
-        title: "Error",
-        description: "Las contraseñas no coinciden",
+        title: t("common.error"),
+        description: t("settings.passwordsDontMatch"),
         variant: "destructive",
       });
       return;
@@ -109,8 +112,8 @@ const Settings = () => {
 
     if (passwordData.newPassword.length < 6) {
       toast({
-        title: "Error",
-        description: "La contraseña debe tener al menos 6 caracteres",
+        title: t("common.error"),
+        description: t("settings.passwordMinLength"),
         variant: "destructive",
       });
       return;
@@ -125,8 +128,8 @@ const Settings = () => {
       if (error) throw error;
 
       toast({
-        title: "Contraseña actualizada",
-        description: "Tu contraseña se ha cambiado correctamente",
+        title: t("settings.passwordUpdated"),
+        description: t("settings.passwordUpdatedDesc"),
       });
 
       setPasswordData({
@@ -136,7 +139,7 @@ const Settings = () => {
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -146,43 +149,47 @@ const Settings = () => {
   };
 
   const handleSavePreferences = () => {
+    // Save language to localStorage
+    localStorage.setItem("language", preferences.language);
+    i18n.changeLanguage(preferences.language);
+    
     toast({
-      title: "Preferencias guardadas",
-      description: "Tus preferencias se han actualizado correctamente",
+      title: t("settings.preferencesSaved"),
+      description: t("settings.preferencesSavedDesc"),
     });
   };
 
   const handleSaveNotifications = () => {
     toast({
-      title: "Notificaciones actualizadas",
-      description: "Tus preferencias de notificaciones se han guardado",
+      title: t("settings.notificationsUpdated"),
+      description: t("settings.notificationsUpdatedDesc"),
     });
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Configuración</h1>
-        <p className="text-muted-foreground">Personaliza tu experiencia en eBill Pro</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("settings.title")}</h1>
+        <p className="text-muted-foreground">{t("settings.subtitle")}</p>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="gap-2">
             <User className="h-4 w-4" />
-            Perfil
+            {t("settings.profile")}
           </TabsTrigger>
           <TabsTrigger value="preferences" className="gap-2">
             <Globe className="h-4 w-4" />
-            Preferencias
+            {t("settings.preferences")}
           </TabsTrigger>
           <TabsTrigger value="notifications" className="gap-2">
             <Bell className="h-4 w-4" />
-            Notificaciones
+            {t("settings.notifications")}
           </TabsTrigger>
           <TabsTrigger value="security" className="gap-2">
             <Shield className="h-4 w-4" />
-            Seguridad
+            {t("settings.security")}
           </TabsTrigger>
         </TabsList>
 
@@ -190,12 +197,12 @@ const Settings = () => {
         <TabsContent value="profile" className="space-y-4">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Información Personal</CardTitle>
-              <CardDescription>Actualiza tu información de perfil</CardDescription>
+              <CardTitle>{t("settings.personalInfo")}</CardTitle>
+              <CardDescription>{t("settings.personalInfoDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Nombre Completo</Label>
+                <Label htmlFor="fullName">{t("auth.fullName")}</Label>
                 <Input
                   id="fullName"
                   value={profile.full_name}
@@ -205,7 +212,7 @@ const Settings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="companyName">Nombre de la Empresa</Label>
+                <Label htmlFor="companyName">{t("auth.companyName")}</Label>
                 <Input
                   id="companyName"
                   value={profile.company_name}
@@ -215,7 +222,7 @@ const Settings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -224,7 +231,7 @@ const Settings = () => {
                   className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground">
-                  El email no se puede cambiar. Contacta soporte si necesitas modificarlo.
+                  {t("settings.emailCannotChange")}
                 </p>
               </div>
 
@@ -235,12 +242,12 @@ const Settings = () => {
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Guardando...
+                      {t("common.saving")}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4" />
-                      Guardar Cambios
+                      {t("settings.saveChanges")}
                     </>
                   )}
                 </Button>
@@ -253,13 +260,13 @@ const Settings = () => {
         <TabsContent value="preferences" className="space-y-4">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Preferencias de la Plataforma</CardTitle>
-              <CardDescription>Configura cómo quieres usar eBill Pro</CardDescription>
+              <CardTitle>{t("settings.platformPreferences")}</CardTitle>
+              <CardDescription>{t("settings.platformPreferencesDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="language">Idioma</Label>
+                  <Label htmlFor="language">{t("settings.language")}</Label>
                   <Select
                     value={preferences.language}
                     onValueChange={(value) => setPreferences({ ...preferences, language: value })}
@@ -270,13 +277,12 @@ const Settings = () => {
                     <SelectContent>
                       <SelectItem value="es">Español</SelectItem>
                       <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="pt">Português</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Moneda Predeterminada</Label>
+                  <Label htmlFor="currency">{t("settings.defaultCurrency")}</Label>
                   <Select
                     value={preferences.currency}
                     onValueChange={(value) => setPreferences({ ...preferences, currency: value })}
@@ -294,7 +300,7 @@ const Settings = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="timezone">Zona Horaria</Label>
+                  <Label htmlFor="timezone">{t("settings.timezone")}</Label>
                   <Select
                     value={preferences.timezone}
                     onValueChange={(value) => setPreferences({ ...preferences, timezone: value })}
@@ -312,7 +318,7 @@ const Settings = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dateFormat">Formato de Fecha</Label>
+                  <Label htmlFor="dateFormat">{t("settings.dateFormat")}</Label>
                   <Select
                     value={preferences.dateFormat}
                     onValueChange={(value) => setPreferences({ ...preferences, dateFormat: value })}
@@ -334,7 +340,7 @@ const Settings = () => {
               <div className="flex justify-end">
                 <Button onClick={handleSavePreferences} className="gap-2">
                   <Save className="h-4 w-4" />
-                  Guardar Preferencias
+                  {t("settings.savePreferences")}
                 </Button>
               </div>
             </CardContent>
@@ -345,8 +351,8 @@ const Settings = () => {
         <TabsContent value="notifications" className="space-y-4">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Notificaciones</CardTitle>
-              <CardDescription>Elige cómo quieres recibir notificaciones</CardDescription>
+              <CardTitle>{t("settings.notificationsTitle")}</CardTitle>
+              <CardDescription>{t("settings.notificationsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
@@ -355,11 +361,11 @@ const Settings = () => {
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       <Label htmlFor="emailInvoices" className="text-base">
-                        Facturas por Email
+                        {t("settings.emailInvoices")}
                       </Label>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Recibe confirmaciones cuando se emitan facturas
+                      {t("settings.emailInvoicesDesc")}
                     </p>
                   </div>
                   <Switch
@@ -376,11 +382,11 @@ const Settings = () => {
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       <Label htmlFor="emailPayments" className="text-base">
-                        Pagos Recibidos
+                        {t("settings.emailPayments")}
                       </Label>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Notificaciones de pagos recibidos
+                      {t("settings.emailPaymentsDesc")}
                     </p>
                   </div>
                   <Switch
@@ -397,11 +403,11 @@ const Settings = () => {
                     <div className="flex items-center gap-2">
                       <Bell className="h-4 w-4 text-muted-foreground" />
                       <Label htmlFor="emailReminders" className="text-base">
-                        Recordatorios
+                        {t("settings.emailReminders")}
                       </Label>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Recordatorios de facturas pendientes o vencidas
+                      {t("settings.emailRemindersDesc")}
                     </p>
                   </div>
                   <Switch
@@ -418,11 +424,11 @@ const Settings = () => {
                     <div className="flex items-center gap-2">
                       <Bell className="h-4 w-4 text-muted-foreground" />
                       <Label htmlFor="pushNotifications" className="text-base">
-                        Notificaciones Push
+                        {t("settings.pushNotifications")}
                       </Label>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Recibe notificaciones en tiempo real en el navegador
+                      {t("settings.pushNotificationsDesc")}
                     </p>
                   </div>
                   <Switch
@@ -440,7 +446,7 @@ const Settings = () => {
               <div className="flex justify-end">
                 <Button onClick={handleSaveNotifications} className="gap-2">
                   <Save className="h-4 w-4" />
-                  Guardar Notificaciones
+                  {t("settings.saveNotifications")}
                 </Button>
               </div>
             </CardContent>
@@ -451,12 +457,12 @@ const Settings = () => {
         <TabsContent value="security" className="space-y-4">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Cambiar Contraseña</CardTitle>
-              <CardDescription>Actualiza tu contraseña para mantener tu cuenta segura</CardDescription>
+              <CardTitle>{t("settings.changePassword")}</CardTitle>
+              <CardDescription>{t("settings.changePasswordDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Contraseña Actual</Label>
+                <Label htmlFor="currentPassword">{t("settings.currentPassword")}</Label>
                 <Input
                   id="currentPassword"
                   type="password"
@@ -469,7 +475,7 @@ const Settings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">Nueva Contraseña</Label>
+                <Label htmlFor="newPassword">{t("settings.newPassword")}</Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -479,11 +485,11 @@ const Settings = () => {
                   }
                   placeholder="••••••••"
                 />
-                <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
+                <p className="text-xs text-muted-foreground">{t("auth.minPasswordLength")}</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
+                <Label htmlFor="confirmPassword">{t("settings.confirmPassword")}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -502,12 +508,12 @@ const Settings = () => {
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Actualizando...
+                      {t("common.saving")}
                     </>
                   ) : (
                     <>
                       <Shield className="h-4 w-4" />
-                      Actualizar Contraseña
+                      {t("settings.updatePassword")}
                     </>
                   )}
                 </Button>
@@ -517,13 +523,13 @@ const Settings = () => {
 
           <Card className="border-l-4 border-l-accent shadow-lg">
             <CardHeader>
-              <CardTitle className="text-base">Seguridad de la Cuenta</CardTitle>
+              <CardTitle className="text-base">{t("settings.accountSecurity")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">Autenticación de Dos Factores</p>
-                  <p className="text-xs text-muted-foreground">Próximamente disponible</p>
+                  <p className="text-sm font-medium">{t("settings.twoFactorAuth")}</p>
+                  <p className="text-xs text-muted-foreground">{t("settings.comingSoon")}</p>
                 </div>
                 <Button variant="outline" disabled size="sm">
                   Configurar
@@ -532,11 +538,11 @@ const Settings = () => {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">Sesiones Activas</p>
-                  <p className="text-xs text-muted-foreground">Ver y gestionar tus sesiones</p>
+                  <p className="text-sm font-medium">{t("settings.activeSessions")}</p>
+                  <p className="text-xs text-muted-foreground">{t("settings.activeSessionsDesc")}</p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Ver Sesiones
+                  {t("settings.viewSessions")}
                 </Button>
               </div>
             </CardContent>

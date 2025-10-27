@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   FileText,
@@ -21,16 +22,17 @@ import {
 } from "@/components/ui/sidebar";
 import ebillLogo from "@/assets/ebill-logo.png";
 
-const menuItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Facturas", url: "/invoices", icon: FileText },
-  { title: "Clientes", url: "/clients", icon: Users },
-  { title: "Productos", url: "/products", icon: Package },
-  { title: "Mi Empresa", url: "/company", icon: Building2 },
-  { title: "Configuración", url: "/settings", icon: Settings },
-];
-
 export function AppSidebar() {
+  const { t } = useTranslation();
+
+  const menuItems = [
+    { title: t("nav.dashboard"), url: "/", icon: LayoutDashboard },
+    { title: t("nav.invoices"), url: "/invoices", icon: FileText },
+    { title: t("nav.clients"), url: "/clients", icon: Users },
+    { title: t("nav.products"), url: "/products", icon: Package },
+    { title: t("nav.company"), url: "/company", icon: Building2 },
+    { title: t("nav.settings"), url: "/settings", icon: Settings },
+  ];
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
@@ -44,14 +46,14 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Principal</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("nav.dashboard")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="bg-accent hover:bg-accent-hover">
                   <NavLink to="/invoices/new">
                     <PlusCircle className="h-4 w-4" />
-                    <span className="font-medium">Nueva Factura</span>
+                    <span className="font-medium">{t("nav.newInvoice")}</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -60,7 +62,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Gestión</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("common.search")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
