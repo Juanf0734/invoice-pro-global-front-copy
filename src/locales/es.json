@@ -13,7 +13,10 @@
     "error": "Error",
     "unexpectedError": "Ocurrió un error inesperado",
     "spanish": "Español",
-    "english": "Inglés"
+    "english": "Inglés",
+    "freePlan": "Plan Gratuito",
+    "upgradeMessage": "Estás usando el plan gratuito. Actualiza para desbloquear más funciones.",
+    "viewPlans": "Ver Planes"
   },
   "nav": {
     "dashboard": "Dashboard",
