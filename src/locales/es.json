@@ -70,9 +70,9 @@
   "invoices": {
     "title": "Facturas",
     "subtitle": "Gestiona todas tus facturas electrónicas",
-    "searchPlaceholder": "Buscar por número de factura o cliente...",
+    "searchPlaceholder": "Buscar por cliente...",
     "filters": "Filtros",
-    "number": "Número",
+    "number": "Número de Factura",
     "client": "Cliente",
     "date": "Fecha",
     "amount": "Monto",
@@ -85,7 +85,8 @@
     "void": "Anular",
     "colombia": "Colombia",
     "spain": "España",
-    "international": "Internacional"
+    "international": "Internacional",
+    "selectDateRange": "Seleccionar rango de fechas"
   },
   "clients": {
     "title": "Clientes",

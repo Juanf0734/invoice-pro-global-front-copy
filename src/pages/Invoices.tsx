@@ -1,16 +1,27 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, Eye, MoreVertical, PlusCircle } from "lucide-react";
+import { Search, Filter, Download, Eye, MoreVertical, PlusCircle, Calendar as CalendarIcon, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
+import { es, enUS } from "date-fns/locale";
+import { DateRange } from "react-day-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const invoices = [
   { id: "INV-2025-001", client: "Boutique Real", date: "2025-01-15", amount: "€1,250", status: "paid", country: "Colombia" },
@@ -30,43 +41,143 @@ const statusConfig = {
 
 const Invoices = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [showFilters, setShowFilters] = useState(false);
 
-  const filteredInvoices = invoices.filter(
-    (invoice) =>
-      invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.client.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredInvoices = invoices.filter((invoice) => {
+    // Filter by search term (client name)
+    const matchesSearch = searchTerm
+      ? invoice.client.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+
+    // Filter by invoice number
+    const matchesInvoiceNumber = invoiceNumber
+      ? invoice.id.toLowerCase().includes(invoiceNumber.toLowerCase())
+      : true;
+
+    // Filter by date range
+    const matchesDateRange = dateRange?.from || dateRange?.to
+      ? (() => {
+          const invoiceDate = new Date(invoice.date);
+          const fromMatch = dateRange.from ? invoiceDate >= dateRange.from : true;
+          const toMatch = dateRange.to ? invoiceDate <= dateRange.to : true;
+          return fromMatch && toMatch;
+        })()
+      : true;
+
+    return matchesSearch && matchesInvoiceNumber && matchesDateRange;
+  });
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setInvoiceNumber("");
+    setDateRange(undefined);
+  };
+
+  const hasActiveFilters = searchTerm || invoiceNumber || dateRange?.from || dateRange?.to;
+  const locale = i18n.language === 'es' ? es : enUS;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Facturas</h1>
-          <p className="text-muted-foreground">Gestiona todas tus facturas electrónicas</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("invoices.title")}</h1>
+          <p className="text-muted-foreground">{t("invoices.subtitle")}</p>
         </div>
         <Button onClick={() => navigate("/invoices/new")} className="gap-2">
           <PlusCircle className="h-4 w-4" />
-          Nueva Factura
+          {t("nav.newInvoice")}
         </Button>
       </div>
 
       <Card className="shadow-lg">
         <CardHeader className="border-b">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por número de factura o cliente..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder={t("invoices.searchPlaceholder")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button 
+                variant={showFilters ? "default" : "outline"} 
+                className="gap-2"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="h-4 w-4" />
+                {t("invoices.filters")}
+              </Button>
+              {hasActiveFilters && (
+                <Button variant="ghost" size="icon" onClick={clearFilters}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filtros
-            </Button>
+
+            {showFilters && (
+              <div className="grid gap-4 md:grid-cols-2 animate-fade-in">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t("invoices.number")}</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="INV-2025-001"
+                      value={invoiceNumber}
+                      onChange={(e) => setInvoiceNumber(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t("invoices.date")}</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            <>
+                              {format(dateRange.from, "PPP", { locale })} -{" "}
+                              {format(dateRange.to, "PPP", { locale })}
+                            </>
+                          ) : (
+                            format(dateRange.from, "PPP", { locale })
+                          )
+                        ) : (
+                          <span>{t("invoices.selectDateRange")}</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={2}
+                        locale={locale}
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0">

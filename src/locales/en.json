@@ -70,9 +70,9 @@
   "invoices": {
     "title": "Invoices",
     "subtitle": "Manage all your electronic invoices",
-    "searchPlaceholder": "Search by invoice number or client...",
+    "searchPlaceholder": "Search by client...",
     "filters": "Filters",
-    "number": "Number",
+    "number": "Invoice Number",
     "client": "Client",
     "date": "Date",
     "amount": "Amount",
@@ -85,7 +85,8 @@
     "void": "Void",
     "colombia": "Colombia",
     "spain": "Spain",
-    "international": "International"
+    "international": "International",
+    "selectDateRange": "Select date range"
   },
   "clients": {
     "title": "Clients",
