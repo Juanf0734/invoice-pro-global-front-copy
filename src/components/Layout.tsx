@@ -3,10 +3,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Bell, LogOut, User, Languages } from "lucide-react";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +22,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const { planName } = useSubscription();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -65,6 +68,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
             <SidebarTrigger />
             <img src={ebillLogo} alt="eBill Pro" className="h-8 w-auto" />
+            <Badge variant="secondary" className="ml-2 font-semibold">
+              {planName}
+            </Badge>
             <div className="flex-1" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,15 +10,18 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Save, User, Bell, Shield, Globe, Mail } from "lucide-react";
+import { Loader2, Save, User, Bell, Shield, Globe, Mail, CreditCard } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
+import { SubscriptionPlans } from "@/components/SubscriptionPlans";
 
 const Settings = () => {
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [defaultTab, setDefaultTab] = useState("profile");
   const [profile, setProfile] = useState({
     full_name: "",
     company_name: "",
@@ -45,8 +49,12 @@ const Settings = () => {
   });
 
   useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "subscription") {
+      setDefaultTab("subscription");
+    }
     loadUserData();
-  }, []);
+  }, [searchParams]);
 
   const loadUserData = async () => {
     try {
@@ -173,11 +181,15 @@ const Settings = () => {
         <p className="text-muted-foreground">{t("settings.subtitle")}</p>
       </div>
 
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs value={defaultTab} onValueChange={setDefaultTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="gap-2">
             <User className="h-4 w-4" />
             {t("settings.profile")}
+          </TabsTrigger>
+          <TabsTrigger value="subscription" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            Suscripción
           </TabsTrigger>
           <TabsTrigger value="preferences" className="gap-2">
             <Globe className="h-4 w-4" />
@@ -251,6 +263,36 @@ const Settings = () => {
                     </>
                   )}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Subscription Tab */}
+        <TabsContent value="subscription" className="space-y-4">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Planes de Suscripción</h2>
+            <p className="text-muted-foreground">
+              Elige el plan que mejor se adapte a las necesidades de tu negocio
+            </p>
+          </div>
+          <SubscriptionPlans />
+          <Card className="mt-6 shadow-lg border-blue-200">
+            <CardHeader>
+              <CardTitle>Complemento PEPPOL</CardTitle>
+              <CardDescription>Interoperabilidad PEPPOL disponible</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-lg">€39,00 / mes</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Valor por documento: €0,01
+                    </p>
+                  </div>
+                  <Button variant="outline">Próximamente</Button>
+                </div>
               </div>
             </CardContent>
           </Card>
