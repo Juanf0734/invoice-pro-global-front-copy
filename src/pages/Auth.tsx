@@ -15,8 +15,9 @@ const Auth = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
 
@@ -39,7 +40,7 @@ const Auth = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          User: email,
+          User: username,
           Password: password,
         }),
       });
@@ -52,7 +53,7 @@ const Auth = () => {
       
       // Store authentication token/data in localStorage
       localStorage.setItem("authToken", JSON.stringify(data));
-      localStorage.setItem("userEmail", email);
+      localStorage.setItem("username", username);
 
       toast({
         title: t("auth.welcome"),
@@ -118,13 +119,13 @@ const Auth = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">{t("auth.email")}</Label>
+                    <Label htmlFor="login-username">Usuario</Label>
                     <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="tu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="login-username"
+                      type="text"
+                      placeholder="nombre_usuario"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                     />
                   </div>
