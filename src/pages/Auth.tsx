@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,10 +23,22 @@ const Auth = () => {
 
   useEffect(() => {
     // Check if user is already logged in
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      navigate("/");
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        navigate("/");
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -33,37 +46,27 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("https://ebillpymetest.facturaenlinea.co/api/Login/autenticacion", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          User: email,
-          Password: password,
-        }),
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (!response.ok) {
-        throw new Error("Credenciales inválidas");
+      if (error) {
+        toast({
+          title: t("auth.signInError"),
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: t("auth.welcome"),
+          description: t("auth.signInSuccess"),
+        });
       }
-
-      const data = await response.json();
-      
-      // Store authentication token/data in localStorage
-      localStorage.setItem("authToken", JSON.stringify(data));
-      localStorage.setItem("userEmail", email);
-
-      toast({
-        title: t("auth.welcome"),
-        description: t("auth.signInSuccess"),
-      });
-
-      navigate("/");
     } catch (error) {
       toast({
-        title: t("auth.signInError"),
-        description: error instanceof Error ? error.message : t("common.unexpectedError"),
+        title: t("common.error"),
+        description: t("common.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -76,12 +79,33 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // TODO: Implement signup endpoint when available
-      toast({
-        title: t("common.error"),
-        description: "Registro no disponible. Por favor contacte al administrador.",
-        variant: "destructive",
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: fullName,
+            company_name: companyName,
+          },
+        },
       });
+
+      if (error) {
+        toast({
+          title: t("auth.signUpError"),
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: t("auth.createAccount"),
+          description: t("auth.signUpSuccess"),
+        });
+        // Switch to login tab after successful signup
+        const loginTab = document.querySelector('[value="login"]') as HTMLElement;
+        loginTab?.click();
+      }
     } catch (error) {
       toast({
         title: t("common.error"),
