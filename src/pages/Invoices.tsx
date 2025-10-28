@@ -3,12 +3,23 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, Eye, MoreVertical, PlusCircle, Calendar as CalendarIcon, X } from "lucide-react";
+import { Search, Filter, Download, Eye, MoreVertical, PlusCircle, Calendar as CalendarIcon, X, Mail, FileText, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,14 +34,14 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
-const invoices = [
-  { id: "INV-2025-001", client: "Boutique Real", date: "2025-01-15", amount: "€1,250", status: "paid", country: "Colombia" },
-  { id: "INV-2025-002", client: "Tech Solutions SL", date: "2025-01-14", amount: "€3,400", status: "pending", country: "España" },
-  { id: "INV-2025-003", client: "Global Trading Inc", date: "2025-01-13", amount: "$2,100", status: "paid", country: "Internacional" },
-  { id: "INV-2025-004", client: "Servicios Digitales", date: "2025-01-12", amount: "€890", status: "overdue", country: "Colombia" },
-  { id: "INV-2025-005", client: "Consulting Group", date: "2025-01-10", amount: "€5,600", status: "paid", country: "España" },
-  { id: "INV-2025-006", client: "Marketing Pro", date: "2025-01-08", amount: "€2,340", status: "pending", country: "España" },
-  { id: "INV-2025-007", client: "Design Studio", date: "2025-01-05", amount: "$1,890", status: "paid", country: "Internacional" },
+const invoices: Invoice[] = [
+  { id: "INV-2025-001", client: "Boutique Real", date: "2025-01-15", amount: "€1,250", status: "paid" as const, country: "Colombia" },
+  { id: "INV-2025-002", client: "Tech Solutions SL", date: "2025-01-14", amount: "€3,400", status: "pending" as const, country: "España" },
+  { id: "INV-2025-003", client: "Global Trading Inc", date: "2025-01-13", amount: "$2,100", status: "paid" as const, country: "Internacional" },
+  { id: "INV-2025-004", client: "Servicios Digitales", date: "2025-01-12", amount: "€890", status: "overdue" as const, country: "Colombia" },
+  { id: "INV-2025-005", client: "Consulting Group", date: "2025-01-10", amount: "€5,600", status: "paid" as const, country: "España" },
+  { id: "INV-2025-006", client: "Marketing Pro", date: "2025-01-08", amount: "€2,340", status: "pending" as const, country: "España" },
+  { id: "INV-2025-007", client: "Design Studio", date: "2025-01-05", amount: "$1,890", status: "paid" as const, country: "Internacional" },
 ];
 
 const statusConfig = {
@@ -39,13 +50,24 @@ const statusConfig = {
   overdue: { label: "Vencida", class: "bg-red-100 text-red-700 border-red-200" },
 };
 
+type Invoice = {
+  id: string;
+  client: string;
+  date: string;
+  amount: string;
+  status: "paid" | "pending" | "overdue";
+  country: string;
+};
+
 const Invoices = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const filteredInvoices = invoices.filter((invoice) => {
     // Filter by search term (client name)
@@ -79,6 +101,34 @@ const Invoices = () => {
 
   const hasActiveFilters = searchTerm || invoiceNumber || dateRange?.from || dateRange?.to;
   const locale = i18n.language === 'es' ? es : enUS;
+
+  const handleViewPDF = () => {
+    toast({
+      title: "Generando PDF",
+      description: "El PDF de la factura se está generando...",
+    });
+  };
+
+  const handleSendEmail = () => {
+    toast({
+      title: "Enviando correo",
+      description: `Notificación enviada a ${selectedInvoice?.client}`,
+    });
+  };
+
+  const handleSendToDIAN = () => {
+    toast({
+      title: "Enviando a DIAN",
+      description: "La factura está siendo enviada a la DIAN de Colombia...",
+    });
+  };
+
+  const handleSendToVerifactu = () => {
+    toast({
+      title: "Enviando a Verifactu",
+      description: "La factura está siendo enviada a Verifactu (España)...",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -197,7 +247,8 @@ const Invoices = () => {
                 {filteredInvoices.map((invoice) => (
                   <tr
                     key={invoice.id}
-                    className="border-b transition-colors hover:bg-muted/50"
+                    className="border-b transition-colors hover:bg-muted/50 cursor-pointer"
+                    onClick={() => setSelectedInvoice(invoice)}
                   >
                     <td className="px-6 py-4">
                       <span className="font-mono text-sm font-medium">{invoice.id}</span>
@@ -221,15 +272,36 @@ const Invoices = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedInvoice(invoice);
+                          }}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast({
+                              title: "Descargando PDF",
+                              description: `Descargando ${invoice.id}...`,
+                            });
+                          }}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -248,6 +320,114 @@ const Invoices = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Invoice Details Drawer */}
+      <Drawer open={!!selectedInvoice} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle className="text-2xl">Detalle de Factura</DrawerTitle>
+            <DrawerDescription>
+              Información completa de la factura {selectedInvoice?.id}
+            </DrawerDescription>
+          </DrawerHeader>
+          
+          <div className="px-4 pb-4">
+            {/* Action Bar */}
+            <div className="mb-6 flex flex-wrap gap-2 p-4 bg-muted/50 rounded-lg border">
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={handleViewPDF}
+              >
+                <FileText className="h-4 w-4" />
+                Ver PDF
+              </Button>
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={handleSendEmail}
+              >
+                <Mail className="h-4 w-4" />
+                Enviar correo al cliente
+              </Button>
+              {selectedInvoice?.country === "Colombia" && (
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={handleSendToDIAN}
+                >
+                  <Send className="h-4 w-4" />
+                  Enviar a DIAN
+                </Button>
+              )}
+              {selectedInvoice?.country === "España" && (
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={handleSendToVerifactu}
+                >
+                  <Send className="h-4 w-4" />
+                  Enviar a Verifactu
+                </Button>
+              )}
+            </div>
+
+            {/* Invoice Details */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Número de Factura</p>
+                  <p className="font-mono font-semibold text-lg">{selectedInvoice?.id}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Cliente</p>
+                  <p className="font-semibold text-lg">{selectedInvoice?.client}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Fecha</p>
+                  <p className="font-medium">{selectedInvoice?.date}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Monto</p>
+                  <p className="font-bold text-xl">{selectedInvoice?.amount}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">País</p>
+                  <Badge variant="outline" className="w-fit">
+                    {selectedInvoice?.country}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Estado</p>
+                  {selectedInvoice && (
+                    <Badge 
+                      variant="outline" 
+                      className={statusConfig[selectedInvoice.status].class}
+                    >
+                      {statusConfig[selectedInvoice.status].label}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Información Adicional</h3>
+                <p className="text-sm text-muted-foreground">
+                  Esta factura fue generada automáticamente por el sistema eBill Pro.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline">Cerrar</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
