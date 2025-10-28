@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, LogOut, User, Languages, Sparkles, X } from "lucide-react";
+import { Bell, LogOut, User, Languages, Sparkles, X, Building2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Alert, AlertDescription } from "./ui/alert";
@@ -14,6 +14,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ebillLogo from "@/assets/ebill-logo.png";
@@ -26,6 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { planName, subscribed } = useSubscription();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
+  const [companyName, setCompanyName] = useState<string>("");
 
   useEffect(() => {
     // Check if user should see onboarding on mount
@@ -43,6 +46,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       }
     };
     checkOnboarding();
+    
+    // Load company name from localStorage
+    const storedCompanyName = localStorage.getItem("companyName");
+    if (storedCompanyName) {
+      setCompanyName(storedCompanyName);
+    }
   }, []);
 
   const handleLogout = async () => {
@@ -150,7 +159,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background">
+              <DropdownMenuContent align="end" className="bg-background w-56">
+                {companyName && (
+                  <>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-xs text-muted-foreground">Empresa</p>
+                          <p className="text-sm font-medium leading-none">{companyName}</p>
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   {t("auth.logout")}

@@ -54,8 +54,15 @@ const Auth = () => {
       }
 
       const data = await response.json();
-      localStorage.setItem("authToken", data.token || "authenticated");
+      localStorage.setItem("authToken", data.messageResponse || "authenticated");
       localStorage.setItem("userName", username);
+      
+      // Store company information from login response
+      if (data.basePresentation) {
+        localStorage.setItem("companyId", data.basePresentation.IdEmpresa?.toString() || "");
+        localStorage.setItem("companyName", data.basePresentation.NombreEmpresa || "");
+        localStorage.setItem("companyNit", data.basePresentation.NitEmpresa || "");
+      }
       
       toast({
         title: t("auth.welcome"),
