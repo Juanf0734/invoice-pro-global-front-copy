@@ -5,7 +5,6 @@ import { Bell, LogOut, User, Languages, Sparkles, X, Building2 } from "lucide-re
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Alert, AlertDescription } from "./ui/alert";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -31,22 +30,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [companyName, setCompanyName] = useState<string>("");
 
   useEffect(() => {
-    // Check if user should see onboarding on mount
-    const checkOnboarding = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${user.id}`);
-        if (!hasSeenOnboarding) {
-          setShowOnboarding(true);
-        }
-        
-        // Check if user dismissed upgrade banner
-        const dismissedBanner = localStorage.getItem(`upgrade_banner_dismissed_${user.id}`);
-        setShowUpgradeBanner(!dismissedBanner);
-      }
-    };
-    checkOnboarding();
-    
     // Load company name from localStorage
     const storedCompanyName = localStorage.getItem("companyName");
     if (storedCompanyName) {
@@ -54,21 +37,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: t("common.error"),
-        description: t("auth.signOutError"),
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: t("auth.sessionClosed"),
-        description: t("auth.sessionClosedDesc"),
-      });
-      navigate("/auth");
-    }
+  const handleLogout = () => {
+    // Clear all auth data from localStorage
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("companyId");
+    localStorage.removeItem("companyName");
+    localStorage.removeItem("companyNit");
+    
+    toast({
+      title: t("auth.sessionClosed"),
+      description: t("auth.sessionClosedDesc"),
+    });
+    
+    navigate("/auth");
   };
 
   const changeLanguage = (lng: string) => {
@@ -76,10 +58,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     localStorage.setItem("language", lng);
   };
 
-  const dismissUpgradeBanner = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      localStorage.setItem(`upgrade_banner_dismissed_${user.id}`, "true");
+  const dismissUpgradeBanner = () => {
+    const userName = localStorage.getItem("userName");
+    if (userName) {
+      localStorage.setItem(`upgrade_banner_dismissed_${userName}`, "true");
       setShowUpgradeBanner(false);
     }
   };
