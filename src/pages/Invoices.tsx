@@ -131,22 +131,23 @@ const Invoices = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("invoices.title")}</h1>
-          <p className="text-muted-foreground">{t("invoices.subtitle")}</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t("invoices.title")}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">{t("invoices.subtitle")}</p>
         </div>
-        <Button onClick={() => navigate("/invoices/new")} className="gap-2">
+        <Button onClick={() => navigate("/invoices/new")} className="gap-2 w-full sm:w-auto">
           <PlusCircle className="h-4 w-4" />
-          {t("nav.newInvoice")}
+          <span className="hidden sm:inline">{t("nav.newInvoice")}</span>
+          <span className="sm:hidden">Nueva</span>
         </Button>
       </div>
 
       <Card className="shadow-lg">
-        <CardHeader className="border-b">
+        <CardHeader className="border-b p-4 md:p-6">
           <div className="space-y-4">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -156,19 +157,21 @@ const Invoices = () => {
                   className="pl-10"
                 />
               </div>
-              <Button 
-                variant={showFilters ? "default" : "outline"} 
-                className="gap-2"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter className="h-4 w-4" />
-                {t("invoices.filters")}
-              </Button>
-              {hasActiveFilters && (
-                <Button variant="ghost" size="icon" onClick={clearFilters}>
-                  <X className="h-4 w-4" />
+              <div className="flex gap-2">
+                <Button 
+                  variant={showFilters ? "default" : "outline"} 
+                  className="gap-2 flex-1 sm:flex-none"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t("invoices.filters")}</span>
                 </Button>
-              )}
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="icon" onClick={clearFilters}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
 
             {showFilters && (
@@ -230,7 +233,8 @@ const Invoices = () => {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="border-b bg-muted/50">
                 <tr>
@@ -318,91 +322,165 @@ const Invoices = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y">
+            {filteredInvoices.map((invoice) => (
+              <div
+                key={invoice.id}
+                className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                onClick={() => setSelectedInvoice(invoice)}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <p className="font-mono text-sm font-medium">{invoice.id}</p>
+                      <p className="font-semibold truncate">{invoice.client}</p>
+                    </div>
+                    <Badge 
+                      variant="outline" 
+                      className={statusConfig[invoice.status].class}
+                    >
+                      {statusConfig[invoice.status].label}
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-muted-foreground text-xs">Fecha</p>
+                      <p>{invoice.date}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Monto</p>
+                      <p className="font-semibold">{invoice.amount}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {invoice.country}
+                    </Badge>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedInvoice(invoice);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast({
+                            title: "Descargando PDF",
+                            description: `Descargando ${invoice.id}...`,
+                          });
+                        }}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
       {/* Invoice Details Drawer */}
       <Drawer open={!!selectedInvoice} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="text-2xl">Detalle de Factura</DrawerTitle>
-            <DrawerDescription>
+        <DrawerContent className="max-h-[90vh]">
+          <DrawerHeader className="px-4 md:px-6">
+            <DrawerTitle className="text-xl md:text-2xl">Detalle de Factura</DrawerTitle>
+            <DrawerDescription className="text-sm">
               Información completa de la factura {selectedInvoice?.id}
             </DrawerDescription>
           </DrawerHeader>
           
-          <div className="px-4 pb-4">
+          <div className="px-4 md:px-6 pb-4 overflow-y-auto">
             {/* Action Bar */}
-            <div className="mb-6 flex flex-wrap gap-2 p-4 bg-muted/50 rounded-lg border">
+            <div className="mb-6 flex flex-col sm:flex-row flex-wrap gap-2 p-3 md:p-4 bg-muted/50 rounded-lg border">
               <Button 
                 variant="outline" 
-                className="gap-2"
+                className="gap-2 flex-1 sm:flex-none text-sm"
                 onClick={handleViewPDF}
               >
                 <FileText className="h-4 w-4" />
-                Ver PDF
+                <span className="hidden sm:inline">Ver PDF</span>
+                <span className="sm:hidden">PDF</span>
               </Button>
               <Button 
                 variant="outline" 
-                className="gap-2"
+                className="gap-2 flex-1 sm:flex-none text-sm"
                 onClick={handleSendEmail}
               >
                 <Mail className="h-4 w-4" />
-                Enviar correo al cliente
+                <span className="hidden sm:inline">Enviar correo al cliente</span>
+                <span className="sm:hidden">Correo</span>
               </Button>
               {selectedInvoice?.country === "Colombia" && (
                 <Button 
                   variant="outline" 
-                  className="gap-2"
+                  className="gap-2 flex-1 sm:flex-none text-sm"
                   onClick={handleSendToDIAN}
                 >
                   <Send className="h-4 w-4" />
-                  Enviar a DIAN
+                  <span className="hidden sm:inline">Enviar a DIAN</span>
+                  <span className="sm:hidden">DIAN</span>
                 </Button>
               )}
               {selectedInvoice?.country === "España" && (
                 <Button 
                   variant="outline" 
-                  className="gap-2"
+                  className="gap-2 flex-1 sm:flex-none text-sm"
                   onClick={handleSendToVerifactu}
                 >
                   <Send className="h-4 w-4" />
-                  Enviar a Verifactu
+                  <span className="hidden sm:inline">Enviar a Verifactu</span>
+                  <span className="sm:hidden">Verifactu</span>
                 </Button>
               )}
             </div>
 
             {/* Invoice Details */}
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4 md:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Número de Factura</p>
-                  <p className="font-mono font-semibold text-lg">{selectedInvoice?.id}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Número de Factura</p>
+                  <p className="font-mono font-semibold text-base md:text-lg">{selectedInvoice?.id}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Cliente</p>
-                  <p className="font-semibold text-lg">{selectedInvoice?.client}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Cliente</p>
+                  <p className="font-semibold text-base md:text-lg">{selectedInvoice?.client}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Fecha</p>
-                  <p className="font-medium">{selectedInvoice?.date}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Fecha</p>
+                  <p className="font-medium text-sm md:text-base">{selectedInvoice?.date}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Monto</p>
-                  <p className="font-bold text-xl">{selectedInvoice?.amount}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Monto</p>
+                  <p className="font-bold text-lg md:text-xl">{selectedInvoice?.amount}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">País</p>
-                  <Badge variant="outline" className="w-fit">
+                  <p className="text-xs md:text-sm text-muted-foreground">País</p>
+                  <Badge variant="outline" className="w-fit text-xs">
                     {selectedInvoice?.country}
                   </Badge>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Estado</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Estado</p>
                   {selectedInvoice && (
                     <Badge 
                       variant="outline" 
-                      className={statusConfig[selectedInvoice.status].class}
+                      className={`${statusConfig[selectedInvoice.status].class} text-xs`}
                     >
                       {statusConfig[selectedInvoice.status].label}
                     </Badge>
@@ -412,18 +490,18 @@ const Invoices = () => {
 
               <Separator />
 
-              <div className="space-y-3">
-                <h3 className="font-semibold text-lg">Información Adicional</h3>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-2 md:space-y-3">
+                <h3 className="font-semibold text-base md:text-lg">Información Adicional</h3>
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Esta factura fue generada automáticamente por el sistema eBill Pro.
                 </p>
               </div>
             </div>
           </div>
 
-          <DrawerFooter>
+          <DrawerFooter className="px-4 md:px-6">
             <DrawerClose asChild>
-              <Button variant="outline">Cerrar</Button>
+              <Button variant="outline" className="w-full sm:w-auto">Cerrar</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
