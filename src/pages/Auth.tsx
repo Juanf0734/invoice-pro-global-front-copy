@@ -54,12 +54,19 @@ const Auth = () => {
       }
 
       const data = await response.json();
-      localStorage.setItem("authToken", data.messageResponse || "authenticated");
+      
+      // El token está en messageResponse
+      const token = data.messageResponse;
+      if (!token) {
+        throw new Error("No se recibió el token de autenticación");
+      }
+      
+      localStorage.setItem("authToken", token);
       localStorage.setItem("userName", username);
       
       // Store company information from login response
-      if (data.basePresentation) {
-        localStorage.setItem("companyId", data.basePresentation.IdEmpresa?.toString() || "");
+      if (data.basePresentation?.IdEmpresa) {
+        localStorage.setItem("companyId", data.basePresentation.IdEmpresa.toString());
         localStorage.setItem("companyName", data.basePresentation.NombreEmpresa || "");
         localStorage.setItem("companyNit", data.basePresentation.NitEmpresa || "");
       }
