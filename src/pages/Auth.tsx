@@ -33,7 +33,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/Login/autenticacion", {
+      const response = await fetch("https://ebillpymetest.facturaenlinea.co/api/Login/autenticacion", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
