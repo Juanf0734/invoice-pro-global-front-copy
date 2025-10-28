@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,29 +15,17 @@ const Auth = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
     // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        navigate("/");
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const authToken = localStorage.getItem("authToken");
+    if (authToken) {
+      navigate("/");
+    }
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -46,23 +33,36 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch("https://ebillpymetest.facturaenlinea.co/api/Login/autenticacion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          User: username,
+          Password: password,
+        }),
       });
 
-      if (error) {
+      if (!response.ok) {
         toast({
           title: t("auth.signInError"),
-          description: error.message,
+          description: "Credenciales inválidas",
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: t("auth.welcome"),
-          description: t("auth.signInSuccess"),
-        });
+        return;
       }
+
+      const data = await response.json();
+      localStorage.setItem("authToken", data.token || "authenticated");
+      localStorage.setItem("userName", username);
+      
+      toast({
+        title: t("auth.welcome"),
+        description: t("auth.signInSuccess"),
+      });
+      
+      navigate("/");
     } catch (error) {
       toast({
         title: t("common.error"),
@@ -76,45 +76,11 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: fullName,
-            company_name: companyName,
-          },
-        },
-      });
-
-      if (error) {
-        toast({
-          title: t("auth.signUpError"),
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: t("auth.createAccount"),
-          description: t("auth.signUpSuccess"),
-        });
-        // Switch to login tab after successful signup
-        const loginTab = document.querySelector('[value="login"]') as HTMLElement;
-        loginTab?.click();
-      }
-    } catch (error) {
-      toast({
-        title: t("common.error"),
-        description: t("common.unexpectedError"),
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: "Registro no disponible",
+      description: "Por favor contacta al administrador para crear una cuenta",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -142,13 +108,13 @@ const Auth = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">{t("auth.email")}</Label>
+                    <Label htmlFor="login-username">Usuario</Label>
                     <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="tu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="login-username"
+                      type="text"
+                      placeholder="nombre_usuario"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                     />
                   </div>
@@ -177,63 +143,11 @@ const Auth = () => {
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">{t("auth.fullName")}</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="Juan Pérez"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-company">{t("auth.companyName")}</Label>
-                    <Input
-                      id="signup-company"
-                      type="text"
-                      placeholder="Mi Empresa S.L."
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">{t("auth.email")}</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="tu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">{t("auth.password")}</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                    <p className="text-xs text-muted-foreground">{t("auth.minPasswordLength")}</p>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t("common.loading")}
-                      </>
-                    ) : (
-                      t("auth.createAccount")
-                    )}
-                  </Button>
-                </form>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    Por favor contacta al administrador para crear una cuenta
+                  </p>
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
