@@ -44,7 +44,18 @@ const Company = () => {
       }
 
       try {
-        const response = await fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`);
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+          throw new Error("No se encontró el token de autenticación");
+        }
+
+        const response = await fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`, {
+          headers: {
+            "Authorization": `Bearer ${authToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
         if (!response.ok) {
           throw new Error("Error al cargar los datos de la empresa");
         }
