@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api";
 
 const monthlyData = [
   { month: "Ene", amount: 12500 },
@@ -65,7 +66,7 @@ const Dashboard = () => {
       try {
         // Fetch invoices
         const invoicesResponse = await fetch(
-          `/api/Documento/TraerDocumentos?IdEmpresa=${companyId}&TipoDocumento=1`,
+          getApiUrl(`/Documento/TraerDocumentos?IdEmpresa=${companyId}&TipoDocumento=1`),
           { headers }
         );
         if (invoicesResponse.ok) {
@@ -90,9 +91,9 @@ const Dashboard = () => {
           }
         }
 
-        // Fetch clients - mismo endpoint que Clients.tsx
+        // Fetch clients
         const clientsResponse = await fetch(
-          `/api/Empresa/TraerClientes?IdEmpresa=${companyId}`,
+          getApiUrl(`/Empresa/TraerClientes?IdEmpresa=${companyId}`),
           { headers }
         );
         if (clientsResponse.ok) {
@@ -102,9 +103,9 @@ const Dashboard = () => {
           }
         }
 
-        // Fetch products - mismo endpoint que Products.tsx
+        // Fetch products
         const productsResponse = await fetch(
-          `/api/Producto/TraerProductos?IdEmpresa=${companyId}`,
+          getApiUrl(`/Producto/TraerProductos?IdEmpresa=${companyId}`),
           { headers }
         );
         if (productsResponse.ok) {
