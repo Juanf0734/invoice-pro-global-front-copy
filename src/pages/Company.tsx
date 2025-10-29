@@ -34,11 +34,29 @@ interface ParametrosEmpresa {
   NotasFiscales: string;
 }
 
+interface MedioPago {
+  Id: number;
+  Nombre: string;
+}
+
+interface Moneda {
+  Id: number;
+  Nombre: string;
+}
+
+interface FormaPago {
+  Id: number;
+  Nombre: string;
+}
+
 const Company = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState<CompanyData | null>(null);
   const [parametros, setParametros] = useState<ParametrosEmpresa | null>(null);
+  const [mediosPago, setMediosPago] = useState<MedioPago[]>([]);
+  const [monedas, setMonedas] = useState<Moneda[]>([]);
+  const [formasPago, setFormasPago] = useState<FormaPago[]>([]);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
@@ -59,14 +77,20 @@ const Company = () => {
           throw new Error("No se encontró el token de autenticación");
         }
 
-        // Fetch company data
-        const responseEmpresa = await fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`, {
-          headers: {
-            "Authorization": `Bearer ${authToken}`,
-            "Content-Type": "application/json"
-          }
-        });
-        
+        const headers = {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json"
+        };
+
+        // Fetch all data in parallel
+        const [responseEmpresa, responseParametros, responseMediosPago, responseMonedas, responseFormasPago] = await Promise.all([
+          fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`, { headers }),
+          fetch(`/api/Empresa/TraerParametros?IdEmpresa=${companyId}`, { headers }),
+          fetch(`/api/Auxiliar/ListaMediosPago`, { headers }),
+          fetch(`/api/Auxiliar/ListaMonedas`, { headers }),
+          fetch(`/api/Auxiliar/ListaFormasPago`, { headers })
+        ]);
+
         if (!responseEmpresa.ok) {
           throw new Error("Error al cargar los datos de la empresa");
         }
@@ -76,18 +100,31 @@ const Company = () => {
           setCompany(dataEmpresa.basePresentation);
         }
 
-        // Fetch company parameters
-        const responseParametros = await fetch(`/api/Empresa/TraerParametros?IdEmpresa=${companyId}`, {
-          headers: {
-            "Authorization": `Bearer ${authToken}`,
-            "Content-Type": "application/json"
-          }
-        });
-
         if (responseParametros.ok) {
           const dataParametros = await responseParametros.json();
           if (dataParametros.basePresentation) {
             setParametros(dataParametros.basePresentation);
+          }
+        }
+
+        if (responseMediosPago.ok) {
+          const dataMediosPago = await responseMediosPago.json();
+          if (dataMediosPago.basePresentationList) {
+            setMediosPago(dataMediosPago.basePresentationList);
+          }
+        }
+
+        if (responseMonedas.ok) {
+          const dataMonedas = await responseMonedas.json();
+          if (dataMonedas.basePresentationList) {
+            setMonedas(dataMonedas.basePresentationList);
+          }
+        }
+
+        if (responseFormasPago.ok) {
+          const dataFormasPago = await responseFormasPago.json();
+          if (dataFormasPago.basePresentationList) {
+            setFormasPago(dataFormasPago.basePresentationList);
           }
         }
       } catch (error) {
@@ -103,6 +140,21 @@ const Company = () => {
 
     fetchCompanyData();
   }, [toast]);
+
+  const getMedioPagoNombre = (id: number) => {
+    const medioPago = mediosPago.find(m => m.Id === id);
+    return medioPago ? medioPago.Nombre : id.toString();
+  };
+
+  const getMonedaNombre = (id: number) => {
+    const moneda = monedas.find(m => m.Id === id);
+    return moneda ? moneda.Nombre : id.toString();
+  };
+
+  const getFormaPagoNombre = (id: number) => {
+    const formaPago = formasPago.find(f => f.Id === id);
+    return formaPago ? formaPago.Nombre : id.toString();
+  };
 
   if (loading) {
     return (
@@ -205,19 +257,31 @@ const Company = () => {
                   <Input id="idCliente" value={parametros?.IdCliente || ""} readOnly />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="idMoneda">ID Moneda</Label>
-                  <Input id="idMoneda" value={parametros?.IdMoneda || ""} readOnly />
+                  <Label htmlFor="moneda">Moneda</Label>
+                  <Input 
+                    id="moneda" 
+                    value={parametros ? getMonedaNombre(parametros.IdMoneda) : ""} 
+                    readOnly 
+                  />
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="idFormaPago">ID Forma de Pago</Label>
-                  <Input id="idFormaPago" value={parametros?.IdFormaPago || ""} readOnly />
+                  <Label htmlFor="formaPago">Forma de Pago</Label>
+                  <Input 
+                    id="formaPago" 
+                    value={parametros ? getFormaPagoNombre(parametros.IdFormaPago) : ""} 
+                    readOnly 
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="idMedioPago">ID Medio de Pago</Label>
-                  <Input id="idMedioPago" value={parametros?.IdMedioPago || ""} readOnly />
+                  <Label htmlFor="medioPago">Medio de Pago</Label>
+                  <Input 
+                    id="medioPago" 
+                    value={parametros ? getMedioPagoNombre(parametros.IdMedioPago) : ""} 
+                    readOnly 
+                  />
                 </div>
               </div>
 
