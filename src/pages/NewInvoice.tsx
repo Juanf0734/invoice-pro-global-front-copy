@@ -108,6 +108,8 @@ const NewInvoice = () => {
     notasCliente: "",
   });
 
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+
   // Client form data
   const [clientData, setClientData] = useState({
     name: "",
@@ -471,6 +473,169 @@ const NewInvoice = () => {
   };
 
   const totals = calculateTotals();
+
+  const handleGenerateInvoice = async () => {
+    try {
+      setCreatingInvoice(true);
+
+      // Validaciones básicas
+      if (!invoiceData.tipoComprobante) {
+        toast({
+          title: "Error",
+          description: "Debe seleccionar un tipo de comprobante",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!clientData.name || !clientData.nit) {
+        toast({
+          title: "Error",
+          description: "Debe completar los datos del cliente",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (invoiceLines.length === 0) {
+        toast({
+          title: "Error",
+          description: "Debe agregar al menos un producto",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const authToken = localStorage.getItem("authToken");
+      const companyId = localStorage.getItem("companyId");
+      
+      if (!authToken || !companyId) {
+        toast({
+          title: "Error",
+          description: "No se encontró la sesión",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Obtener parámetros de la empresa para la resolución
+      const paramsResponse = await fetch(`/api/Empresa/TraerParametros?IdEmpresa=${companyId}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const paramsData = await paramsResponse.json();
+      
+      let numAprobacionRes = 0;
+      let anoAprobacionRes = new Date().getFullYear();
+      
+      if (paramsData.codResponse === 1 && paramsData.basePresentation?.IdResolucion) {
+        const resResponse = await fetch(`/api/Empresa/TraerResoluciones?IdEmpresa=${companyId}`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        const resData = await resResponse.json();
+        
+        if (resData.codResponse === 1 && resData.basePresentationList) {
+          const resolucion = resData.basePresentationList.find(
+            (r: any) => r.Codigo === paramsData.basePresentation.IdResolucion
+          );
+          if (resolucion) {
+            numAprobacionRes = parseInt(resolucion.Descripcion) || 0;
+            anoAprobacionRes = parseInt(resolucion.InfoAdicional) || new Date().getFullYear();
+          }
+        }
+      }
+
+      // Construir objeto FV_CFDCab
+      const cabecera = {
+        TipoComprobante: parseInt(invoiceData.tipoComprobante),
+        Prefijo: "",
+        NumFactura: 0,
+        IDInterno: selectedClientDetail?.IDInterno || clientData.nit,
+        NombreVendedor: "",
+        OrderID: "",
+        FormaPago: clientData.regimenFiscal || "1",
+        Condiciones_Pago: "10",
+        MonedaISO: "COP",
+        pague_hasta3: invoiceData.fechaVencimiento ? new Date(invoiceData.fechaVencimiento) : null,
+        FechaExpedicion: new Date(invoiceData.fechaExpedicion),
+        FechaVencimiento: new Date(invoiceData.fechaVencimiento || invoiceData.fechaExpedicion),
+        NumAprobacionRes: numAprobacionRes,
+        AnoAprobacionRes: anoAprobacionRes,
+        CFD_LineCountNumeric: invoiceLines.length,
+        CFD_LineExtensionAmount: totals.subtotal,
+        TotalIVA: totals.iva,
+        CFD_TaxExclusiveAmount: totals.subtotal,
+        CFD_TaxInclusiveAmount: totals.total,
+        Total_a_Pagar: totals.total,
+        InfoAdicional: invoiceData.notasCliente || "",
+        FV_TDO_Codigo_TipoOperacion: "",
+      };
+
+      // Construir detalles FV_CFDDet
+      const detalles = invoiceLines.map((line, index) => ({
+        IdConcepto: index + 1,
+        ItemReferencia: `ITEM-${index + 1}`,
+        CodigoProducto: `PROD-${index + 1}`,
+        CodigosString: "",
+        DescripcionProducto: line.productName,
+        Cantidad: line.quantity,
+        ValorUnitario: line.unitPrice,
+        PorIVAProducto: line.iva,
+        IVAProducto: (line.quantity * line.unitPrice * line.iva) / 100,
+        CON_dato_decimal1: line.quantity * line.unitPrice,
+        CON_dato_texto15: "",
+        TipoImpuesto: line.iva > 0 ? "1" : "0",
+        CON_categoria_1: "",
+        CON_dato_fecha: null,
+        con_recurrente: false,
+      }));
+
+      const documentoElectronico = {
+        FV_CFDCab: cabecera,
+        FV_CFDDet: detalles,
+      };
+
+      console.log("Enviando documento:", documentoElectronico);
+
+      // Enviar al servidor
+      const response = await fetch("/api/Documento/CreateBilling", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(documentoElectronico),
+      });
+
+      const data = await response.json();
+
+      if (data.codResponse === 1 || data.messageResponse?.includes("exitosamente") || data.messageResponse?.includes("registrado")) {
+        toast({
+          title: "Éxito",
+          description: data.messageResponse || "Factura creada exitosamente",
+        });
+        
+        // Redirigir a la lista de facturas
+        setTimeout(() => {
+          navigate("/invoices");
+        }, 2000);
+      } else {
+        toast({
+          title: "Error",
+          description: data.messageResponse || "Error al crear la factura",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      toast({
+        title: "Error",
+        description: "Error al crear la factura. Por favor intente nuevamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingInvoice(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -1162,9 +1327,22 @@ const NewInvoice = () => {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button className="gap-2">
-              <Check className="h-4 w-4" />
-              Generar Factura
+            <Button 
+              className="gap-2"
+              onClick={handleGenerateInvoice}
+              disabled={creatingInvoice}
+            >
+              {creatingInvoice ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  Generar Factura
+                </>
+              )}
             </Button>
           )}
         </div>
