@@ -64,9 +64,9 @@ const Clients = () => {
 
   const filteredClients = clients.filter(
     (client) =>
-      client.Nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.Identificacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.Email.toLowerCase().includes(searchTerm.toLowerCase())
+      client.Nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.Identificacion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.Email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
