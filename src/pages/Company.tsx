@@ -487,13 +487,6 @@ const Company = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="rounded-lg border bg-card p-3">
-                <p className="text-sm font-medium">España (Verifactu)</p>
-                <p className="text-xs text-muted-foreground">Estado: No configurado</p>
-                <Button variant="link" size="sm" className="h-auto p-0 text-xs">
-                  Configurar →
-                </Button>
-              </div>
-              <div className="rounded-lg border bg-card p-3">
                 <p className="text-sm font-medium">Colombia (DIAN)</p>
                 <p className="text-xs text-muted-foreground">
                   Ambiente: {company?.AmbienteDian === 1 ? "Producción" : "Pruebas"}
@@ -501,14 +494,6 @@ const Company = () => {
                 <Button variant="link" size="sm" className="h-auto p-0 text-xs">
                   Configurar →
                 </Button>
-              </div>
-              
-              <div className="rounded-lg border bg-card p-3 space-y-1">
-                <p className="text-sm font-medium">Estadísticas</p>
-                <p className="text-xs text-muted-foreground">Facturas: {company?.TotalFacturas || 0}</p>
-                <p className="text-xs text-muted-foreground">Notas Crédito: {company?.TotalNotasCredito || 0}</p>
-                <p className="text-xs text-muted-foreground">Notas Débito: {company?.TotalNotasDebito || 0}</p>
-                <p className="text-xs text-muted-foreground">Total Documentos: {company?.TotalDocumentos || 0}</p>
               </div>
             </CardContent>
           </Card>
