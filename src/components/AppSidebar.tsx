@@ -230,7 +230,7 @@ export function AppSidebar() {
           <img 
             src={ebillTagline} 
             alt="eBill - Conectando Negocios, Simplificando Finanzas" 
-            className="w-full max-w-[200px] opacity-90"
+            className="w-full max-w-[140px] opacity-90"
           />
         </div>
       </SidebarContent>
