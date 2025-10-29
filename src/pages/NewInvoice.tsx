@@ -158,12 +158,14 @@ const NewInvoice = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="country">Jurisdicción *</Label>
-                <Select defaultValue="co" disabled>
+                <Select defaultValue="co">
                   <SelectTrigger id="country">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="co">Colombia (DIAN)</SelectItem>
+                    <SelectItem value="es">España (Verifactu)</SelectItem>
+                    <SelectItem value="int">Internacional</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
