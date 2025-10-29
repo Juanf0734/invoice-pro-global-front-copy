@@ -39,6 +39,7 @@ const Dashboard = () => {
   const [invoicesCount, setInvoicesCount] = useState(0);
   const [clientsCount, setClientsCount] = useState(0);
   const [productsCount, setProductsCount] = useState(0);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
   const [invoicesByType, setInvoicesByType] = useState<{name: string, value: number}[]>([]);
   const [monthlyData, setMonthlyData] = useState<{month: string, amount: number}[]>([]);
@@ -78,6 +79,10 @@ const Dashboard = () => {
             
             // Contar todas las facturas del período
             setInvoicesCount(allInvoices.length);
+
+            // Calcular ingresos del mes sumando todos los ValorTotal
+            const totalRevenue = allInvoices.reduce((sum, inv) => sum + (inv.ValorTotal || 0), 0);
+            setMonthlyRevenue(totalRevenue);
 
             // Agrupar por tipo de comprobante para la gráfica
             const typeCount = allInvoices.reduce((acc, inv) => {
@@ -153,22 +158,15 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-primary relative overflow-hidden">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-            <div className="text-center">
-              <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Próximamente disponible</p>
-            </div>
-          </div>
+        <Card className="border-l-4 border-l-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$128,900,000</div>
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span className="text-green-500">+20.1%</span> desde el mes pasado
+            <div className="text-2xl font-bold">{loading ? "..." : formatCurrency(monthlyRevenue)}</div>
+            <p className="text-xs text-muted-foreground">
+              Último mes
             </p>
           </CardContent>
         </Card>
