@@ -71,7 +71,7 @@ const Invoices = () => {
       setLoading(true);
       try {
         const authToken = localStorage.getItem("authToken");
-        const companyId = localStorage.getItem("IdEmpresa");
+        const companyId = localStorage.getItem("companyId");
         
         if (!authToken || !companyId) {
           toast({
@@ -79,6 +79,7 @@ const Invoices = () => {
             description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
             variant: "destructive",
           });
+          navigate("/auth");
           return;
         }
 
