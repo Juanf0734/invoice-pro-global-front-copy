@@ -285,6 +285,13 @@ const Dashboard = () => {
                     return value;
                   }}
                 />
+                <Bar
+                  yAxisId="right"
+                  dataKey="count"
+                  fill="hsl(var(--accent))"
+                  radius={[8, 8, 0, 0]}
+                  opacity={0.7}
+                />
                 <Area
                   yAxisId="left"
                   type="monotone"
@@ -294,13 +301,6 @@ const Dashboard = () => {
                   fillOpacity={1}
                   fill="url(#colorAmount)"
                 />
-                <Bar
-                  yAxisId="right"
-                  dataKey="count"
-                  fill="hsl(var(--accent))"
-                  radius={[8, 8, 0, 0]}
-                  opacity={0.7}
-                />
               </ComposedChart>
             </ResponsiveContainer>
           </CardContent>
@@ -309,7 +309,7 @@ const Dashboard = () => {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Facturas por Tipo</CardTitle>
-            <CardDescription>Distribución de documentos emitidos</CardDescription>
+            <CardDescription>Distribución de documentos del último mes</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
