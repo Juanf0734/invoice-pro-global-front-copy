@@ -105,6 +105,32 @@ const Dashboard = () => {
           }
         }
 
+        // Fetch datos de los últimos 3 meses para la gráfica mensual
+        const monthlyPromises = [];
+        for (let i = 2; i >= 0; i--) {
+          const monthDate = subMonths(now, i);
+          const monthStart = startOfMonth(monthDate);
+          const monthEnd = endOfMonth(monthDate);
+          
+          monthlyPromises.push(
+            fetch(
+              getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${format(monthStart, 'yyyy-MM-dd')}&FechaFinal=${format(monthEnd, 'yyyy-MM-dd')}`),
+              { headers }
+            ).then(res => res.json()).then(data => ({
+              month: format(monthDate, 'MMM', { locale: es }),
+              data: data.basePresentationList || []
+            }))
+          );
+        }
+
+        const monthlyResults = await Promise.all(monthlyPromises);
+        const monthlyChartData = monthlyResults.map(result => ({
+          month: result.month,
+          amount: result.data.reduce((sum: number, inv: Invoice) => sum + (inv.ValorTotal || 0), 0)
+        }));
+        setMonthlyData(monthlyChartData);
+        console.log('Monthly chart data:', monthlyChartData);
+
         // Fetch clients
         const clientsResponse = await fetch(
           getApiUrl(`/Empresa/TraerClientes?IdEmpresa=${companyId}`),
