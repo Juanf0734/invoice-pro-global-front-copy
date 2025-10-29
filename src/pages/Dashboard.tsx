@@ -4,6 +4,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/lib/api";
+import { format, subMonths } from "date-fns";
 
 const monthlyData = [
   { month: "Ene", amount: 12500 },
@@ -64,9 +65,15 @@ const Dashboard = () => {
       };
 
       try {
-        // Fetch invoices
+        // Calcular fechas del último mes
+        const now = new Date();
+        const lastMonth = subMonths(now, 1);
+        const fechaInicial = format(lastMonth, 'yyyy-MM-dd');
+        const fechaFinal = format(now, 'yyyy-MM-dd');
+
+        // Fetch invoices del último mes
         const invoicesResponse = await fetch(
-          getApiUrl(`/Documento/TraerDocumentos?IdEmpresa=${companyId}&TipoDocumento=1`),
+          getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`),
           { headers }
         );
         if (invoicesResponse.ok) {
@@ -74,14 +81,8 @@ const Dashboard = () => {
           if (invoicesData.basePresentationList) {
             const allInvoices = invoicesData.basePresentationList as Invoice[];
             
-            // Count invoices from last month
-            const now = new Date();
-            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-            const lastMonthInvoices = allInvoices.filter(inv => {
-              const invDate = new Date(inv.FechaDocumento);
-              return invDate >= lastMonth;
-            });
-            setInvoicesCount(lastMonthInvoices.length);
+            // Contar todas las facturas del período
+            setInvoicesCount(allInvoices.length);
 
             // Get last 5 invoices
             const sorted = [...allInvoices].sort((a, b) => 
