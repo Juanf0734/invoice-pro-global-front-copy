@@ -117,14 +117,39 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-4">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 -z-10">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/10 to-background" />
+        
+        {/* Animated Orbs */}
+        <div className="absolute top-20 left-20 h-72 w-72 rounded-full bg-primary/20 blur-3xl animate-pulse" 
+             style={{ animationDuration: '4s' }} />
+        <div className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-accent/20 blur-3xl animate-pulse" 
+             style={{ animationDuration: '6s', animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-80 rounded-full bg-primary/10 blur-3xl animate-pulse" 
+             style={{ animationDuration: '5s', animationDelay: '2s' }} />
+        
+        {/* Animated Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        
+        {/* Floating Shapes */}
+        <div className="absolute top-1/4 left-1/4 h-20 w-20 rounded-lg bg-primary/10 rotate-45 animate-float"
+             style={{ animation: 'float 8s ease-in-out infinite' }} />
+        <div className="absolute bottom-1/3 right-1/4 h-16 w-16 rounded-full bg-accent/10 animate-float"
+             style={{ animation: 'float 10s ease-in-out infinite 2s' }} />
+        <div className="absolute top-2/3 left-1/3 h-24 w-24 rounded-lg bg-primary/5 -rotate-12 animate-float"
+             style={{ animation: 'float 12s ease-in-out infinite 4s' }} />
+      </div>
+
+      <div className="relative w-full max-w-md animate-fade-in">
         <div className="mb-8 text-center">
-          <img src={ebillLogo} alt="eBill Pro" className="mx-auto mb-4 h-16 w-auto" />
+          <img src={ebillLogo} alt="eBill Pro" className="mx-auto mb-4 h-16 w-auto animate-scale-in" />
           <p className="text-muted-foreground">{t("auth.platformSubtitle")}</p>
         </div>
 
-        <Card className="shadow-2xl">
+        <Card className="shadow-2xl backdrop-blur-sm bg-background/95 border-primary/10 animate-scale-in">
           <CardHeader>
             <CardTitle className="text-center text-2xl">{t("auth.accessPlatform")}</CardTitle>
             <CardDescription className="text-center">
@@ -200,6 +225,21 @@ const Auth = () => {
           </div>
         </div>
       </div>
+
+      {/* Add floating animation keyframe */}
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          33% {
+            transform: translateY(-20px) rotate(5deg);
+          }
+          66% {
+            transform: translateY(10px) rotate(-5deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };
