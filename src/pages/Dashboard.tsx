@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign } from "lucide-react";
+import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign, Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const monthlyData = [
   { month: "Ene", amount: 12500 },
@@ -17,7 +19,109 @@ const invoicesByCountry = [
   { country: "Internacional", count: 23 },
 ];
 
+interface Invoice {
+  Id: number;
+  NumeroDocumento: string;
+  FechaDocumento: string;
+  NitCliente: string;
+  NombreCliente: string;
+  ValorDocumento: number;
+  Estado: string;
+}
+
+interface Client {
+  Id: number;
+  Nombre: string;
+}
+
+interface Product {
+  Id: number;
+  Descripcion: string;
+}
+
 const Dashboard = () => {
+  const { toast } = useToast();
+  const [invoicesCount, setInvoicesCount] = useState(0);
+  const [clientsCount, setClientsCount] = useState(0);
+  const [productsCount, setProductsCount] = useState(0);
+  const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const companyId = localStorage.getItem("companyId");
+      const authToken = localStorage.getItem("authToken");
+
+      if (!companyId || !authToken) {
+        setLoading(false);
+        return;
+      }
+
+      const headers = {
+        "Authorization": `Bearer ${authToken}`,
+        "Content-Type": "application/json"
+      };
+
+      try {
+        // Fetch invoices
+        const invoicesResponse = await fetch(`/api/Documento/TraerDocumentos?IdEmpresa=${companyId}&TipoDocumento=1`, { headers });
+        if (invoicesResponse.ok) {
+          const invoicesData = await invoicesResponse.json();
+          if (invoicesData.basePresentationList) {
+            const allInvoices = invoicesData.basePresentationList as Invoice[];
+            
+            // Count invoices from last month
+            const now = new Date();
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+            const lastMonthInvoices = allInvoices.filter(inv => {
+              const invDate = new Date(inv.FechaDocumento);
+              return invDate >= lastMonth;
+            });
+            setInvoicesCount(lastMonthInvoices.length);
+
+            // Get last 5 invoices
+            const sorted = [...allInvoices].sort((a, b) => 
+              new Date(b.FechaDocumento).getTime() - new Date(a.FechaDocumento).getTime()
+            );
+            setRecentInvoices(sorted.slice(0, 5));
+          }
+        }
+
+        // Fetch clients
+        const clientsResponse = await fetch(`/api/Cliente/TraerClientes?IdEmpresa=${companyId}`, { headers });
+        if (clientsResponse.ok) {
+          const clientsData = await clientsResponse.json();
+          if (clientsData.basePresentationList) {
+            setClientsCount(clientsData.basePresentationList.length);
+          }
+        }
+
+        // Fetch products
+        const productsResponse = await fetch(`/api/Producto/TraerProductos?IdEmpresa=${companyId}`, { headers });
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          if (productsData.basePresentationList) {
+            setProductsCount(productsData.basePresentationList.length);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
+
   return (
     <div className="space-y-6">
       <div data-tour="dashboard">
@@ -27,7 +131,13 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-primary">
+        <Card className="border-l-4 border-l-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center">
+              <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Próximamente disponible</p>
+            </div>
+          </div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -47,10 +157,9 @@ const Dashboard = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">100</div>
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span className="text-green-500">+12.5%</span> desde el mes pasado
+            <div className="text-2xl font-bold">{loading ? "..." : invoicesCount}</div>
+            <p className="text-xs text-muted-foreground">
+              Último mes
             </p>
           </CardContent>
         </Card>
@@ -61,10 +170,9 @@ const Dashboard = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">48</div>
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span className="text-green-500">+4</span> nuevos este mes
+            <div className="text-2xl font-bold">{loading ? "..." : clientsCount}</div>
+            <p className="text-xs text-muted-foreground">
+              Total de clientes
             </p>
           </CardContent>
         </Card>
@@ -75,10 +183,9 @@ const Dashboard = () => {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">156</div>
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <TrendingDown className="h-3 w-3 text-red-500" />
-              <span className="text-red-500">-2</span> desde el mes pasado
+            <div className="text-2xl font-bold">{loading ? "..." : productsCount}</div>
+            <p className="text-xs text-muted-foreground">
+              Total de productos
             </p>
           </CardContent>
         </Card>
@@ -86,7 +193,13 @@ const Dashboard = () => {
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="shadow-lg">
+        <Card className="shadow-lg relative overflow-hidden">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center">
+              <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Próximamente disponible</p>
+            </div>
+          </div>
           <CardHeader>
             <CardTitle>Facturación Mensual</CardTitle>
             <CardDescription>Ingresos de los últimos 6 meses</CardDescription>
@@ -123,7 +236,13 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg">
+        <Card className="shadow-lg relative overflow-hidden">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center">
+              <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Próximamente disponible</p>
+            </div>
+          </div>
           <CardHeader>
             <CardTitle>Facturas por País</CardTitle>
             <CardDescription>Distribución de facturas emitidas</CardDescription>
@@ -156,42 +275,34 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[
-              { id: "INV-2025-001", client: "Boutique Real", amount: "$5,600,000", status: "Pagada", country: "COL" },
-              { id: "INV-2025-002", client: "Tech Solutions SL", amount: "$15,200,000", status: "Pendiente", country: "COL" },
-              { id: "INV-2025-003", client: "Global Trading Inc", amount: "$9,400,000", status: "Pagada", country: "COL" },
-              { id: "INV-2025-004", client: "Servicios Digitales", amount: "$3,980,000", status: "Vencida", country: "COL" },
-              { id: "INV-2025-005", client: "Consulting Group", amount: "$25,000,000", status: "Pagada", country: "COL" },
-            ].map((invoice) => (
-              <div
-                key={invoice.id}
-                className="flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:shadow-md"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
-                    {invoice.country}
+            {loading ? (
+              <p className="text-center text-muted-foreground">Cargando...</p>
+            ) : recentInvoices.length === 0 ? (
+              <p className="text-center text-muted-foreground">No hay facturas recientes</p>
+            ) : (
+              recentInvoices.map((invoice) => (
+                <div
+                  key={invoice.Id}
+                  className="flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:shadow-md"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                      COL
+                    </div>
+                    <div>
+                      <p className="font-medium">{invoice.NombreCliente}</p>
+                      <p className="text-xs text-muted-foreground">{invoice.NumeroDocumento}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{invoice.client}</p>
-                    <p className="text-xs text-muted-foreground">{invoice.id}</p>
+                  <div className="flex items-center gap-4">
+                    <p className="font-semibold">{formatCurrency(invoice.ValorDocumento)}</p>
+                    <span className="rounded-full px-3 py-1 text-xs font-medium bg-green-100 text-green-700">
+                      {invoice.Estado}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <p className="font-semibold">{invoice.amount}</p>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      invoice.status === "Pagada"
-                        ? "bg-green-100 text-green-700"
-                        : invoice.status === "Pendiente"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {invoice.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
