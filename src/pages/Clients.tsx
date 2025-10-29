@@ -1,57 +1,72 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search, PlusCircle, Mail, Phone, MapPin, Building2 } from "lucide-react";
+import { toast } from "sonner";
 
-const clients = [
-  {
-    id: 1,
-    name: "Boutique Real",
-    taxId: "900123895",
-    email: "juandavidpinzonpruebasqa@fymtech.com",
-    phone: "0",
-    address: "calle 49 sur # 95a - 63",
-    city: "Bogotá",
-    country: "Colombia",
-    invoices: 12,
-    totalBilled: "€15,000",
-  },
-  {
-    id: 2,
-    name: "Tech Solutions SL",
-    taxId: "B12345678",
-    email: "contacto@techsolutions.es",
-    phone: "+34 912 345 678",
-    address: "Calle Mayor 45",
-    city: "Madrid",
-    country: "España",
-    invoices: 24,
-    totalBilled: "€45,600",
-  },
-  {
-    id: 3,
-    name: "Global Trading Inc",
-    taxId: "US-123456789",
-    email: "info@globaltrading.com",
-    phone: "+1 555 0123",
-    address: "123 Business Ave",
-    city: "New York",
-    country: "USA",
-    invoices: 8,
-    totalBilled: "$18,900",
-  },
-];
+interface Client {
+  IdCliente: number;
+  Nombre: string;
+  Identificacion: string;
+  Email: string;
+  Telefono: string;
+  Direccion: string;
+  Ciudad: string;
+  Pais: string;
+}
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          toast.error("No se encontró el token de autenticación");
+          return;
+        }
+
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const companyId = payload.IdEmpresa;
+
+        const response = await fetch(
+          `/api/Empresa/TraerClientes?IdEmpresa=${companyId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+        
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setClients(data.basePresentationList);
+        } else {
+          toast.error("Error al cargar los clientes");
+        }
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+        toast.error("Error al cargar los clientes");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   const filteredClients = clients.filter(
     (client) =>
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.taxId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email.toLowerCase().includes(searchTerm.toLowerCase())
+      client.Nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.Identificacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.Email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -80,58 +95,77 @@ const Clients = () => {
           </div>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredClients.map((client) => (
-              <Card key={client.id} className="overflow-hidden transition-all hover:shadow-md">
-                <div className="h-2 bg-gradient-primary" />
-                <CardContent className="p-6">
-                  <div className="mb-4 flex items-start justify-between">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                      <Building2 className="h-6 w-6 text-primary" />
+          {loading ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="h-2 w-full" />
+                  <CardContent className="p-6 space-y-4">
+                    <Skeleton className="h-12 w-12 rounded-lg" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
                     </div>
-                    <Badge variant="outline">{client.country}</Badge>
-                  </div>
-
-                  <h3 className="mb-1 text-lg font-semibold">{client.name}</h3>
-                  <p className="mb-4 font-mono text-sm text-muted-foreground">{client.taxId}</p>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Mail className="h-4 w-4" />
-                      <span className="truncate">{client.email}</span>
-                    </div>
-                    {client.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                        <span>{client.phone}</span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredClients.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No se encontraron clientes</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredClients.map((client) => (
+                <Card key={client.IdCliente} className="overflow-hidden transition-all hover:shadow-md">
+                  <div className="h-2 bg-gradient-primary" />
+                  <CardContent className="p-6">
+                    <div className="mb-4 flex items-start justify-between">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                        <Building2 className="h-6 w-6 text-primary" />
                       </div>
-                    )}
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span className="truncate">{client.city}</span>
+                      {client.Pais && <Badge variant="outline">{client.Pais}</Badge>}
                     </div>
-                  </div>
 
-                  <div className="mt-4 border-t pt-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Facturas</p>
-                        <p className="font-semibold">{client.invoices}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">Total Facturado</p>
-                        <p className="font-semibold text-primary">{client.totalBilled}</p>
-                      </div>
+                    <h3 className="mb-1 text-lg font-semibold">{client.Nombre}</h3>
+                    <p className="mb-4 font-mono text-sm text-muted-foreground">{client.Identificacion}</p>
+
+                    <div className="space-y-2 text-sm">
+                      {client.Email && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Mail className="h-4 w-4" />
+                          <span className="truncate">{client.Email}</span>
+                        </div>
+                      )}
+                      {client.Telefono && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-4 w-4" />
+                          <span>{client.Telefono}</span>
+                        </div>
+                      )}
+                      {client.Ciudad && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span className="truncate">{client.Ciudad}</span>
+                        </div>
+                      )}
+                      {client.Direccion && (
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                          <span className="truncate">{client.Direccion}</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
 
-                  <Button variant="outline" className="mt-4 w-full">
-                    Ver Detalles
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <Button variant="outline" className="mt-4 w-full">
+                      Ver Detalles
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
