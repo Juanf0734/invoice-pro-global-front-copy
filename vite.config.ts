@@ -10,9 +10,10 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/api': {
-        target: 'https://ebillpymetest.facturaenlinea.co',
+        target: 'https://ebillqa.azurewebsites.net',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path
       }
     }
   },
