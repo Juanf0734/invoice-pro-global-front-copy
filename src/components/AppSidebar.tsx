@@ -22,10 +22,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
   const { t } = useTranslation();
+  const { open } = useSidebar();
 
   const handleRestartTour = () => {
     window.dispatchEvent(new Event('restart-tour'));
@@ -212,38 +214,42 @@ export function AppSidebar() {
 
         <SidebarSeparator className="my-2" />
 
-        {/* Soluciones eBill */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <a 
-                  href="https://fymebill.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col gap-2 p-4 mx-2 rounded-lg bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <ExternalLink className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-semibold text-primary">Descubre más soluciones IA de eBill</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Explora todas nuestras herramientas inteligentes para tu negocio
-                  </p>
-                </a>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* Soluciones eBill - Solo visible cuando está expandido */}
+        {open && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <a 
+                    href="https://fymebill.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex flex-col gap-2 p-4 mx-2 rounded-lg bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                      <span className="text-sm font-semibold text-primary">Descubre más soluciones IA de eBill</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Explora todas nuestras herramientas inteligentes para tu negocio
+                    </p>
+                  </a>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        {/* Logo eBill */}
-        <div className="p-4 flex items-center justify-center">
-          <img 
-            src={ebillTagline} 
-            alt="eBill - Conectando Negocios, Simplificando Finanzas" 
-            className="w-full max-w-[140px] opacity-90"
-          />
-        </div>
+        {/* Logo eBill - Solo visible cuando está expandido */}
+        {open && (
+          <div className="p-4 flex items-center justify-center">
+            <img 
+              src={ebillTagline} 
+              alt="eBill - Conectando Negocios, Simplificando Finanzas" 
+              className="w-full max-w-[140px] opacity-90"
+            />
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );
