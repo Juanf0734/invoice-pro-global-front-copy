@@ -45,8 +45,10 @@ type Invoice = {
   client: string;
   date: string;
   amount: string;
-  status: "paid" | "pending" | "overdue";
-  country: string;
+  status: string;
+  prefix: string;
+  documentType: string;
+  pdfUrl: string;
 };
 
 const Invoices = () => {
@@ -103,12 +105,14 @@ const Invoices = () => {
         
         if (data.codResponse === 1 && data.basePresentationList) {
           const mappedInvoices: Invoice[] = data.basePresentationList.map((item: any) => ({
-            id: item.Codigo || item.NumeroDocumento || "N/A",
-            client: item.Descripcion || item.NombreCliente || "Cliente desconocido",
-            date: item.InfoAdicional || item.FechaDocumento || "",
-            amount: item.InfoAdicional2 || "0",
-            status: "pending" as const,
-            country: "Colombia",
+            id: item.Id_CFD?.toString() || "N/A",
+            client: item.NombreCliente || "Cliente desconocido",
+            date: item.FechaExpedicion ? format(new Date(item.FechaExpedicion), "dd/MM/yyyy") : "",
+            amount: item.ValorTotal ? `$${item.ValorTotal.toLocaleString('es-CO', { minimumFractionDigits: 2 })}` : "$0.00",
+            status: item.EstadoTramite || "Desconocido",
+            prefix: item.Prefijo || "",
+            documentType: item.TipoComprobante || "",
+            pdfUrl: item.RutaPDF || "",
           }));
           setInvoices(mappedInvoices);
         } else {
@@ -154,10 +158,15 @@ const Invoices = () => {
   const locale = i18n.language === 'es' ? es : enUS;
 
   const handleViewPDF = () => {
-    toast({
-      title: "Generando PDF",
-      description: "El PDF de la factura se está generando...",
-    });
+    if (selectedInvoice?.pdfUrl) {
+      window.open(selectedInvoice.pdfUrl, '_blank');
+    } else {
+      toast({
+        title: "PDF no disponible",
+        description: "No hay PDF disponible para esta factura",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSendEmail = () => {
@@ -171,13 +180,6 @@ const Invoices = () => {
     toast({
       title: "Enviando a DIAN",
       description: "La factura está siendo enviada a la DIAN de Colombia...",
-    });
-  };
-
-  const handleSendToVerifactu = () => {
-    toast({
-      title: "Enviando a Verifactu",
-      description: "La factura está siendo enviada a Verifactu (España)...",
     });
   };
 
@@ -309,11 +311,12 @@ const Invoices = () => {
                 <table className="w-full">
                   <thead className="border-b bg-muted/50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">Número</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">ID</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Prefijo</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Tipo</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Cliente</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Monto</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">País</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Estado</th>
                       <th className="px-6 py-4 text-right text-sm font-semibold">Acciones</th>
                     </tr>
@@ -329,6 +332,12 @@ const Invoices = () => {
                       <span className="font-mono text-sm font-medium">{invoice.id}</span>
                     </td>
                     <td className="px-6 py-4">
+                      <span className="text-sm">{invoice.prefix}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm">{invoice.documentType}</span>
+                    </td>
+                    <td className="px-6 py-4">
                       <span className="font-medium">{invoice.client}</span>
                     </td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{invoice.date}</td>
@@ -337,12 +346,7 @@ const Invoices = () => {
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant="outline" className="font-normal">
-                        {invoice.country}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={statusConfig[invoice.status as keyof typeof statusConfig].class}>
-                        {statusConfig[invoice.status as keyof typeof statusConfig].label}
+                        {invoice.status}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
@@ -362,10 +366,15 @@ const Invoices = () => {
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast({
-                              title: "Descargando PDF",
-                              description: `Descargando ${invoice.id}...`,
-                            });
+                            if (invoice.pdfUrl) {
+                              window.open(invoice.pdfUrl, '_blank');
+                            } else {
+                              toast({
+                                title: "PDF no disponible",
+                                description: "No hay PDF disponible para esta factura",
+                                variant: "destructive",
+                              });
+                            }
                           }}
                         >
                           <Download className="h-4 w-4" />
@@ -406,13 +415,14 @@ const Invoices = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div className="space-y-1 flex-1 min-w-0">
                       <p className="font-mono text-sm font-medium">{invoice.id}</p>
+                      <p className="text-xs text-muted-foreground">{invoice.prefix} - {invoice.documentType}</p>
                       <p className="font-semibold truncate">{invoice.client}</p>
                     </div>
                     <Badge 
                       variant="outline" 
-                      className={statusConfig[invoice.status].class}
+                      className="font-normal text-xs"
                     >
-                      {statusConfig[invoice.status].label}
+                      {invoice.status}
                     </Badge>
                   </div>
                   
@@ -427,10 +437,7 @@ const Invoices = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {invoice.country}
-                    </Badge>
+                    <div className="flex items-center justify-end gap-2">
                     <div className="flex gap-1">
                       <Button 
                         variant="ghost" 
@@ -449,10 +456,15 @@ const Invoices = () => {
                         className="h-8 w-8"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toast({
-                            title: "Descargando PDF",
-                            description: `Descargando ${invoice.id}...`,
-                          });
+                          if (invoice.pdfUrl) {
+                            window.open(invoice.pdfUrl, '_blank');
+                          } else {
+                            toast({
+                              title: "PDF no disponible",
+                              description: "No hay PDF disponible para esta factura",
+                              variant: "destructive",
+                            });
+                          }
                         }}
                       >
                         <Download className="h-4 w-4" />
@@ -499,63 +511,52 @@ const Invoices = () => {
                 <span className="hidden sm:inline">Enviar correo al cliente</span>
                 <span className="sm:hidden">Correo</span>
               </Button>
-              {selectedInvoice?.country === "Colombia" && (
-                <Button 
-                  variant="outline" 
-                  className="gap-2 flex-1 sm:flex-none text-sm"
-                  onClick={handleSendToDIAN}
-                >
-                  <Send className="h-4 w-4" />
-                  <span className="hidden sm:inline">Enviar a DIAN</span>
-                  <span className="sm:hidden">DIAN</span>
-                </Button>
-              )}
-              {selectedInvoice?.country === "España" && (
-                <Button 
-                  variant="outline" 
-                  className="gap-2 flex-1 sm:flex-none text-sm"
-                  onClick={handleSendToVerifactu}
-                >
-                  <Send className="h-4 w-4" />
-                  <span className="hidden sm:inline">Enviar a Verifactu</span>
-                  <span className="sm:hidden">Verifactu</span>
-                </Button>
-              )}
+              <Button 
+                variant="outline" 
+                className="gap-2 flex-1 sm:flex-none text-sm"
+                onClick={handleSendToDIAN}
+              >
+                <Send className="h-4 w-4" />
+                <span className="hidden sm:inline">Enviar a DIAN</span>
+                <span className="sm:hidden">DIAN</span>
+              </Button>
             </div>
 
             {/* Invoice Details */}
             <div className="space-y-4 md:space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-1">
-                  <p className="text-xs md:text-sm text-muted-foreground">Número de Factura</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">ID</p>
                   <p className="font-mono font-semibold text-base md:text-lg">{selectedInvoice?.id}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs md:text-sm text-muted-foreground">Prefijo</p>
+                  <p className="font-medium text-sm md:text-base">{selectedInvoice?.prefix}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs md:text-sm text-muted-foreground">Tipo de Comprobante</p>
+                  <p className="font-medium text-sm md:text-base">{selectedInvoice?.documentType}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs md:text-sm text-muted-foreground">Cliente</p>
                   <p className="font-semibold text-base md:text-lg">{selectedInvoice?.client}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs md:text-sm text-muted-foreground">Fecha</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Fecha de Expedición</p>
                   <p className="font-medium text-sm md:text-base">{selectedInvoice?.date}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs md:text-sm text-muted-foreground">Monto</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Monto Total</p>
                   <p className="font-bold text-lg md:text-xl">{selectedInvoice?.amount}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs md:text-sm text-muted-foreground">País</p>
-                  <Badge variant="outline" className="w-fit text-xs">
-                    {selectedInvoice?.country}
-                  </Badge>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs md:text-sm text-muted-foreground">Estado</p>
                   {selectedInvoice && (
                     <Badge 
                       variant="outline" 
-                      className={`${statusConfig[selectedInvoice.status].class} text-xs`}
+                      className="w-fit text-xs"
                     >
-                      {statusConfig[selectedInvoice.status].label}
+                      {selectedInvoice.status}
                     </Badge>
                   )}
                 </div>
