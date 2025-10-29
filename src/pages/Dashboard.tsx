@@ -126,7 +126,10 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value: number | null | undefined) => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return '$0';
+    }
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
@@ -308,8 +311,8 @@ const Dashboard = () => {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="font-semibold">{formatCurrency(invoice.ValorDocumento)}</p>
-                      <p className="text-xs text-muted-foreground">{invoice.Tramite}</p>
+                      <p className="font-semibold">{formatCurrency(invoice.ValorDocumento || 0)}</p>
+                      <p className="text-xs text-muted-foreground">{invoice.Tramite || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
