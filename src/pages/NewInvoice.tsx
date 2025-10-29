@@ -618,6 +618,11 @@ const NewInvoice = () => {
 
       const data = await response.json();
 
+      console.log("=== RESPUESTA DEL SERVIDOR ===");
+      console.log("Status:", response.status);
+      console.log("Respuesta completa:", JSON.stringify(data, null, 2));
+      console.log("==============================");
+
       if (data.codResponse === 1 || data.messageResponse?.includes("exitosamente") || data.messageResponse?.includes("registrado")) {
         toast({
           title: "Éxito",
@@ -629,9 +634,10 @@ const NewInvoice = () => {
           navigate("/invoices");
         }, 2000);
       } else {
+        console.error("Error del servidor:", data);
         toast({
           title: "Error",
-          description: data.messageResponse || "Error al crear la factura",
+          description: `${data.messageResponse || "Error al crear la factura"}. Ver consola para detalles.`,
           variant: "destructive",
         });
       }
