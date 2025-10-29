@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import ebillTagline from "@/assets/ebill-tagline.png";
 import {
   LayoutDashboard,
   FileText,
@@ -223,6 +224,15 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Logo eBill */}
+        <div className="p-4 flex items-center justify-center">
+          <img 
+            src={ebillTagline} 
+            alt="eBill - Conectando Negocios, Simplificando Finanzas" 
+            className="w-full max-w-[200px] opacity-90"
+          />
+        </div>
       </SidebarContent>
     </Sidebar>
   );
