@@ -154,7 +154,7 @@ export function AppSidebar() {
                 >
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-semibold text-primary">Descubre más soluciones IA</span>
+                    <span className="text-sm font-semibold text-primary">Descubre más soluciones IA de eBill</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Explora todas nuestras herramientas inteligentes para tu negocio
