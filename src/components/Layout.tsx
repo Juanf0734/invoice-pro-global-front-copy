@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, LogOut, User, Languages, Sparkles, X, Building2 } from "lucide-react";
+import { Bell, LogOut, User, Languages, Sparkles, X, Building2, Settings } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Alert, AlertDescription } from "./ui/alert";
@@ -156,6 +156,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <DropdownMenuSeparator />
                   </>
                 )}
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Configuración
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/company")}>
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Mi Empresa
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   {t("auth.logout")}
