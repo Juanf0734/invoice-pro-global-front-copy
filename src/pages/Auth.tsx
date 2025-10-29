@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ebillLogo from "@/assets/ebill-logo.png";
+import ebillIcon from "@/assets/ebill-icon.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -179,7 +180,7 @@ const Auth = () => {
 
       <div className="relative w-full max-w-md animate-fade-in">
         <div className="mb-8 text-center">
-          <img src={ebillLogo} alt="eBill Pro" className="mx-auto mb-4 h-16 w-auto animate-scale-in" />
+          <img src={ebillLogo} alt="eBill Pro" className="mx-auto mb-4 h-24 w-auto animate-scale-in" />
           <p className="text-muted-foreground">{t("auth.platformSubtitle")}</p>
         </div>
 
@@ -256,6 +257,13 @@ const Auth = () => {
             >
               Ver planes y precios →
             </Link>
+          </div>
+          <div className="flex justify-center pt-4">
+            <img 
+              src={ebillIcon} 
+              alt="eBill" 
+              className="h-16 w-auto opacity-80 hover:opacity-100 transition-opacity"
+            />
           </div>
         </div>
       </div>
