@@ -621,15 +621,30 @@ const Invoices = () => {
                   </div>
                 </div>
               ) : pdfUrl ? (
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-base md:text-lg">Vista Previa del PDF</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-base md:text-lg">Documento PDF</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(pdfUrl, '_blank')}
+                      className="gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Abrir en nueva pestaña
+                    </Button>
+                  </div>
                   <div className="border rounded-lg overflow-hidden bg-muted/20">
                     <iframe
-                      src={pdfUrl}
+                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`}
                       className="w-full h-[400px] md:h-[500px]"
                       title="Vista previa del PDF"
+                      frameBorder="0"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Si el PDF no se visualiza, haz clic en "Abrir en nueva pestaña"
+                  </p>
                 </div>
               ) : (
                 <div className="text-center p-8 text-muted-foreground">
