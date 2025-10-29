@@ -547,37 +547,53 @@ const NewInvoice = () => {
         }
       }
 
-      // Construir objeto FV_CFDCab
+      // Formato de fecha sin milisegundos y sin Z
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:00`;
+      };
+
+      const fechaExp = new Date(invoiceData.fechaExpedicion);
+      const fechaVenc = new Date(invoiceData.fechaVencimiento || invoiceData.fechaExpedicion);
+
+      // Construir objeto FV_CFDCab - TODOS los valores como strings
       const cabecera = {
-        TipoComprobante: parseInt(invoiceData.tipoComprobante),
-        Prefijo: prefijo,
+        TipoComprobante: String(invoiceData.tipoComprobante),
+        Prefijo: "",
         NumFactura: 0,
         IDInterno: selectedClientDetail?.IDInterno || clientData.nit,
         NombreVendedor: "",
-        OrderID: "",
-        FormaPago: "1", // 1 = Contado, 2 = Crédito
-        Condiciones_Pago: "10", // Código del medio de pago
+        Condiciones_Pago: "14",
+        FV_TDO_Codigo_TipoOperacion: "4",
+        FechaExpedicion: formatDate(fechaExp),
+        FechaVencimiento: formatDate(fechaVenc),
+        FormaPago: "1",
+        InfoAdicional: " ",
         MonedaISO: "COP",
-        pague_hasta3: invoiceData.fechaVencimiento ? new Date(invoiceData.fechaVencimiento).toISOString() : null,
-        FechaExpedicion: new Date(invoiceData.fechaExpedicion).toISOString(),
-        FechaVencimiento: new Date(invoiceData.fechaVencimiento || invoiceData.fechaExpedicion).toISOString(),
-        NumAprobacionRes: numAprobacionRes,
-        AnoAprobacionRes: anoAprobacionRes,
-        CFD_LineCountNumeric: invoiceLines.length,
-        CFD_LineExtensionAmount: totals.subtotal,
-        TotalIVA: totals.iva,
-        CFD_TaxExclusiveAmount: totals.subtotal,
-        CFD_TaxInclusiveAmount: totals.total,
-        Total_a_Pagar: totals.total,
-        InfoAdicional: invoiceData.notasCliente || "",
-        FV_TDO_Codigo_TipoOperacion: "",
-        CFD_TaxPointDate: new Date(invoiceData.fechaExpedicion).toISOString(),
-        TotalRetIVA: 0,
-        TotalRetencion: 0,
-        TotalRetICA: 0,
-        RetencionCREETotal: 0,
-        CFD_Modelo_Facturacion: "3",
-        ValorHasta4: 1,
+        NumAprobacionRes: String(numAprobacionRes),
+        AnoAprobacionRes: String(anoAprobacionRes),
+        OrderID: "",
+        TasaCambio: "",
+        TotalIVA: totals.iva.toFixed(2),
+        Total_a_Pagar: totals.total.toFixed(2),
+        pague_hasta1: null,
+        pague_hasta3: formatDate(fechaExp),
+        referencia: "",
+        CFD_LineCountNumeric: String(invoiceLines.length),
+        CFD_LineExtensionAmount: totals.subtotal.toFixed(2),
+        CFD_ResponseCode: "",
+        CFD_TaxExclusiveAmount: totals.subtotal.toFixed(2),
+        CFD_TaxInclusiveAmount: totals.total.toFixed(2),
+        CFD_base_impo_total_nal: "0.00",
+        CFD_campo_texto_15: null,
+        CFD_fecha_tasadeCambio: formatDate(fechaExp),
+        CFD_inf_origen_despacho: "",
+        FechaFinalPeriodoFacturado: "",
+        FechaInicialPeriodoFacturado: "",
       };
 
       // Construir detalles FV_CFDDet
