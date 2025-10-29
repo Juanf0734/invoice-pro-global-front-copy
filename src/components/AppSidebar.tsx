@@ -21,6 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
@@ -56,6 +57,8 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarSeparator className="my-2" />
 
         {/* Operaciones principales */}
         <SidebarGroup>
@@ -100,6 +103,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <SidebarSeparator className="my-2" />
+
         {/* Gestión de datos */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-sm">Gestión</SidebarGroupLabel>
@@ -142,32 +147,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Soluciones eBill */}
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <a 
-                  href="https://fymebill.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col gap-2 p-4 mx-2 rounded-lg bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <ExternalLink className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-semibold text-primary">Descubre más soluciones IA de eBill</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Explora todas nuestras herramientas inteligentes para tu negocio
-                  </p>
-                </a>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarSeparator className="my-2" />
 
         {/* Tour - Ayuda */}
-        <SidebarGroup>
+        <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -182,6 +165,8 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarSeparator className="my-2" />
 
         {/* Configuración */}
         <SidebarGroup>
@@ -220,6 +205,32 @@ export function AppSidebar() {
                     <span className="text-base">{t("nav.settings")}</span>
                   </NavLink>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="my-2" />
+
+        {/* Soluciones eBill */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <a 
+                  href="https://fymebill.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col gap-2 p-4 mx-2 rounded-lg bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-semibold text-primary">Descubre más soluciones IA de eBill</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Explora todas nuestras herramientas inteligentes para tu negocio
+                  </p>
+                </a>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
