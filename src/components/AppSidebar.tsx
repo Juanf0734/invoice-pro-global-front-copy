@@ -140,9 +140,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Configuración - Al final */}
+        {/* Tour - Ayuda */}
         <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel className="text-sm">Ajustes</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -154,7 +153,15 @@ export function AppSidebar() {
                   <span className="text-base">Tour de la plataforma</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
+        {/* Configuración */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sm">Ajustes</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="h-11">
                   <NavLink
