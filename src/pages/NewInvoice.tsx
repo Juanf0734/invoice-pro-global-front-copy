@@ -552,8 +552,8 @@ const NewInvoice = () => {
         IDInterno: selectedClientDetail?.IDInterno || clientData.nit,
         NombreVendedor: "",
         OrderID: "",
-        FormaPago: clientData.regimenFiscal || "1",
-        Condiciones_Pago: "10",
+        FormaPago: "1", // 1 = Contado, 2 = Crédito
+        Condiciones_Pago: "10", // Código del medio de pago
         MonedaISO: "COP",
         pague_hasta3: invoiceData.fechaVencimiento ? new Date(invoiceData.fechaVencimiento).toISOString() : null,
         FechaExpedicion: new Date(invoiceData.fechaExpedicion).toISOString(),
@@ -568,6 +568,13 @@ const NewInvoice = () => {
         Total_a_Pagar: totals.total,
         InfoAdicional: invoiceData.notasCliente || "",
         FV_TDO_Codigo_TipoOperacion: "",
+        CFD_TaxPointDate: new Date(invoiceData.fechaExpedicion).toISOString(),
+        TotalRetIVA: 0,
+        TotalRetencion: 0,
+        TotalRetICA: 0,
+        RetencionCREETotal: 0,
+        CFD_Modelo_Facturacion: "3",
+        ValorHasta4: 1,
       };
 
       // Construir detalles FV_CFDDet
