@@ -564,6 +564,21 @@ const Invoices = () => {
 
               <Separator />
 
+              {selectedInvoice?.pdfUrl && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-base md:text-lg">Vista Previa del PDF</h3>
+                  <div className="border rounded-lg overflow-hidden bg-muted/20">
+                    <iframe
+                      src={selectedInvoice.pdfUrl}
+                      className="w-full h-[400px] md:h-[500px]"
+                      title="Vista previa del PDF"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <Separator />
+
               <div className="space-y-2 md:space-y-3">
                 <h3 className="font-semibold text-base md:text-lg">Información Adicional</h3>
                 <p className="text-xs md:text-sm text-muted-foreground">
