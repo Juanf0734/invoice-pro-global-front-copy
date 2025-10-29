@@ -166,7 +166,7 @@ const NewInvoice = () => {
   }, [toast]);
 
   const handleClientSelect = async (clientId: string) => {
-    if (!clientId) {
+    if (!clientId || clientId === "__new__") {
       setSelectedClientId("");
       setSelectedClientDetail(null);
       setClientData({
@@ -393,7 +393,7 @@ const NewInvoice = () => {
                   <SelectValue placeholder={loadingClients ? "Cargando clientes..." : "Seleccione un cliente"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">-- Nuevo Cliente --</SelectItem>
+                  <SelectItem value="__new__">-- Nuevo Cliente --</SelectItem>
                   {clients.map((client) => (
                     <SelectItem key={client.Codigo} value={client.Codigo.toString()}>
                       {client.Descripcion}
