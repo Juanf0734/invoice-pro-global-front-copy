@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,32 @@ const categoryColors: Record<string, string> = {
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const token = localStorage.getItem("authToken");
+      const companyId = localStorage.getItem("companyId");
+      
+      try {
+        const response = await fetch(
+          `/api/Producto/TraerProductos?IdEmpresa=${companyId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        console.log("=== PRODUCTOS API RESPONSE ===");
+        console.log(JSON.stringify(data, null, 2));
+        console.log("==============================");
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const filteredProducts = products.filter(
     (product) =>
