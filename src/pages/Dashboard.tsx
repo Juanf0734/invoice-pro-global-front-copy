@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line } from "recharts";
 import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/lib/api";
@@ -42,7 +42,7 @@ const Dashboard = () => {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
   const [invoicesByType, setInvoicesByType] = useState<{name: string, value: number}[]>([]);
-  const [monthlyData, setMonthlyData] = useState<{month: string, amount: number}[]>([]);
+  const [monthlyData, setMonthlyData] = useState<{month: string, amount: number, count: number}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -126,7 +126,8 @@ const Dashboard = () => {
         const monthlyResults = await Promise.all(monthlyPromises);
         const monthlyChartData = monthlyResults.map(result => ({
           month: result.month,
-          amount: result.data.reduce((sum: number, inv: Invoice) => sum + (inv.ValorTotal || 0), 0)
+          amount: result.data.reduce((sum: number, inv: Invoice) => sum + (inv.ValorTotal || 0), 0),
+          count: result.data.length
         }));
         setMonthlyData(monthlyChartData);
         console.log('Monthly chart data:', monthlyChartData);
@@ -242,11 +243,11 @@ const Dashboard = () => {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Facturación Mensual</CardTitle>
-            <CardDescription>Valor total de los últimos 3 meses</CardDescription>
+            <CardDescription>Valor total y cantidad de facturas de los últimos 3 meses</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={monthlyData}>
+              <ComposedChart data={monthlyData}>
                 <defs>
                   <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -255,16 +256,37 @@ const Dashboard = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
+                <YAxis 
+                  yAxisId="left" 
+                  className="text-xs"
+                  tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
+                />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right" 
+                  className="text-xs"
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)",
                   }}
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={(value: number, name: string) => {
+                    if (name === 'amount') return [formatCurrency(value), 'Valor Total'];
+                    if (name === 'count') return [value, 'Cantidad'];
+                    return [value, name];
+                  }}
+                />
+                <Legend 
+                  formatter={(value) => {
+                    if (value === 'amount') return 'Valor Total';
+                    if (value === 'count') return 'Cantidad de Facturas';
+                    return value;
+                  }}
                 />
                 <Area
+                  yAxisId="left"
                   type="monotone"
                   dataKey="amount"
                   stroke="hsl(var(--primary))"
@@ -272,7 +294,14 @@ const Dashboard = () => {
                   fillOpacity={1}
                   fill="url(#colorAmount)"
                 />
-              </AreaChart>
+                <Bar
+                  yAxisId="right"
+                  dataKey="count"
+                  fill="hsl(var(--accent))"
+                  radius={[8, 8, 0, 0]}
+                  opacity={0.7}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
