@@ -4,18 +4,10 @@ import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/lib/api";
-import { format, subMonths } from "date-fns";
+import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { es } from "date-fns/locale";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
-
-const monthlyData = [
-  { month: "Ene", amount: 12500 },
-  { month: "Feb", amount: 18200 },
-  { month: "Mar", amount: 15800 },
-  { month: "Abr", amount: 22400 },
-  { month: "May", amount: 19600 },
-  { month: "Jun", amount: 28900 },
-];
 
 interface Invoice {
   Id_CFD: number;
@@ -49,6 +41,7 @@ const Dashboard = () => {
   const [productsCount, setProductsCount] = useState(0);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
   const [invoicesByType, setInvoicesByType] = useState<{name: string, value: number}[]>([]);
+  const [monthlyData, setMonthlyData] = useState<{month: string, amount: number}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -222,16 +215,10 @@ const Dashboard = () => {
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="shadow-lg relative overflow-hidden">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-            <div className="text-center">
-              <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Próximamente disponible</p>
-            </div>
-          </div>
+        <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Facturación Mensual</CardTitle>
-            <CardDescription>Ingresos de los últimos 6 meses</CardDescription>
+            <CardDescription>Valor total de los últimos 3 meses</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -251,6 +238,7 @@ const Dashboard = () => {
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)",
                   }}
+                  formatter={(value: number) => formatCurrency(value)}
                 />
                 <Area
                   type="monotone"
