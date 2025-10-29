@@ -183,6 +183,14 @@ const Dashboard = () => {
         <p className="text-muted-foreground">Resumen de tu actividad de facturación</p>
       </div>
 
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground text-lg">Cargando y calculando datos del dashboard...</p>
+        </div>
+      ) : (
+        <>
+
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-l-4 border-l-primary">
@@ -381,6 +389,8 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+      </>
+      )}
     </div>
   );
 };
