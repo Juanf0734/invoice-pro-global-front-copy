@@ -8,14 +8,9 @@ import { Search, PlusCircle, Mail, Phone, MapPin, Building2 } from "lucide-react
 import { toast } from "sonner";
 
 interface Client {
-  IdCliente: number;
-  Nombre: string;
-  Identificacion: string;
-  Email: string;
-  Telefono: string;
-  Direccion: string;
-  Ciudad: string;
-  Pais: string;
+  Codigo: number;
+  Descripcion: string;
+  InfoAdicional: string;
 }
 
 const Clients = () => {
@@ -70,14 +65,12 @@ const Clients = () => {
 
   const filteredClients = clients.filter(
     (client) =>
-      client.Nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.Identificacion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.Email?.toLowerCase().includes(searchTerm.toLowerCase())
+      client.Descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.InfoAdicional?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   console.log("Total clientes:", clients.length);
   console.log("Clientes filtrados:", filteredClients.length);
-  console.log("Término de búsqueda:", searchTerm);
 
   return (
     <div className="space-y-6">
@@ -97,7 +90,7 @@ const Clients = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar clientes por nombre, NIT o email..."
+              placeholder="Buscar clientes por identificación o email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -129,41 +122,23 @@ const Clients = () => {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredClients.map((client) => (
-                <Card key={client.IdCliente} className="overflow-hidden transition-all hover:shadow-md">
+                <Card key={client.Codigo} className="overflow-hidden transition-all hover:shadow-md">
                   <div className="h-2 bg-gradient-primary" />
                   <CardContent className="p-6">
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                         <Building2 className="h-6 w-6 text-primary" />
                       </div>
-                      {client.Pais && <Badge variant="outline">{client.Pais}</Badge>}
+                      <Badge variant="outline">ID: {client.Codigo}</Badge>
                     </div>
 
-                    <h3 className="mb-1 text-lg font-semibold">{client.Nombre}</h3>
-                    <p className="mb-4 font-mono text-sm text-muted-foreground">{client.Identificacion}</p>
-
-                    <div className="space-y-2 text-sm">
-                      {client.Email && (
+                    <h3 className="mb-1 text-lg font-semibold">{client.Descripcion}</h3>
+                    
+                    <div className="space-y-2 text-sm mt-4">
+                      {client.InfoAdicional && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Mail className="h-4 w-4" />
-                          <span className="truncate">{client.Email}</span>
-                        </div>
-                      )}
-                      {client.Telefono && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Phone className="h-4 w-4" />
-                          <span>{client.Telefono}</span>
-                        </div>
-                      )}
-                      {client.Ciudad && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          <span className="truncate">{client.Ciudad}</span>
-                        </div>
-                      )}
-                      {client.Direccion && (
-                        <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                          <span className="truncate">{client.Direccion}</span>
+                          <span className="truncate">{client.InfoAdicional}</span>
                         </div>
                       )}
                     </div>
