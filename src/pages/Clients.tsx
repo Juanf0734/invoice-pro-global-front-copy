@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, PlusCircle, Mail, Phone, MapPin, Building2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, PlusCircle, Mail, Phone, MapPin, Building2, User, Hash, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 interface Client {
@@ -13,10 +14,25 @@ interface Client {
   InfoAdicional: string;
 }
 
+interface ClientDetail {
+  IdCliente: number;
+  Identificacion: string;
+  Nombre: string;
+  Email: string;
+  Telefono: string;
+  Direccion: string;
+  Ciudad: string;
+  Pais: string;
+  [key: string]: any;
+}
+
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<ClientDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -62,6 +78,44 @@ const Clients = () => {
 
     fetchClients();
   }, []);
+
+  const handleViewDetails = async (clientId: number) => {
+    try {
+      setLoadingDetail(true);
+      setShowDetailDialog(true);
+      
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("No se encontró el token de autenticación");
+        return;
+      }
+
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const companyId = payload.IdEmpresa;
+
+      const response = await fetch(
+        `/api/Empresa/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      
+      if (data.codResponse === 1 && data.basePresentation) {
+        setSelectedClient(data.basePresentation);
+      } else {
+        toast.error("Error al cargar los detalles del cliente");
+      }
+    } catch (error) {
+      console.error("Error fetching client details:", error);
+      toast.error("Error al cargar los detalles del cliente");
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
 
   const filteredClients = clients.filter(
     (client) =>
@@ -143,7 +197,7 @@ const Clients = () => {
                       )}
                     </div>
 
-                    <Button variant="outline" className="mt-4 w-full">
+                    <Button variant="outline" className="mt-4 w-full" onClick={() => handleViewDetails(client.Codigo)}>
                       Ver Detalles
                     </Button>
                   </CardContent>
@@ -153,6 +207,101 @@ const Clients = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalles del Cliente</DialogTitle>
+          </DialogHeader>
+          
+          {loadingDetail ? (
+            <div className="space-y-4 py-4">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ) : selectedClient ? (
+            <div className="space-y-6 py-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                  <Building2 className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold">{selectedClient.Nombre}</h3>
+                  <p className="text-sm text-muted-foreground">ID: {selectedClient.IdCliente}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {selectedClient.Identificacion && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Hash className="h-4 w-4 text-muted-foreground" />
+                      Identificación
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Identificacion}</p>
+                  </div>
+                )}
+
+                {selectedClient.Email && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      Email
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Email}</p>
+                  </div>
+                )}
+
+                {selectedClient.Telefono && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      Teléfono
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Telefono}</p>
+                  </div>
+                )}
+
+                {selectedClient.Pais && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      País
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Pais}</p>
+                  </div>
+                )}
+
+                {selectedClient.Ciudad && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      Ciudad
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Ciudad}</p>
+                  </div>
+                )}
+
+                {selectedClient.Direccion && (
+                  <div className="space-y-1 md:col-span-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      Dirección
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Direccion}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No se encontraron detalles del cliente
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
