@@ -12,7 +12,12 @@ interface OnboardingStep {
   position: "top" | "bottom" | "left" | "right";
 }
 
-export function OnboardingTour() {
+interface OnboardingTourProps {
+  forceStart?: boolean;
+  onComplete?: () => void;
+}
+
+export function OnboardingTour({ forceStart = false, onComplete }: OnboardingTourProps) {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -70,8 +75,12 @@ export function OnboardingTour() {
   ];
 
   useEffect(() => {
-    checkOnboardingStatus();
-  }, []);
+    if (forceStart) {
+      setTimeout(() => setIsVisible(true), 500);
+    } else {
+      checkOnboardingStatus();
+    }
+  }, [forceStart]);
 
   useEffect(() => {
     if (isVisible && currentStep < steps.length) {
@@ -125,6 +134,7 @@ export function OnboardingTour() {
       localStorage.setItem(`onboarding_completed_${user.id}`, "true");
     }
     setIsVisible(false);
+    onComplete?.();
   };
 
   const handleFinish = async () => {
@@ -136,6 +146,7 @@ export function OnboardingTour() {
       localStorage.setItem(`onboarding_completed_${user.id}`, "true");
     }
     setIsVisible(false);
+    onComplete?.();
   };
 
   const getCardPosition = () => {

@@ -8,6 +8,7 @@ import {
   Building2,
   Settings,
   PlusCircle,
+  HelpCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,6 +23,10 @@ import {
 
 export function AppSidebar() {
   const { t } = useTranslation();
+
+  const handleRestartTour = () => {
+    window.dispatchEvent(new Event('restart-tour'));
+  };
 
   const menuItems = [
     { title: t("nav.dashboard"), url: "/", icon: LayoutDashboard },
@@ -140,6 +145,16 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-sm">Ajustes</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={handleRestartTour}
+                  className="h-11 hover:bg-sidebar-accent/50 cursor-pointer"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                  <span className="text-base">Tour de la plataforma</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="h-11">
                   <NavLink

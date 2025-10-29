@@ -26,8 +26,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { t, i18n } = useTranslation();
   const { planName, subscribed } = useSubscription();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [forceStartTour, setForceStartTour] = useState(false);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
   const [companyName, setCompanyName] = useState<string>("");
+
+  // Event listener for restarting the tour
+  useEffect(() => {
+    const handleRestartTour = () => {
+      setForceStartTour(true);
+      setShowOnboarding(true);
+    };
+
+    window.addEventListener('restart-tour', handleRestartTour);
+    return () => window.removeEventListener('restart-tour', handleRestartTour);
+  }, []);
 
   useEffect(() => {
     // Load company name from localStorage
@@ -174,7 +186,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </header>
           <main className="flex-1 overflow-auto bg-muted/30 p-6">{children}</main>
         </div>
-        {showOnboarding && <OnboardingTour />}
+        <OnboardingTour 
+          forceStart={forceStartTour} 
+          onComplete={() => {
+            setShowOnboarding(false);
+            setForceStartTour(false);
+          }} 
+        />
       </div>
     </SidebarProvider>
   );
