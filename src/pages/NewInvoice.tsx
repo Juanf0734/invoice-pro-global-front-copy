@@ -16,6 +16,34 @@ type TipoComprobante = {
   InfoAdicional: string;
 };
 
+type Client = {
+  Codigo: number;
+  Descripcion: string;
+  InfoAdicional: string;
+};
+
+type ClientDetail = {
+  Id: number;
+  Nombre: string;
+  TipoPersona: number;
+  TipoIdentificacion: number;
+  Nit: string;
+  DigitoVerificacion: string;
+  IdRegimenFiscal: number;
+  Telefono: string;
+  Correo: string;
+  Ubicacion: string;
+  CodigoPostal: string;
+  PaisIso: string;
+  IdPais: number;
+  DepartamentoDane: string;
+  IdDepartamento: number;
+  MunicipioDane: string;
+  IdMunicipio: number;
+  IDInterno: string;
+  IdUbicacionFiscal: number;
+};
+
 const steps = [
   { id: 1, title: "Inicio", description: "Tipo de documento" },
   { id: 2, title: "Cliente", description: "Datos del cliente" },
@@ -29,6 +57,21 @@ const NewInvoice = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [tiposComprobante, setTiposComprobante] = useState<TipoComprobante[]>([]);
   const [loadingTipos, setLoadingTipos] = useState(true);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loadingClients, setLoadingClients] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [selectedClientDetail, setSelectedClientDetail] = useState<ClientDetail | null>(null);
+  const [loadingClientDetail, setLoadingClientDetail] = useState(false);
+
+  // Client form data
+  const [clientData, setClientData] = useState({
+    name: "",
+    nit: "",
+    address: "",
+    city: "",
+    phone: "",
+    email: "",
+  });
 
   useEffect(() => {
     const fetchTiposComprobante = async () => {
@@ -77,6 +120,117 @@ const NewInvoice = () => {
 
     fetchTiposComprobante();
   }, [toast, navigate]);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        setLoadingClients(true);
+        const authToken = localStorage.getItem("authToken");
+        const companyId = localStorage.getItem("companyId");
+        
+        if (!authToken || !companyId) {
+          return;
+        }
+
+        const response = await fetch(
+          `/api/Empresa/TraerClientes?IdEmpresa=${companyId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al cargar los clientes");
+        }
+
+        const data = await response.json();
+        
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setClients(data.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los clientes",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingClients(false);
+      }
+    };
+
+    fetchClients();
+  }, [toast]);
+
+  const handleClientSelect = async (clientId: string) => {
+    if (!clientId) {
+      setSelectedClientId("");
+      setSelectedClientDetail(null);
+      setClientData({
+        name: "",
+        nit: "",
+        address: "",
+        city: "",
+        phone: "",
+        email: "",
+      });
+      return;
+    }
+
+    try {
+      setLoadingClientDetail(true);
+      setSelectedClientId(clientId);
+      
+      const authToken = localStorage.getItem("authToken");
+      const companyId = localStorage.getItem("companyId");
+      
+      if (!authToken || !companyId) {
+        return;
+      }
+
+      const response = await fetch(
+        `/api/Empresa/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al cargar los detalles del cliente");
+      }
+
+      const data = await response.json();
+      
+      if (data.codResponse === 1 && data.basePresentation) {
+        const client = data.basePresentation;
+        setSelectedClientDetail(client);
+        
+        // Auto-fill form
+        setClientData({
+          name: client.Nombre || "",
+          nit: client.Nit || "",
+          address: client.Ubicacion || "",
+          city: client.MunicipioDane || "",
+          phone: client.Telefono || "",
+          email: client.Correo || "",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching client details:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los detalles del cliente",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingClientDetail(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -228,25 +382,62 @@ const NewInvoice = () => {
             <CardTitle>Datos del Cliente</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <Input placeholder="Buscar cliente por NIT..." className="flex-1" />
-              <Button variant="outline">Buscar Cliente</Button>
+            <div className="space-y-2">
+              <Label htmlFor="clientSelect">Seleccionar Cliente Existente</Label>
+              <Select 
+                value={selectedClientId} 
+                onValueChange={handleClientSelect}
+                disabled={loadingClients}
+              >
+                <SelectTrigger id="clientSelect">
+                  <SelectValue placeholder={loadingClients ? "Cargando clientes..." : "Seleccione un cliente"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">-- Nuevo Cliente --</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.Codigo} value={client.Codigo.toString()}>
+                      {client.Descripcion}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            {loadingClientDetail && (
+              <div className="flex items-center justify-center p-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            )}
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="clientName">Nombre del Cliente *</Label>
-                <Input id="clientName" placeholder="Cliente_Ejemplo" />
+                <Input 
+                  id="clientName" 
+                  placeholder="Cliente_Ejemplo"
+                  value={clientData.name}
+                  onChange={(e) => setClientData({...clientData, name: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="clientTax">NIT/CIF *</Label>
-                <Input id="clientTax" placeholder="111111111" />
+                <Input 
+                  id="clientTax" 
+                  placeholder="111111111"
+                  value={clientData.nit}
+                  onChange={(e) => setClientData({...clientData, nit: e.target.value})}
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="clientAddress">Dirección *</Label>
-              <Input id="clientAddress" placeholder="CRA 63 NO 17-91" />
+              <Input 
+                id="clientAddress" 
+                placeholder="CRA 63 NO 17-91"
+                value={clientData.address}
+                onChange={(e) => setClientData({...clientData, address: e.target.value})}
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -265,17 +456,33 @@ const NewInvoice = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="clientCity">Ciudad *</Label>
-                <Input id="clientCity" placeholder="BOGOTA, D.C." />
+                <Input 
+                  id="clientCity" 
+                  placeholder="BOGOTA, D.C."
+                  value={clientData.city}
+                  onChange={(e) => setClientData({...clientData, city: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="clientPhone">Teléfono</Label>
-                <Input id="clientPhone" placeholder="0" />
+                <Input 
+                  id="clientPhone" 
+                  placeholder="0"
+                  value={clientData.phone}
+                  onChange={(e) => setClientData({...clientData, phone: e.target.value})}
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="clientEmail">Email *</Label>
-              <Input id="clientEmail" type="email" placeholder="alejandranino@fymtech.com" />
+              <Input 
+                id="clientEmail" 
+                type="email" 
+                placeholder="alejandranino@fymtech.com"
+                value={clientData.email}
+                onChange={(e) => setClientData({...clientData, email: e.target.value})}
+              />
             </div>
           </CardContent>
         </Card>
