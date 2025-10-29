@@ -16,6 +16,12 @@ type TipoComprobante = {
   InfoAdicional: string;
 };
 
+type ListItem = {
+  Codigo: number;
+  Descripcion: string;
+  InfoAdicional?: string;
+};
+
 type Client = {
   Codigo: number;
   Descripcion: string;
@@ -63,10 +69,24 @@ const NewInvoice = () => {
   const [selectedClientDetail, setSelectedClientDetail] = useState<ClientDetail | null>(null);
   const [loadingClientDetail, setLoadingClientDetail] = useState(false);
 
+  // Listas auxiliares
+  const [tiposPersona, setTiposPersona] = useState<ListItem[]>([]);
+  const [tiposIdentificacion, setTiposIdentificacion] = useState<ListItem[]>([]);
+  const [paises, setPaises] = useState<ListItem[]>([]);
+  const [departamentos, setDepartamentos] = useState<ListItem[]>([]);
+  const [municipios, setMunicipios] = useState<ListItem[]>([]);
+  const [regimenesFiscales, setRegimenesFiscales] = useState<ListItem[]>([]);
+
   // Client form data
   const [clientData, setClientData] = useState({
     name: "",
     nit: "",
+    tipoPersona: "",
+    tipoIdentificacion: "",
+    regimenFiscal: "",
+    pais: "44", // Colombia por defecto
+    departamento: "",
+    municipio: "",
     address: "",
     city: "",
     phone: "",
@@ -165,6 +185,91 @@ const NewInvoice = () => {
     fetchClients();
   }, [toast]);
 
+  // Cargar listas auxiliares
+  useEffect(() => {
+    const fetchAuxiliares = async () => {
+      try {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) return;
+
+        const endpoints = [
+          { url: '/api/Auxiliar/ListaTiposPersona', setter: setTiposPersona },
+          { url: '/api/Auxiliar/ListaTiposIdentificacion', setter: setTiposIdentificacion },
+          { url: '/api/Auxiliar/ListaPaises', setter: setPaises },
+          { url: '/api/Auxiliar/ListaRegimenesFiscales', setter: setRegimenesFiscales },
+        ];
+
+        for (const endpoint of endpoints) {
+          const response = await fetch(endpoint.url, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+          const data = await response.json();
+          if (data.codResponse === 1 && data.basePresentationList) {
+            endpoint.setter(data.basePresentationList);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching auxiliares:", error);
+      }
+    };
+
+    fetchAuxiliares();
+  }, []);
+
+  // Cargar departamentos cuando cambie el país
+  useEffect(() => {
+    const fetchDepartamentos = async () => {
+      if (!clientData.pais) return;
+      
+      try {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) return;
+
+        const response = await fetch(
+          `/api/Auxiliar/ListaDepartamentosPais?IdPais=${clientData.pais}`,
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
+        const data = await response.json();
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setDepartamentos(data.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching departamentos:", error);
+      }
+    };
+
+    fetchDepartamentos();
+  }, [clientData.pais]);
+
+  // Cargar municipios cuando cambie el departamento
+  useEffect(() => {
+    const fetchMunicipios = async () => {
+      if (!clientData.departamento) return;
+      
+      try {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) return;
+
+        const response = await fetch(
+          `/api/Auxiliar/ListaMuniciposDepartamento?IdDepartamento=${clientData.departamento}`,
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
+        const data = await response.json();
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setMunicipios(data.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching municipios:", error);
+      }
+    };
+
+    fetchMunicipios();
+  }, [clientData.departamento]);
+
   const handleClientSelect = async (clientId: string) => {
     if (!clientId || clientId === "__new__") {
       setSelectedClientId("");
@@ -172,6 +277,12 @@ const NewInvoice = () => {
       setClientData({
         name: "",
         nit: "",
+        tipoPersona: "",
+        tipoIdentificacion: "",
+        regimenFiscal: "",
+        pais: "44",
+        departamento: "",
+        municipio: "",
         address: "",
         city: "",
         phone: "",
@@ -214,6 +325,12 @@ const NewInvoice = () => {
         setClientData({
           name: client.Nombre || "",
           nit: client.Nit || "",
+          tipoPersona: client.TipoPersona?.toString() || "",
+          tipoIdentificacion: client.TipoIdentificacion?.toString() || "",
+          regimenFiscal: client.IdRegimenFiscal?.toString() || "",
+          pais: client.IdPais?.toString() || "44",
+          departamento: client.IdDepartamento?.toString() || "",
+          municipio: client.IdMunicipio?.toString() || "",
           address: client.Ubicacion || "",
           city: client.MunicipioDane || "",
           phone: client.Telefono || "",
@@ -411,6 +528,45 @@ const NewInvoice = () => {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
+                <Label htmlFor="tipoPersona">Tipo de Persona *</Label>
+                <Select 
+                  value={clientData.tipoPersona}
+                  onValueChange={(value) => setClientData({...clientData, tipoPersona: value})}
+                >
+                  <SelectTrigger id="tipoPersona">
+                    <SelectValue placeholder="Seleccione tipo de persona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tiposPersona.map((tipo) => (
+                      <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
+                        {tipo.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tipoIdentificacion">Tipo de Identificación *</Label>
+                <Select 
+                  value={clientData.tipoIdentificacion}
+                  onValueChange={(value) => setClientData({...clientData, tipoIdentificacion: value})}
+                >
+                  <SelectTrigger id="tipoIdentificacion">
+                    <SelectValue placeholder="Seleccione tipo de identificación" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tiposIdentificacion.map((tipo) => (
+                      <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
+                        {tipo.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
                 <Label htmlFor="clientName">Nombre del Cliente *</Label>
                 <Input 
                   id="clientName" 
@@ -431,6 +587,25 @@ const NewInvoice = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="regimenFiscal">Régimen Fiscal *</Label>
+              <Select 
+                value={clientData.regimenFiscal}
+                onValueChange={(value) => setClientData({...clientData, regimenFiscal: value})}
+              >
+                <SelectTrigger id="regimenFiscal">
+                  <SelectValue placeholder="Seleccione régimen fiscal" />
+                </SelectTrigger>
+                <SelectContent>
+                  {regimenesFiscales.map((regimen) => (
+                    <SelectItem key={regimen.Codigo} value={regimen.Codigo.toString()}>
+                      {regimen.Descripcion}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="clientAddress">Dirección *</Label>
               <Input 
                 id="clientAddress" 
@@ -443,35 +618,77 @@ const NewInvoice = () => {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="clientCountry">País *</Label>
-                <Select defaultValue="co">
+                <Select 
+                  value={clientData.pais}
+                  onValueChange={(value) => {
+                    setClientData({...clientData, pais: value, departamento: "", municipio: ""});
+                    setDepartamentos([]);
+                    setMunicipios([]);
+                  }}
+                >
                   <SelectTrigger id="clientCountry">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="es">España</SelectItem>
-                    <SelectItem value="co">Colombia</SelectItem>
-                    <SelectItem value="other">Otro</SelectItem>
+                    {paises.map((pais) => (
+                      <SelectItem key={pais.Codigo} value={pais.Codigo.toString()}>
+                        {pais.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="clientCity">Ciudad *</Label>
-                <Input 
-                  id="clientCity" 
-                  placeholder="BOGOTA, D.C."
-                  value={clientData.city}
-                  onChange={(e) => setClientData({...clientData, city: e.target.value})}
-                />
+                <Label htmlFor="clientDepartment">Departamento *</Label>
+                <Select 
+                  value={clientData.departamento}
+                  onValueChange={(value) => {
+                    setClientData({...clientData, departamento: value, municipio: ""});
+                    setMunicipios([]);
+                  }}
+                  disabled={!clientData.pais}
+                >
+                  <SelectTrigger id="clientDepartment">
+                    <SelectValue placeholder="Seleccione departamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departamentos.map((dept) => (
+                      <SelectItem key={dept.Codigo} value={dept.Codigo.toString()}>
+                        {dept.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="clientPhone">Teléfono</Label>
-                <Input 
-                  id="clientPhone" 
-                  placeholder="0"
-                  value={clientData.phone}
-                  onChange={(e) => setClientData({...clientData, phone: e.target.value})}
-                />
+                <Label htmlFor="clientCity">Ciudad/Municipio *</Label>
+                <Select 
+                  value={clientData.municipio}
+                  onValueChange={(value) => setClientData({...clientData, municipio: value})}
+                  disabled={!clientData.departamento}
+                >
+                  <SelectTrigger id="clientCity">
+                    <SelectValue placeholder="Seleccione municipio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {municipios.map((mun) => (
+                      <SelectItem key={mun.Codigo} value={mun.Codigo.toString()}>
+                        {mun.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="clientPhone">Teléfono</Label>
+              <Input 
+                id="clientPhone" 
+                placeholder="0"
+                value={clientData.phone}
+                onChange={(e) => setClientData({...clientData, phone: e.target.value})}
+              />
             </div>
 
             <div className="space-y-2">
