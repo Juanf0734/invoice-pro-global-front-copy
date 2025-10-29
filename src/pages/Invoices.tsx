@@ -65,6 +65,8 @@ const Invoices = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pdfUrl, setPdfUrl] = useState<string>("");
+  const [loadingPdf, setLoadingPdf] = useState(false);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -134,6 +136,53 @@ const Invoices = () => {
     fetchInvoices();
   }, [dateRange, toast]);
 
+  useEffect(() => {
+    const fetchPdfDetails = async () => {
+      if (!selectedInvoice) {
+        setPdfUrl("");
+        return;
+      }
+
+      setLoadingPdf(true);
+      try {
+        const authToken = localStorage.getItem("authToken");
+        const companyId = localStorage.getItem("companyId");
+
+        if (!authToken || !companyId) {
+          return;
+        }
+
+        const response = await fetch(
+          `/api/Documento/TraerDatosDocumento?IdDocumento=${selectedInvoice.id}&IdEmpresa=${companyId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al cargar los detalles del documento");
+        }
+
+        const data = await response.json();
+        
+        if (data.codResponse === 1 && data.basePresentation?.RutaPDF) {
+          setPdfUrl(data.basePresentation.RutaPDF);
+        } else {
+          setPdfUrl("");
+        }
+      } catch (error) {
+        console.error("Error fetching PDF details:", error);
+        setPdfUrl("");
+      } finally {
+        setLoadingPdf(false);
+      }
+    };
+
+    fetchPdfDetails();
+  }, [selectedInvoice]);
+
   const filteredInvoices = invoices.filter((invoice) => {
     // Filter by search term (client name)
     const matchesSearch = searchTerm
@@ -158,8 +207,8 @@ const Invoices = () => {
   const locale = i18n.language === 'es' ? es : enUS;
 
   const handleViewPDF = () => {
-    if (selectedInvoice?.pdfUrl) {
-      window.open(selectedInvoice.pdfUrl, '_blank');
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank');
     } else {
       toast({
         title: "PDF no disponible",
@@ -564,16 +613,27 @@ const Invoices = () => {
 
               <Separator />
 
-              {selectedInvoice?.pdfUrl && (
+              {loadingPdf ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center space-y-2">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-sm text-muted-foreground">Cargando PDF...</p>
+                  </div>
+                </div>
+              ) : pdfUrl ? (
                 <div className="space-y-2">
                   <h3 className="font-semibold text-base md:text-lg">Vista Previa del PDF</h3>
                   <div className="border rounded-lg overflow-hidden bg-muted/20">
                     <iframe
-                      src={selectedInvoice.pdfUrl}
+                      src={pdfUrl}
                       className="w-full h-[400px] md:h-[500px]"
                       title="Vista previa del PDF"
                     />
                   </div>
+                </div>
+              ) : (
+                <div className="text-center p-8 text-muted-foreground">
+                  <p>No hay PDF disponible para esta factura</p>
                 </div>
               )}
 
