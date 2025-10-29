@@ -33,7 +33,7 @@ const Dashboard = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€28,900</div>
+            <div className="text-2xl font-bold">$128,900,000</div>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3 text-green-500" />
               <span className="text-green-500">+20.1%</span> desde el mes pasado
@@ -157,11 +157,11 @@ const Dashboard = () => {
         <CardContent>
           <div className="space-y-3">
             {[
-              { id: "INV-2025-001", client: "Boutique Real", amount: "€1,250", status: "Pagada", country: "COL" },
-              { id: "INV-2025-002", client: "Tech Solutions SL", amount: "€3,400", status: "Pendiente", country: "ESP" },
-              { id: "INV-2025-003", client: "Global Trading Inc", amount: "$2,100", status: "Pagada", country: "INT" },
-              { id: "INV-2025-004", client: "Servicios Digitales", amount: "€890", status: "Vencida", country: "COL" },
-              { id: "INV-2025-005", client: "Consulting Group", amount: "€5,600", status: "Pagada", country: "ESP" },
+              { id: "INV-2025-001", client: "Boutique Real", amount: "$5,600,000", status: "Pagada", country: "COL" },
+              { id: "INV-2025-002", client: "Tech Solutions SL", amount: "$15,200,000", status: "Pendiente", country: "COL" },
+              { id: "INV-2025-003", client: "Global Trading Inc", amount: "$9,400,000", status: "Pagada", country: "COL" },
+              { id: "INV-2025-004", client: "Servicios Digitales", amount: "$3,980,000", status: "Vencida", country: "COL" },
+              { id: "INV-2025-005", client: "Consulting Group", amount: "$25,000,000", status: "Pagada", country: "COL" },
             ].map((invoice) => (
               <div
                 key={invoice.id}

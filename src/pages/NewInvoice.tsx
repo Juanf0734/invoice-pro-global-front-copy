@@ -98,13 +98,13 @@ const NewInvoice = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="country">Jurisdicción *</Label>
-                <Select defaultValue="es">
+                <Select defaultValue="co">
                   <SelectTrigger id="country">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="es">España (Verifactu)</SelectItem>
                     <SelectItem value="co">Colombia (DIAN)</SelectItem>
+                    <SelectItem value="es">España (Verifactu)</SelectItem>
                     <SelectItem value="int">Internacional</SelectItem>
                   </SelectContent>
                 </Select>
@@ -144,12 +144,12 @@ const NewInvoice = () => {
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-100 text-green-700">España</Badge>
-                    <span className="text-xs">Verifactu compatible</span>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-blue-100 text-blue-700">Colombia</Badge>
                     <span className="text-xs">Validado DIAN</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-100 text-green-700">España</Badge>
+                    <span className="text-xs">Verifactu compatible</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-purple-100 text-purple-700">Internacional</Badge>
@@ -256,19 +256,19 @@ const NewInvoice = () => {
                       <Input type="number" placeholder="0.00" className="w-28" />
                     </td>
                     <td className="px-4 py-3">
-                      <Select defaultValue="21">
+                      <Select defaultValue="19">
                         <SelectTrigger className="w-20">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="0">0%</SelectItem>
-                          <SelectItem value="10">10%</SelectItem>
-                          <SelectItem value="21">21%</SelectItem>
+                          <SelectItem value="5">5%</SelectItem>
+                          <SelectItem value="19">19%</SelectItem>
                         </SelectContent>
                       </Select>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-semibold">€0.00</span>
+                      <span className="font-semibold">$0</span>
                     </td>
                     <td className="px-4 py-3">
                       <Button variant="ghost" size="sm">
@@ -284,15 +284,15 @@ const NewInvoice = () => {
               <div className="w-80 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Subtotal:</span>
-                  <span className="font-medium">€0.00</span>
+                  <span className="font-medium">$0</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>IVA:</span>
-                  <span className="font-medium">€0.00</span>
+                  <span className="font-medium">$0</span>
                 </div>
                 <div className="flex justify-between border-t pt-2 text-lg font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">€0.00</span>
+                  <span className="text-primary">$0</span>
                 </div>
               </div>
             </div>
@@ -330,15 +330,15 @@ const NewInvoice = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">Subtotal:</span>
-                    <span className="font-medium">€0.00</span>
+                    <span className="font-medium">$0</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">IVA (21%):</span>
-                    <span className="font-medium">€0.00</span>
+                    <span className="text-sm">IVA (19%):</span>
+                    <span className="font-medium">$0</span>
                   </div>
                   <div className="flex justify-between border-t pt-2">
                     <span className="font-semibold">Total:</span>
-                    <span className="text-xl font-bold text-primary">€0.00</span>
+                    <span className="text-xl font-bold text-primary">$0</span>
                   </div>
                 </div>
               </div>
