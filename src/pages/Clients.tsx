@@ -48,6 +48,7 @@ const Clients = () => {
         
         console.log("API Response:", data);
         console.log("basePresentationList:", data.basePresentationList);
+        console.log("Primer cliente:", data.basePresentationList?.[0]);
         
         if (data.codResponse === 1 && data.basePresentationList) {
           setClients(data.basePresentationList);
