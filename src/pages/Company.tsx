@@ -486,6 +486,10 @@ const Company = () => {
               <CardTitle className="text-base">Certificados Digitales</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              <div className="rounded-lg border bg-muted/50 p-3 opacity-60">
+                <p className="text-sm font-medium">España (Verifactu)</p>
+                <p className="text-xs text-muted-foreground">Próximamente disponible</p>
+              </div>
               <div className="rounded-lg border bg-card p-3">
                 <p className="text-sm font-medium">Colombia (DIAN)</p>
                 <p className="text-xs text-muted-foreground">
@@ -494,6 +498,11 @@ const Company = () => {
                 <Button variant="link" size="sm" className="h-auto p-0 text-xs">
                   Configurar →
                 </Button>
+              </div>
+              
+              <div className="rounded-lg border bg-muted/50 p-3 space-y-1 opacity-60">
+                <p className="text-sm font-medium">Estadísticas</p>
+                <p className="text-xs text-muted-foreground">Próximamente disponible</p>
               </div>
             </CardContent>
           </Card>
