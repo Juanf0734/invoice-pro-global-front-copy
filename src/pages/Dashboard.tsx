@@ -22,14 +22,18 @@ const invoicesByCountry = [
 ];
 
 interface Invoice {
-  Id: number;
-  NumeroDocumento: string;
-  FechaDocumento: string;
+  Id_CFD: number;
+  Prefijo: string;
+  Numero: number;
+  TipoComprobante: string;
+  FechaGeneracion: string;
+  FechaExpedicion: string;
   NitCliente: string;
   NombreCliente: string;
-  ValorDocumento: number;
-  Estado: string;
-  Tramite: string;
+  ValorTotal: number;
+  EstadoDian: string;
+  EstadoTramite: string;
+  RutaPDF: string;
 }
 
 interface Client {
@@ -87,7 +91,7 @@ const Dashboard = () => {
 
             // Get last 5 invoices
             const sorted = [...allInvoices].sort((a, b) => 
-              new Date(b.FechaDocumento).getTime() - new Date(a.FechaDocumento).getTime()
+              new Date(b.FechaGeneracion).getTime() - new Date(a.FechaGeneracion).getTime()
             );
             setRecentInvoices(sorted.slice(0, 5));
           }
@@ -297,22 +301,22 @@ const Dashboard = () => {
             ) : (
               recentInvoices.map((invoice) => (
                 <div
-                  key={invoice.Id}
+                  key={invoice.Id_CFD}
                   className="flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:shadow-md"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
-                      COL
+                      {invoice.Prefijo}
                     </div>
                     <div>
                       <p className="font-medium">{invoice.NombreCliente}</p>
-                      <p className="text-xs text-muted-foreground">{invoice.NumeroDocumento}</p>
+                      <p className="text-xs text-muted-foreground">{invoice.Prefijo}-{invoice.Numero}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="font-semibold">{formatCurrency(invoice.ValorDocumento || 0)}</p>
-                      <p className="text-xs text-muted-foreground">{invoice.Tramite || 'N/A'}</p>
+                      <p className="font-semibold">{formatCurrency(invoice.ValorTotal)}</p>
+                      <p className="text-xs text-muted-foreground">{invoice.EstadoTramite}</p>
                     </div>
                   </div>
                 </div>
