@@ -63,8 +63,13 @@ const Dashboard = () => {
       };
 
       try {
+        const baseUrl = 'https://ebillpymetest.facturaenlinea.co';
+        
         // Fetch invoices
-        const invoicesResponse = await fetch(`/api/Documento/TraerDocumentos?IdEmpresa=${companyId}&TipoDocumento=1`, { headers });
+        const invoicesResponse = await fetch(`${baseUrl}/api/Documento/TraerDocumentos?IdEmpresa=${companyId}&TipoDocumento=1`, { 
+          headers,
+          mode: 'cors'
+        });
         if (invoicesResponse.ok) {
           const invoicesData = await invoicesResponse.json();
           if (invoicesData.basePresentationList) {
@@ -87,8 +92,11 @@ const Dashboard = () => {
           }
         }
 
-        // Fetch clients - usando el mismo endpoint que Clients.tsx
-        const clientsResponse = await fetch(`/api/Empresa/TraerClientes?IdEmpresa=${companyId}`, { headers });
+        // Fetch clients
+        const clientsResponse = await fetch(`${baseUrl}/api/Empresa/TraerClientes?IdEmpresa=${companyId}`, { 
+          headers,
+          mode: 'cors'
+        });
         if (clientsResponse.ok) {
           const clientsData = await clientsResponse.json();
           if (clientsData.basePresentationList) {
@@ -96,8 +104,11 @@ const Dashboard = () => {
           }
         }
 
-        // Fetch products - usando el mismo endpoint que Products.tsx
-        const productsResponse = await fetch(`/api/Producto/TraerProductos?IdEmpresa=${companyId}`, { headers });
+        // Fetch products
+        const productsResponse = await fetch(`${baseUrl}/api/Producto/TraerProductos?IdEmpresa=${companyId}`, { 
+          headers,
+          mode: 'cors'
+        });
         if (productsResponse.ok) {
           const productsData = await productsResponse.json();
           if (productsData.basePresentationList) {
