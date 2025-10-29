@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download, Eye, MoreVertical, PlusCircle, Calendar as CalendarIcon, X, Mail, FileText, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
+import { format, subMonths } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import {
@@ -34,16 +34,6 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
-const invoices: Invoice[] = [
-  { id: "INV-2025-001", client: "Boutique Real", date: "2025-01-15", amount: "€1,250", status: "paid" as const, country: "Colombia" },
-  { id: "INV-2025-002", client: "Tech Solutions SL", date: "2025-01-14", amount: "€3,400", status: "pending" as const, country: "España" },
-  { id: "INV-2025-003", client: "Global Trading Inc", date: "2025-01-13", amount: "$2,100", status: "paid" as const, country: "Internacional" },
-  { id: "INV-2025-004", client: "Servicios Digitales", date: "2025-01-12", amount: "€890", status: "overdue" as const, country: "Colombia" },
-  { id: "INV-2025-005", client: "Consulting Group", date: "2025-01-10", amount: "€5,600", status: "paid" as const, country: "España" },
-  { id: "INV-2025-006", client: "Marketing Pro", date: "2025-01-08", amount: "€2,340", status: "pending" as const, country: "España" },
-  { id: "INV-2025-007", client: "Design Studio", date: "2025-01-05", amount: "$1,890", status: "paid" as const, country: "Internacional" },
-];
-
 const statusConfig = {
   paid: { label: "Pagada", class: "bg-green-100 text-green-700 border-green-200" },
   pending: { label: "Pendiente", class: "bg-yellow-100 text-yellow-700 border-yellow-200" },
@@ -65,9 +55,79 @@ const Invoices = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subMonths(new Date(), 1),
+    to: new Date(),
+  });
   const [showFilters, setShowFilters] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      if (!dateRange?.from || !dateRange?.to) return;
+      
+      setLoading(true);
+      try {
+        const authToken = localStorage.getItem("authToken");
+        const companyId = localStorage.getItem("IdEmpresa");
+        
+        if (!authToken || !companyId) {
+          toast({
+            title: "Error",
+            description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const fechaInicial = format(dateRange.from, "yyyy-MM-dd");
+        const fechaFinal = format(dateRange.to, "yyyy-MM-dd");
+
+        const response = await fetch(
+          `https://ebillqa.azurewebsites.net/api/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al cargar las facturas");
+        }
+
+        const data = await response.json();
+        
+        if (data.codResponse === 1 && data.basePresentationList) {
+          const mappedInvoices: Invoice[] = data.basePresentationList.map((item: any) => ({
+            id: item.Codigo || item.NumeroDocumento || "N/A",
+            client: item.Descripcion || item.NombreCliente || "Cliente desconocido",
+            date: item.InfoAdicional || item.FechaDocumento || "",
+            amount: item.InfoAdicional2 || "0",
+            status: "pending" as const,
+            country: "Colombia",
+          }));
+          setInvoices(mappedInvoices);
+        } else {
+          setInvoices([]);
+        }
+      } catch (error) {
+        console.error("Error fetching invoices:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las facturas",
+          variant: "destructive",
+        });
+        setInvoices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoices();
+  }, [dateRange, toast]);
 
   const filteredInvoices = invoices.filter((invoice) => {
     // Filter by search term (client name)
@@ -80,17 +140,7 @@ const Invoices = () => {
       ? invoice.id.toLowerCase().includes(invoiceNumber.toLowerCase())
       : true;
 
-    // Filter by date range
-    const matchesDateRange = dateRange?.from || dateRange?.to
-      ? (() => {
-          const invoiceDate = new Date(invoice.date);
-          const fromMatch = dateRange.from ? invoiceDate >= dateRange.from : true;
-          const toMatch = dateRange.to ? invoiceDate <= dateRange.to : true;
-          return fromMatch && toMatch;
-        })()
-      : true;
-
-    return matchesSearch && matchesInvoiceNumber && matchesDateRange;
+    return matchesSearch && matchesInvoiceNumber;
   });
 
   const clearFilters = () => {
@@ -215,7 +265,7 @@ const Invoices = () => {
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-background" align="start">
+                     <PopoverContent className="w-auto p-0 bg-background" align="start">
                       <Calendar
                         initialFocus
                         mode="range"
@@ -224,6 +274,7 @@ const Invoices = () => {
                         onSelect={setDateRange}
                         numberOfMonths={2}
                         locale={locale}
+                        className="pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
@@ -233,22 +284,41 @@ const Invoices = () => {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b bg-muted/50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Número</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Cliente</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Monto</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">País</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Estado</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInvoices.map((invoice) => (
+          {loading ? (
+            <div className="flex items-center justify-center p-12">
+              <div className="text-center space-y-3">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground">Cargando facturas...</p>
+              </div>
+            </div>
+          ) : filteredInvoices.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No se encontraron facturas</h3>
+              <p className="text-muted-foreground">
+                {hasActiveFilters
+                  ? "Intenta ajustar los filtros de búsqueda"
+                  : "No hay facturas en el período seleccionado"}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Número</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Cliente</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Monto</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">País</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Estado</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredInvoices.map((invoice) => (
                   <tr
                     key={invoice.id}
                     className="border-b transition-colors hover:bg-muted/50 cursor-pointer"
@@ -392,6 +462,8 @@ const Invoices = () => {
               </div>
             ))}
           </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
