@@ -50,6 +50,23 @@ type ClientDetail = {
   IdUbicacionFiscal: number;
 };
 
+type Product = {
+  Id: number;
+  Descripcion: string;
+  CodigoReferencia: string;
+  PrecioVenta: number;
+  IdTipoImpuesto: number;
+};
+
+type InvoiceLine = {
+  id: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  iva: number;
+  total: number;
+};
+
 const steps = [
   { id: 1, title: "Inicio", description: "Tipo de documento" },
   { id: 2, title: "Cliente", description: "Datos del cliente" },
@@ -76,6 +93,11 @@ const NewInvoice = () => {
   const [departamentos, setDepartamentos] = useState<ListItem[]>([]);
   const [municipios, setMunicipios] = useState<ListItem[]>([]);
   const [regimenesFiscales, setRegimenesFiscales] = useState<ListItem[]>([]);
+  
+  // Products
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [invoiceLines, setInvoiceLines] = useState<InvoiceLine[]>([]);
 
   // Client form data
   const [clientData, setClientData] = useState({
@@ -270,6 +292,37 @@ const NewInvoice = () => {
     fetchMunicipios();
   }, [clientData.departamento]);
 
+  // Cargar productos
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        const authToken = localStorage.getItem("authToken");
+        const companyId = localStorage.getItem("companyId");
+        
+        if (!authToken || !companyId) return;
+
+        const response = await fetch(
+          `/api/Producto/TraerProductos?IdEmpresa=${companyId}`,
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
+
+        const data = await response.json();
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setProducts(data.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const handleClientSelect = async (clientId: string) => {
     if (!clientId || clientId === "__new__") {
       setSelectedClientId("");
@@ -348,6 +401,67 @@ const NewInvoice = () => {
       setLoadingClientDetail(false);
     }
   };
+
+  const handleAddProductLine = (productId: string) => {
+    if (!productId || productId === "__manual__") {
+      // Agregar línea manual vacía
+      const newLine: InvoiceLine = {
+        id: Date.now().toString(),
+        productName: "",
+        quantity: 1,
+        unitPrice: 0,
+        iva: 19,
+        total: 0,
+      };
+      setInvoiceLines([...invoiceLines, newLine]);
+      return;
+    }
+
+    const product = products.find(p => p.Id.toString() === productId);
+    if (!product) return;
+
+    const newLine: InvoiceLine = {
+      id: Date.now().toString(),
+      productName: product.Descripcion,
+      quantity: 1,
+      unitPrice: product.PrecioVenta,
+      iva: 19, // Por defecto, podría venir de product.IdTipoImpuesto
+      total: product.PrecioVenta * 1.19,
+    };
+    setInvoiceLines([...invoiceLines, newLine]);
+  };
+
+  const handleRemoveLine = (lineId: string) => {
+    setInvoiceLines(invoiceLines.filter(line => line.id !== lineId));
+  };
+
+  const handleUpdateLine = (lineId: string, field: keyof InvoiceLine, value: any) => {
+    setInvoiceLines(invoiceLines.map(line => {
+      if (line.id !== lineId) return line;
+      
+      const updatedLine = { ...line, [field]: value };
+      
+      // Recalcular total
+      const subtotal = updatedLine.quantity * updatedLine.unitPrice;
+      updatedLine.total = subtotal * (1 + updatedLine.iva / 100);
+      
+      return updatedLine;
+    }));
+  };
+
+  const calculateTotals = () => {
+    const subtotal = invoiceLines.reduce((sum, line) => 
+      sum + (line.quantity * line.unitPrice), 0
+    );
+    const iva = invoiceLines.reduce((sum, line) => 
+      sum + (line.quantity * line.unitPrice * line.iva / 100), 0
+    );
+    const total = subtotal + iva;
+    
+    return { subtotal, iva, total };
+  };
+
+  const totals = calculateTotals();
 
   return (
     <div className="space-y-6">
@@ -710,12 +824,36 @@ const NewInvoice = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Detalle de Productos/Servicios</CardTitle>
-              <Button variant="outline" size="sm">
-                Agregar Línea
-              </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="productSelect">Agregar Producto</Label>
+              <div className="flex gap-2">
+                <Select 
+                  onValueChange={handleAddProductLine}
+                  disabled={loadingProducts}
+                  value=""
+                >
+                  <SelectTrigger id="productSelect" className="flex-1">
+                    <SelectValue placeholder={loadingProducts ? "Cargando productos..." : "Seleccione un producto"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__manual__">-- Producto Manual --</SelectItem>
+                    {products.map((product) => (
+                      <SelectItem key={product.Id} value={product.Id.toString()}>
+                        {product.Descripcion} - {new Intl.NumberFormat("es-CO", {
+                          style: "currency",
+                          currency: "COP",
+                          minimumFractionDigits: 0,
+                        }).format(product.PrecioVenta)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
@@ -729,37 +867,74 @@ const NewInvoice = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b">
-                    <td className="px-4 py-3">
-                      <Input placeholder="Nombre del producto..." />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Input type="number" defaultValue="1" className="w-20" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Input type="number" placeholder="0.00" className="w-28" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Select defaultValue="19">
-                        <SelectTrigger className="w-20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">0%</SelectItem>
-                          <SelectItem value="5">5%</SelectItem>
-                          <SelectItem value="19">19%</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="font-semibold">$0</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Button variant="ghost" size="sm">
-                        Eliminar
-                      </Button>
-                    </td>
-                  </tr>
+                  {invoiceLines.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                        No hay productos agregados. Seleccione un producto arriba para comenzar.
+                      </td>
+                    </tr>
+                  ) : (
+                    invoiceLines.map((line) => (
+                      <tr key={line.id} className="border-b">
+                        <td className="px-4 py-3">
+                          <Input 
+                            placeholder="Nombre del producto..."
+                            value={line.productName}
+                            onChange={(e) => handleUpdateLine(line.id, 'productName', e.target.value)}
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input 
+                            type="number" 
+                            className="w-20"
+                            value={line.quantity}
+                            onChange={(e) => handleUpdateLine(line.id, 'quantity', Number(e.target.value))}
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input 
+                            type="number" 
+                            className="w-28"
+                            value={line.unitPrice}
+                            onChange={(e) => handleUpdateLine(line.id, 'unitPrice', Number(e.target.value))}
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Select 
+                            value={line.iva.toString()}
+                            onValueChange={(value) => handleUpdateLine(line.id, 'iva', Number(value))}
+                          >
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">0%</SelectItem>
+                              <SelectItem value="5">5%</SelectItem>
+                              <SelectItem value="19">19%</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="font-semibold">
+                            {new Intl.NumberFormat("es-CO", {
+                              style: "currency",
+                              currency: "COP",
+                              minimumFractionDigits: 0,
+                            }).format(line.total)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleRemoveLine(line.id)}
+                          >
+                            Eliminar
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -768,15 +943,33 @@ const NewInvoice = () => {
               <div className="w-80 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Subtotal:</span>
-                  <span className="font-medium">$0</span>
+                  <span className="font-medium">
+                    {new Intl.NumberFormat("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      minimumFractionDigits: 0,
+                    }).format(totals.subtotal)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>IVA:</span>
-                  <span className="font-medium">$0</span>
+                  <span className="font-medium">
+                    {new Intl.NumberFormat("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      minimumFractionDigits: 0,
+                    }).format(totals.iva)}
+                  </span>
                 </div>
                 <div className="flex justify-between border-t pt-2 text-lg font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">$0</span>
+                  <span className="text-primary">
+                    {new Intl.NumberFormat("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      minimumFractionDigits: 0,
+                    }).format(totals.total)}
+                  </span>
                 </div>
               </div>
             </div>
