@@ -75,7 +75,7 @@ export function AppSidebar() {
                     data-tour="dashboard"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-medium border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -92,7 +92,7 @@ export function AppSidebar() {
                     data-tour="invoices"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-medium border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -119,7 +119,7 @@ export function AppSidebar() {
                     data-tour="clients"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-medium border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -136,7 +136,7 @@ export function AppSidebar() {
                     data-tour="products"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-medium border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -182,7 +182,7 @@ export function AppSidebar() {
                     data-tour="company"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-medium border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -199,7 +199,7 @@ export function AppSidebar() {
                     data-tour="settings"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-medium border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
