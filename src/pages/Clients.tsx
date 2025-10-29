@@ -94,7 +94,7 @@ const Clients = () => {
       const companyId = payload.IdEmpresa;
 
       const response = await fetch(
-        `/api/Empresa/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
+        `/api/Cliente/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
