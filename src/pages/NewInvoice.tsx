@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Check, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+
+type TipoComprobante = {
+  Codigo: number;
+  Descripcion: string;
+  InfoAdicional: string;
+};
 
 const steps = [
   { id: 1, title: "Inicio", description: "Tipo de documento" },
@@ -18,7 +25,58 @@ const steps = [
 
 const NewInvoice = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
+  const [tiposComprobante, setTiposComprobante] = useState<TipoComprobante[]>([]);
+  const [loadingTipos, setLoadingTipos] = useState(true);
+
+  useEffect(() => {
+    const fetchTiposComprobante = async () => {
+      try {
+        const authToken = localStorage.getItem("authToken");
+        
+        if (!authToken) {
+          toast({
+            title: "Error",
+            description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
+            variant: "destructive",
+          });
+          navigate("/auth");
+          return;
+        }
+
+        const response = await fetch(
+          "/api/Auxiliar/ListaTiposComprobante?IncluirSoloPrincipales=true",
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al cargar los tipos de comprobante");
+        }
+
+        const data = await response.json();
+        
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setTiposComprobante(data.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching tipos de comprobante:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los tipos de comprobante",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingTipos(false);
+      }
+    };
+
+    fetchTiposComprobante();
+  }, [toast, navigate]);
 
   return (
     <div className="space-y-6">
@@ -84,14 +142,16 @@ const NewInvoice = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="docType">Tipo de Comprobante *</Label>
-                <Select defaultValue="invoice">
+                <Select disabled={loadingTipos}>
                   <SelectTrigger id="docType">
-                    <SelectValue />
+                    <SelectValue placeholder={loadingTipos ? "Cargando..." : "Seleccione un tipo"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="invoice">Factura</SelectItem>
-                    <SelectItem value="quote">Cotización</SelectItem>
-                    <SelectItem value="receipt">Recibo</SelectItem>
+                    {tiposComprobante.map((tipo) => (
+                      <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
+                        {tipo.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
