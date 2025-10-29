@@ -25,10 +25,20 @@ interface CompanyData {
   SetTestId: string;
 }
 
+interface ParametrosEmpresa {
+  IdCliente: number;
+  IdMoneda: number;
+  IdFormaPago: number;
+  IdMedioPago: number;
+  IdResolucion: number;
+  NotasFiscales: string;
+}
+
 const Company = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState<CompanyData | null>(null);
+  const [parametros, setParametros] = useState<ParametrosEmpresa | null>(null);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
@@ -49,20 +59,36 @@ const Company = () => {
           throw new Error("No se encontró el token de autenticación");
         }
 
-        const response = await fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`, {
+        // Fetch company data
+        const responseEmpresa = await fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`, {
           headers: {
             "Authorization": `Bearer ${authToken}`,
             "Content-Type": "application/json"
           }
         });
         
-        if (!response.ok) {
+        if (!responseEmpresa.ok) {
           throw new Error("Error al cargar los datos de la empresa");
         }
 
-        const data = await response.json();
-        if (data.basePresentation) {
-          setCompany(data.basePresentation);
+        const dataEmpresa = await responseEmpresa.json();
+        if (dataEmpresa.basePresentation) {
+          setCompany(dataEmpresa.basePresentation);
+        }
+
+        // Fetch company parameters
+        const responseParametros = await fetch(`/api/Empresa/TraerParametros?IdEmpresa=${companyId}`, {
+          headers: {
+            "Authorization": `Bearer ${authToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (responseParametros.ok) {
+          const dataParametros = await responseParametros.json();
+          if (dataParametros.basePresentation) {
+            setParametros(dataParametros.basePresentation);
+          }
         }
       } catch (error) {
         toast({
@@ -170,29 +196,44 @@ const Company = () => {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Configuración Fiscal</CardTitle>
-              <CardDescription>Información específica para cada jurisdicción</CardDescription>
+              <CardDescription>Parámetros por defecto de la empresa</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="idCliente">ID Cliente</Label>
+                  <Input id="idCliente" value={parametros?.IdCliente || ""} readOnly />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="idMoneda">ID Moneda</Label>
+                  <Input id="idMoneda" value={parametros?.IdMoneda || ""} readOnly />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="idFormaPago">ID Forma de Pago</Label>
+                  <Input id="idFormaPago" value={parametros?.IdFormaPago || ""} readOnly />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="idMedioPago">ID Medio de Pago</Label>
+                  <Input id="idMedioPago" value={parametros?.IdMedioPago || ""} readOnly />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="regime">Régimen Fiscal</Label>
-                <Select defaultValue="general">
-                  <SelectTrigger id="regime">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">Régimen General</SelectItem>
-                    <SelectItem value="simplified">Régimen Simplificado</SelectItem>
-                    <SelectItem value="exempt">Exento</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="idResolucion">ID Resolución</Label>
+                <Input id="idResolucion" value={parametros?.IdResolucion || ""} readOnly />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="notes">Notas Fiscales</Label>
                 <Textarea
                   id="notes"
+                  value={parametros?.NotasFiscales || ""}
                   placeholder="Información adicional que deseas incluir en tus facturas..."
                   rows={4}
+                  readOnly
                 />
               </div>
             </CardContent>
