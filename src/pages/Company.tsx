@@ -52,6 +52,12 @@ interface FormaPago {
   Descripcion: string;
 }
 
+interface Resolucion {
+  Codigo: number;
+  Descripcion: string;
+  InfoAdicional: string;
+}
+
 const Company = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -61,6 +67,7 @@ const Company = () => {
   const [mediosPago, setMediosPago] = useState<MedioPago[]>([]);
   const [monedas, setMonedas] = useState<Moneda[]>([]);
   const [formasPago, setFormasPago] = useState<FormaPago[]>([]);
+  const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
@@ -87,12 +94,13 @@ const Company = () => {
         };
 
         // Fetch all data in parallel
-        const [responseEmpresa, responseParametros, responseMediosPago, responseMonedas, responseFormasPago] = await Promise.all([
+        const [responseEmpresa, responseParametros, responseMediosPago, responseMonedas, responseFormasPago, responseResoluciones] = await Promise.all([
           fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`, { headers }),
           fetch(`/api/Empresa/TraerParametros?IdEmpresa=${companyId}`, { headers }),
           fetch(`/api/Auxiliar/ListaMediosPago`, { headers }),
           fetch(`/api/Auxiliar/ListaMonedas`, { headers }),
-          fetch(`/api/Auxiliar/ListaFormasPago`, { headers })
+          fetch(`/api/Auxiliar/ListaFormasPago`, { headers }),
+          fetch(`/api/Empresa/TraerResoluciones?IdEmpresa=${companyId}`, { headers })
         ]);
 
         if (!responseEmpresa.ok) {
@@ -129,6 +137,13 @@ const Company = () => {
           const dataFormasPago = await responseFormasPago.json();
           if (dataFormasPago.basePresentationList) {
             setFormasPago(dataFormasPago.basePresentationList);
+          }
+        }
+
+        if (responseResoluciones.ok) {
+          const dataResoluciones = await responseResoluciones.json();
+          if (dataResoluciones.basePresentationList) {
+            setResoluciones(dataResoluciones.basePresentationList);
           }
         }
       } catch (error) {
@@ -367,12 +382,22 @@ const Company = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="idResolucion">ID Resolución</Label>
-                <Input 
-                  id="idResolucion" 
-                  value={parametros?.IdResolucion || ""} 
-                  onChange={(e) => setParametros(prev => prev ? {...prev, IdResolucion: parseInt(e.target.value) || 0} : null)}
-                />
+                <Label htmlFor="resolucion">Resolución</Label>
+                <Select 
+                  value={parametros?.IdResolucion?.toString() || ""} 
+                  onValueChange={(value) => setParametros(prev => prev ? {...prev, IdResolucion: parseInt(value)} : null)}
+                >
+                  <SelectTrigger id="resolucion">
+                    <SelectValue placeholder="Seleccione resolución" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resoluciones.map((resolucion) => (
+                      <SelectItem key={resolucion.Codigo} value={resolucion.Codigo.toString()}>
+                        {resolucion.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
