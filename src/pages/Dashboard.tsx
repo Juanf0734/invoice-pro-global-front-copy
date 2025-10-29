@@ -29,6 +29,7 @@ interface Invoice {
   NombreCliente: string;
   ValorDocumento: number;
   Estado: string;
+  Tramite: string;
 }
 
 interface Client {
@@ -306,10 +307,10 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <p className="font-semibold">{formatCurrency(invoice.ValorDocumento)}</p>
-                    <span className="rounded-full px-3 py-1 text-xs font-medium bg-green-100 text-green-700">
-                      {invoice.Estado}
-                    </span>
+                    <div className="text-right">
+                      <p className="font-semibold">{formatCurrency(invoice.ValorDocumento)}</p>
+                      <p className="text-xs text-muted-foreground">{invoice.Tramite}</p>
+                    </div>
                   </div>
                 </div>
               ))
