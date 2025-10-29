@@ -68,14 +68,14 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-11 relative">
+                <SidebarMenuButton asChild className="h-11">
                   <NavLink
                     to="/"
                     end
                     data-tour="dashboard"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -86,13 +86,13 @@ export function AppSidebar() {
               </SidebarMenuItem>
               
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-11 relative">
+                <SidebarMenuButton asChild className="h-11">
                   <NavLink
                     to="/invoices"
                     data-tour="invoices"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -113,13 +113,13 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-11 relative">
+                <SidebarMenuButton asChild className="h-11">
                   <NavLink
                     to="/clients"
                     data-tour="clients"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -130,13 +130,13 @@ export function AppSidebar() {
               </SidebarMenuItem>
               
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-11 relative">
+                <SidebarMenuButton asChild className="h-11">
                   <NavLink
                     to="/products"
                     data-tour="products"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -176,13 +176,13 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-11 relative">
+                <SidebarMenuButton asChild className="h-11">
                   <NavLink
                     to="/company"
                     data-tour="company"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
@@ -193,13 +193,13 @@ export function AppSidebar() {
               </SidebarMenuItem>
               
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-11 relative">
+                <SidebarMenuButton asChild className="h-11">
                   <NavLink
                     to="/settings"
                     data-tour="settings"
                     className={({ isActive }) =>
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary font-semibold border-l-4 border-primary"
+                        ? "bg-sidebar-accent text-sidebar-primary font-medium"
                         : "hover:bg-sidebar-accent/50"
                     }
                   >
