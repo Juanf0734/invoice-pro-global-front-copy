@@ -9,6 +9,7 @@ import {
   Settings,
   PlusCircle,
   HelpCircle,
+  ExternalLink,
 } from "lucide-react";
 import {
   Sidebar,
@@ -140,8 +141,32 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Tour - Ayuda */}
+        {/* Soluciones eBill */}
         <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild
+                  className="h-11 hover:bg-sidebar-accent/50 cursor-pointer"
+                >
+                  <a 
+                    href="https://fymebill.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
+                    <ExternalLink className="h-5 w-5" />
+                    <span className="text-base">Conoce más de eBill</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Tour - Ayuda */}
+        <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
