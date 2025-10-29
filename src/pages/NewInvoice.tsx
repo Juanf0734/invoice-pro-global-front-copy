@@ -192,7 +192,7 @@ const NewInvoice = () => {
       }
 
       const response = await fetch(
-        `/api/Empresa/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
+        `/api/Cliente/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
