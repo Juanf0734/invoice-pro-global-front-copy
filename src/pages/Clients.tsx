@@ -15,15 +15,25 @@ interface Client {
 }
 
 interface ClientDetail {
-  IdCliente: number;
-  Identificacion: string;
+  Id: number;
   Nombre: string;
-  Email: string;
+  TipoPersona: number;
+  TipoIdentificacion: number;
+  Nit: string;
+  DigitoVerificacion: string;
+  IdRegimenFiscal: number;
   Telefono: string;
-  Direccion: string;
-  Ciudad: string;
-  Pais: string;
-  [key: string]: any;
+  Correo: string;
+  Ubicacion: string;
+  CodigoPostal: string;
+  PaisIso: string;
+  IdPais: number;
+  DepartamentoDane: string;
+  IdDepartamento: number;
+  MunicipioDane: string;
+  IdMunicipio: number;
+  IDInterno: string;
+  IdUbicacionFiscal: number;
 }
 
 const Clients = () => {
@@ -228,33 +238,43 @@ const Clients = () => {
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold">{selectedClient.Nombre}</h3>
-                  <p className="text-sm text-muted-foreground">ID: {selectedClient.IdCliente}</p>
+                  <h3 className="text-xl font-semibold">{selectedClient.Nombre || 'Sin nombre'}</h3>
+                  <p className="text-sm text-muted-foreground">ID: {selectedClient.Id}</p>
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                {selectedClient.Identificacion && (
+                {selectedClient.Nit && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Hash className="h-4 w-4 text-muted-foreground" />
-                      Identificación
+                      NIT
                     </div>
-                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Identificacion}</p>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Nit}</p>
                   </div>
                 )}
 
-                {selectedClient.Email && (
+                {selectedClient.IDInterno && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Hash className="h-4 w-4 text-muted-foreground" />
+                      ID Interno
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.IDInterno}</p>
+                  </div>
+                )}
+
+                {selectedClient.Correo && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       Email
                     </div>
-                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Email}</p>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Correo}</p>
                   </div>
                 )}
 
-                {selectedClient.Telefono && (
+                {selectedClient.Telefono && selectedClient.Telefono !== "0" && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Phone className="h-4 w-4 text-muted-foreground" />
@@ -264,33 +284,33 @@ const Clients = () => {
                   </div>
                 )}
 
-                {selectedClient.Pais && (
+                {selectedClient.PaisIso && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Globe className="h-4 w-4 text-muted-foreground" />
                       País
                     </div>
-                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Pais}</p>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.PaisIso}</p>
                   </div>
                 )}
 
-                {selectedClient.Ciudad && (
+                {selectedClient.CodigoPostal && selectedClient.CodigoPostal.trim() && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      Ciudad
+                      Código Postal
                     </div>
-                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Ciudad}</p>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.CodigoPostal}</p>
                   </div>
                 )}
 
-                {selectedClient.Direccion && (
+                {selectedClient.Ubicacion && (
                   <div className="space-y-1 md:col-span-2">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      Dirección
+                      Ubicación
                     </div>
-                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Direccion}</p>
+                    <p className="text-sm text-muted-foreground pl-6">{selectedClient.Ubicacion}</p>
                   </div>
                 )}
               </div>
