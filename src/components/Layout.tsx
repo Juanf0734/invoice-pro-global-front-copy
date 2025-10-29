@@ -121,7 +121,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
             <SidebarTrigger />
-            <img src={ebillLogo} alt="eBill Pro" className="h-8 w-auto" />
+            <img src={ebillLogo} alt="eBill Pro" className="h-12 w-auto" />
             <Badge variant="secondary" className="ml-2 font-semibold">
               {planName}
             </Badge>
