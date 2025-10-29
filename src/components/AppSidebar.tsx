@@ -146,20 +146,20 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild
-                  className="h-11 hover:bg-sidebar-accent/50 cursor-pointer"
+                <a 
+                  href="https://fymebill.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col gap-2 p-4 mx-2 rounded-lg bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group cursor-pointer"
                 >
-                  <a 
-                    href="https://fymebill.com" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <ExternalLink className="h-5 w-5" />
-                    <span className="text-base">Conoce más de eBill</span>
-                  </a>
-                </SidebarMenuButton>
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-semibold text-primary">Descubre más soluciones IA</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Explora todas nuestras herramientas inteligentes para tu negocio
+                  </p>
+                </a>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
