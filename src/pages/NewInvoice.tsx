@@ -526,6 +526,7 @@ const NewInvoice = () => {
       
       let numAprobacionRes = 0;
       let anoAprobacionRes = new Date().getFullYear();
+      let prefijo = "";
       
       if (paramsData.codResponse === 1 && paramsData.basePresentation?.IdResolucion) {
         const resResponse = await fetch(`/api/Empresa/TraerResoluciones?IdEmpresa=${companyId}`, {
@@ -540,6 +541,8 @@ const NewInvoice = () => {
           if (resolucion) {
             numAprobacionRes = parseInt(resolucion.Descripcion) || 0;
             anoAprobacionRes = parseInt(resolucion.InfoAdicional) || new Date().getFullYear();
+            // Extraer prefijo del InfoAdicional2 (formato: "SETT - ")
+            prefijo = resolucion.InfoAdicional2?.replace(" - ", "").trim() || "";
           }
         }
       }
@@ -547,7 +550,7 @@ const NewInvoice = () => {
       // Construir objeto FV_CFDCab
       const cabecera = {
         TipoComprobante: parseInt(invoiceData.tipoComprobante),
-        Prefijo: "",
+        Prefijo: prefijo,
         NumFactura: 0,
         IDInterno: selectedClientDetail?.IDInterno || clientData.nit,
         NombreVendedor: "",
