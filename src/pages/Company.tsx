@@ -56,6 +56,7 @@ interface Resolucion {
   Codigo: number;
   Descripcion: string;
   InfoAdicional: string;
+  InfoAdicional2: string;
 }
 
 const Company = () => {
@@ -393,7 +394,7 @@ const Company = () => {
                   <SelectContent>
                     {resoluciones.map((resolucion) => (
                       <SelectItem key={resolucion.Codigo} value={resolucion.Codigo.toString()}>
-                        {resolucion.Descripcion}
+                        {resolucion.Descripcion} - {resolucion.InfoAdicional2} - {resolucion.InfoAdicional}
                       </SelectItem>
                     ))}
                   </SelectContent>
