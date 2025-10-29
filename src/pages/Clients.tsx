@@ -5,8 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, PlusCircle, Mail, Phone, MapPin, Building2, User, Hash, Globe } from "lucide-react";
+import { Search, PlusCircle, Mail, Phone, MapPin, Building2, User, Hash, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Client {
   Codigo: number;
@@ -43,6 +52,8 @@ const Clients = () => {
   const [selectedClient, setSelectedClient] = useState<ClientDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9; // 3 columns x 3 rows
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -133,8 +144,63 @@ const Clients = () => {
       client.InfoAdicional?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentClients = filteredClients.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const showEllipsisStart = currentPage > 3;
+    const showEllipsisEnd = currentPage < totalPages - 2;
+
+    if (totalPages <= 7) {
+      // Show all pages if 7 or less
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (showEllipsisStart) {
+        pages.push(-1); // -1 represents ellipsis
+      }
+
+      // Show pages around current page
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (showEllipsisEnd) {
+        pages.push(-2); // -2 represents ellipsis
+      }
+
+      // Always show last page
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
   console.log("Total clientes:", clients.length);
   console.log("Clientes filtrados:", filteredClients.length);
+  console.log("Página actual:", currentPage);
+  console.log("Total páginas:", totalPages);
 
   return (
     <div className="space-y-6">
@@ -184,36 +250,93 @@ const Clients = () => {
               <p className="text-muted-foreground">No se encontraron clientes</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredClients.map((client) => (
-                <Card key={client.Codigo} className="overflow-hidden transition-all hover:shadow-md">
-                  <div className="h-2 bg-gradient-primary" />
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex items-start justify-between">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                        <Building2 className="h-6 w-6 text-primary" />
-                      </div>
-                      <Badge variant="outline">ID: {client.Codigo}</Badge>
-                    </div>
-
-                    <h3 className="mb-1 text-lg font-semibold">{client.Descripcion}</h3>
-                    
-                    <div className="space-y-2 text-sm mt-4">
-                      {client.InfoAdicional && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Mail className="h-4 w-4" />
-                          <span className="truncate">{client.InfoAdicional}</span>
+            <>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {currentClients.map((client) => (
+                  <Card key={client.Codigo} className="overflow-hidden transition-all hover:shadow-md">
+                    <div className="h-2 bg-gradient-primary" />
+                    <CardContent className="p-6">
+                      <div className="mb-4 flex items-start justify-between">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                          <Building2 className="h-6 w-6 text-primary" />
                         </div>
-                      )}
-                    </div>
+                        <Badge variant="outline">ID: {client.Codigo}</Badge>
+                      </div>
 
-                    <Button variant="outline" className="mt-4 w-full" onClick={() => handleViewDetails(client.Codigo)}>
-                      Ver Detalles
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <h3 className="mb-1 text-lg font-semibold">{client.Descripcion}</h3>
+                      
+                      <div className="space-y-2 text-sm mt-4">
+                        {client.InfoAdicional && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Mail className="h-4 w-4" />
+                            <span className="truncate">{client.InfoAdicional}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <Button variant="outline" className="mt-4 w-full" onClick={() => handleViewDetails(client.Codigo)}>
+                        Ver Detalles
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Mostrando {startIndex + 1}-{Math.min(endIndex, filteredClients.length)} de {filteredClients.length} clientes
+                  </p>
+                  
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="gap-1"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Anterior
+                        </Button>
+                      </PaginationItem>
+
+                      {getPageNumbers().map((pageNum, index) => (
+                        <PaginationItem key={index}>
+                          {pageNum === -1 || pageNum === -2 ? (
+                            <PaginationEllipsis />
+                          ) : (
+                            <PaginationLink
+                              onClick={() => handlePageChange(pageNum)}
+                              isActive={currentPage === pageNum}
+                              className="cursor-pointer"
+                            >
+                              {pageNum}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+
+                      <PaginationItem>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="gap-1"
+                        >
+                          Siguiente
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
