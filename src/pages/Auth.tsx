@@ -120,21 +120,21 @@ const Auth = () => {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4" 
          style={{ 
-           background: 'linear-gradient(135deg, hsl(210 100% 97%) 0%, hsl(180 85% 96%) 25%, hsl(190 90% 95%) 50%, hsl(180 85% 96%) 75%, hsl(210 100% 97%) 100%)'
+           background: 'linear-gradient(135deg, hsl(210 100% 98%) 0%, hsl(180 70% 98%) 25%, hsl(190 80% 97%) 50%, hsl(180 70% 98%) 75%, hsl(210 100% 98%) 100%)'
          }}>
       {/* Animated Background Layers */}
       <div className="absolute inset-0 -z-10">
         {/* Large Animated Orbs with Gradient */}
         <div className="absolute -top-20 -left-20 h-[600px] w-[600px] rounded-full animate-pulse" 
              style={{ 
-               background: 'radial-gradient(circle, hsl(210 80% 60% / 0.25) 0%, hsl(210 70% 65% / 0.15) 35%, transparent 70%)',
+               background: 'radial-gradient(circle, hsl(210 70% 70% / 0.2) 0%, hsl(210 60% 75% / 0.12) 35%, transparent 70%)',
                animationDuration: '8s',
                filter: 'blur(60px)'
              }} />
         
         <div className="absolute -bottom-32 -right-32 h-[700px] w-[700px] rounded-full animate-pulse" 
              style={{ 
-               background: 'radial-gradient(circle, hsl(180 90% 60% / 0.3) 0%, hsl(180 80% 65% / 0.2) 35%, transparent 70%)',
+               background: 'radial-gradient(circle, hsl(180 80% 70% / 0.22) 0%, hsl(180 70% 75% / 0.15) 35%, transparent 70%)',
                animationDuration: '10s',
                animationDelay: '2s',
                filter: 'blur(70px)'
@@ -142,7 +142,7 @@ const Auth = () => {
         
         <div className="absolute top-1/3 right-1/4 h-[500px] w-[500px] rounded-full animate-pulse" 
              style={{ 
-               background: 'radial-gradient(circle, hsl(200 85% 65% / 0.2) 0%, hsl(200 75% 70% / 0.1) 40%, transparent 70%)',
+               background: 'radial-gradient(circle, hsl(200 75% 75% / 0.15) 0%, hsl(200 65% 80% / 0.08) 40%, transparent 70%)',
                animationDuration: '12s',
                animationDelay: '4s',
                filter: 'blur(65px)'
