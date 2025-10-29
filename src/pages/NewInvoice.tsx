@@ -65,6 +65,8 @@ type InvoiceLine = {
   unitPrice: number;
   iva: number;
   total: number;
+  productCode?: string;
+  productId?: number;
 };
 
 const steps = [
@@ -423,6 +425,8 @@ const NewInvoice = () => {
         unitPrice: 0,
         iva: 19,
         total: 0,
+        productCode: "",
+        productId: undefined,
       };
       setInvoiceLines([...invoiceLines, newLine]);
       return;
@@ -438,6 +442,8 @@ const NewInvoice = () => {
       unitPrice: product.PrecioVenta,
       iva: 19, // Por defecto, podría venir de product.IdTipoImpuesto
       total: product.PrecioVenta * 1.19,
+      productCode: product.CodigoReferencia,
+      productId: product.Id,
     };
     setInvoiceLines([...invoiceLines, newLine]);
   };
@@ -596,23 +602,27 @@ const NewInvoice = () => {
         FechaInicialPeriodoFacturado: "",
       };
 
-      // Construir detalles FV_CFDDet
+      // Construir detalles FV_CFDDet - matching formato funcional
       const detalles = invoiceLines.map((line, index) => ({
-        IdConcepto: index + 1,
-        ItemReferencia: `ITEM-${index + 1}`,
-        CodigoProducto: `PROD-${index + 1}`,
-        CodigosString: "",
+        id: String(index + 1),
+        CodigoProducto: line.productCode || String(line.productId || `PROD-${index + 1}`),
         DescripcionProducto: line.productName,
         Cantidad: line.quantity,
         ValorUnitario: line.unitPrice,
         PorIVAProducto: line.iva,
         IVAProducto: (line.quantity * line.unitPrice * line.iva) / 100,
+        IdConcepto: index + 1,
+        ItemReferencia: index + 1,
+        TipoImpuesto: 1,
+        CodigosString: line.productCode || String(line.productId || `${index + 1}`),
         CON_dato_decimal1: line.quantity * line.unitPrice,
-        CON_dato_texto15: "",
-        TipoImpuesto: line.iva > 0 ? "1" : "0",
-        CON_categoria_1: "",
+        CON_dato_texto15: "Producto Nacional",
+        CON_categoria_1: null,
         CON_dato_fecha: null,
         con_recurrente: false,
+        ConCategoria1: "",
+        ConceptoFecha: "",
+        tableData: { id: index }
       }));
 
       const documentoElectronico = {
