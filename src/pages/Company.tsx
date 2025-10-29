@@ -26,32 +26,36 @@ interface CompanyData {
 }
 
 interface ParametrosEmpresa {
+  IdEmpresa?: number;
   IdCliente: number;
   IdMoneda: number;
   IdFormaPago: number;
   IdMedioPago: number;
   IdResolucion: number;
-  NotasFiscales: string;
+  Nota1: string | null;
+  Nota2: string | null;
+  Nota3: string | null;
 }
 
 interface MedioPago {
-  Id: number;
-  Nombre: string;
+  Codigo: number;
+  Descripcion: string;
 }
 
 interface Moneda {
-  Id: number;
-  Nombre: string;
+  Codigo: number;
+  Descripcion: string;
 }
 
 interface FormaPago {
-  Id: number;
-  Nombre: string;
+  Codigo: number;
+  Descripcion: string;
 }
 
 const Company = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [company, setCompany] = useState<CompanyData | null>(null);
   const [parametros, setParametros] = useState<ParametrosEmpresa | null>(null);
   const [mediosPago, setMediosPago] = useState<MedioPago[]>([]);
@@ -142,18 +146,61 @@ const Company = () => {
   }, [toast]);
 
   const getMedioPagoNombre = (id: number) => {
-    const medioPago = mediosPago.find(m => m.Id === id);
-    return medioPago ? medioPago.Nombre : id.toString();
+    const medioPago = mediosPago.find(m => m.Codigo === id);
+    return medioPago ? medioPago.Descripcion : id.toString();
   };
 
   const getMonedaNombre = (id: number) => {
-    const moneda = monedas.find(m => m.Id === id);
-    return moneda ? moneda.Nombre : id.toString();
+    const moneda = monedas.find(m => m.Codigo === id);
+    return moneda ? moneda.Descripcion : id.toString();
   };
 
   const getFormaPagoNombre = (id: number) => {
-    const formaPago = formasPago.find(f => f.Id === id);
-    return formaPago ? formaPago.Nombre : id.toString();
+    const formaPago = formasPago.find(f => f.Codigo === id);
+    return formaPago ? formaPago.Descripcion : id.toString();
+  };
+
+  const handleSaveParametros = async () => {
+    if (!parametros) return;
+
+    setSaving(true);
+    try {
+      const authToken = localStorage.getItem("authToken");
+      const companyId = localStorage.getItem("companyId");
+      
+      if (!authToken || !companyId) {
+        throw new Error("No se encontró autenticación");
+      }
+
+      const response = await fetch(`/api/Empresa/ActualizarParametros`, {
+        method: 'PUT',
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ...parametros,
+          IdEmpresa: parseInt(companyId)
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al actualizar los parámetros");
+      }
+
+      toast({
+        title: "Éxito",
+        description: "Parámetros actualizados correctamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudieron actualizar los parámetros",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -254,50 +301,110 @@ const Company = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="idCliente">ID Cliente</Label>
-                  <Input id="idCliente" value={parametros?.IdCliente || ""} readOnly />
+                  <Input 
+                    id="idCliente" 
+                    value={parametros?.IdCliente || ""} 
+                    onChange={(e) => setParametros(prev => prev ? {...prev, IdCliente: parseInt(e.target.value) || 0} : null)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="moneda">Moneda</Label>
-                  <Input 
-                    id="moneda" 
-                    value={parametros ? getMonedaNombre(parametros.IdMoneda) : ""} 
-                    readOnly 
-                  />
+                  <Select 
+                    value={parametros?.IdMoneda?.toString() || ""} 
+                    onValueChange={(value) => setParametros(prev => prev ? {...prev, IdMoneda: parseInt(value)} : null)}
+                  >
+                    <SelectTrigger id="moneda">
+                      <SelectValue placeholder="Seleccione moneda" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {monedas.map((moneda) => (
+                        <SelectItem key={moneda.Codigo} value={moneda.Codigo.toString()}>
+                          {moneda.Descripcion}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="formaPago">Forma de Pago</Label>
-                  <Input 
-                    id="formaPago" 
-                    value={parametros ? getFormaPagoNombre(parametros.IdFormaPago) : ""} 
-                    readOnly 
-                  />
+                  <Select 
+                    value={parametros?.IdFormaPago?.toString() || ""} 
+                    onValueChange={(value) => setParametros(prev => prev ? {...prev, IdFormaPago: parseInt(value)} : null)}
+                  >
+                    <SelectTrigger id="formaPago">
+                      <SelectValue placeholder="Seleccione forma de pago" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formasPago.map((forma) => (
+                        <SelectItem key={forma.Codigo} value={forma.Codigo.toString()}>
+                          {forma.Descripcion}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="medioPago">Medio de Pago</Label>
-                  <Input 
-                    id="medioPago" 
-                    value={parametros ? getMedioPagoNombre(parametros.IdMedioPago) : ""} 
-                    readOnly 
-                  />
+                  <Select 
+                    value={parametros?.IdMedioPago?.toString() || ""} 
+                    onValueChange={(value) => setParametros(prev => prev ? {...prev, IdMedioPago: parseInt(value)} : null)}
+                  >
+                    <SelectTrigger id="medioPago">
+                      <SelectValue placeholder="Seleccione medio de pago" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mediosPago.map((medio) => (
+                        <SelectItem key={medio.Codigo} value={medio.Codigo.toString()}>
+                          {medio.Descripcion}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="idResolucion">ID Resolución</Label>
-                <Input id="idResolucion" value={parametros?.IdResolucion || ""} readOnly />
+                <Input 
+                  id="idResolucion" 
+                  value={parametros?.IdResolucion || ""} 
+                  onChange={(e) => setParametros(prev => prev ? {...prev, IdResolucion: parseInt(e.target.value) || 0} : null)}
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes">Notas Fiscales</Label>
+                <Label htmlFor="nota1">Nota Fiscal 1</Label>
                 <Textarea
-                  id="notes"
-                  value={parametros?.NotasFiscales || ""}
-                  placeholder="Información adicional que deseas incluir en tus facturas..."
-                  rows={4}
-                  readOnly
+                  id="nota1"
+                  value={parametros?.Nota1 || ""}
+                  onChange={(e) => setParametros(prev => prev ? {...prev, Nota1: e.target.value} : null)}
+                  placeholder="Primera nota fiscal..."
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nota2">Nota Fiscal 2</Label>
+                <Textarea
+                  id="nota2"
+                  value={parametros?.Nota2 || ""}
+                  onChange={(e) => setParametros(prev => prev ? {...prev, Nota2: e.target.value} : null)}
+                  placeholder="Segunda nota fiscal..."
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nota3">Nota Fiscal 3</Label>
+                <Textarea
+                  id="nota3"
+                  value={parametros?.Nota3 || ""}
+                  onChange={(e) => setParametros(prev => prev ? {...prev, Nota3: e.target.value} : null)}
+                  placeholder="Tercera nota fiscal..."
+                  rows={2}
                 />
               </div>
             </CardContent>
@@ -305,9 +412,18 @@ const Company = () => {
 
           <div className="flex justify-end gap-4">
             <Button variant="outline">Cancelar</Button>
-            <Button className="gap-2">
-              <Save className="h-4 w-4" />
-              Guardar Cambios
+            <Button className="gap-2" onClick={handleSaveParametros} disabled={saving}>
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Guardar Cambios
+                </>
+              )}
             </Button>
           </div>
         </div>
