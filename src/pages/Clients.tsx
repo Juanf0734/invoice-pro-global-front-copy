@@ -74,6 +74,10 @@ const Clients = () => {
       client.Email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  console.log("Total clientes:", clients.length);
+  console.log("Clientes filtrados:", filteredClients.length);
+  console.log("Término de búsqueda:", searchTerm);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
