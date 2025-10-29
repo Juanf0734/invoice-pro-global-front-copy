@@ -46,9 +46,14 @@ const Clients = () => {
 
         const data = await response.json();
         
+        console.log("API Response:", data);
+        console.log("basePresentationList:", data.basePresentationList);
+        
         if (data.codResponse === 1 && data.basePresentationList) {
           setClients(data.basePresentationList);
+          console.log("Clientes cargados:", data.basePresentationList.length);
         } else {
+          console.log("No se encontraron clientes o error en respuesta");
           toast.error("Error al cargar los clientes");
         }
       } catch (error) {
