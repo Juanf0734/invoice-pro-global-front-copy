@@ -33,6 +33,8 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      console.log("Intentando login con usuario:", username);
+      
       const response = await fetch("/api/Login/autenticacion", {
         method: "POST",
         headers: {
@@ -44,6 +46,22 @@ const Auth = () => {
         }),
       });
 
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers.get("content-type"));
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("La respuesta no es JSON. Content-Type:", contentType);
+        const text = await response.text();
+        console.error("Respuesta recibida:", text.substring(0, 200));
+        toast({
+          title: "Error de conexión",
+          description: "No se pudo conectar con el servidor de autenticación. Verifica tu conexión.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (!response.ok) {
         toast({
           title: t("auth.signInError"),
@@ -54,6 +72,7 @@ const Auth = () => {
       }
 
       const data = await response.json();
+      console.log("Datos de login recibidos:", data);
       
       // El token está en messageResponse
       const token = data.messageResponse;
