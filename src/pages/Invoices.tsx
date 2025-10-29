@@ -87,7 +87,7 @@ const Invoices = () => {
         const fechaFinal = format(dateRange.to, "yyyy-MM-dd");
 
         const response = await fetch(
-          `https://ebillqa.azurewebsites.net/api/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`,
+          `/api/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`,
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
