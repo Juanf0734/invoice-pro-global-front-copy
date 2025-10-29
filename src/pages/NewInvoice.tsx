@@ -99,6 +99,15 @@ const NewInvoice = () => {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [invoiceLines, setInvoiceLines] = useState<InvoiceLine[]>([]);
 
+  // Invoice data
+  const [invoiceData, setInvoiceData] = useState({
+    tipoComprobante: "",
+    fechaExpedicion: new Date().toISOString().split('T')[0],
+    fechaVencimiento: "",
+    notasInternas: "",
+    notasCliente: "",
+  });
+
   // Client form data
   const [clientData, setClientData] = useState({
     name: "",
@@ -527,7 +536,11 @@ const NewInvoice = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="docType">Tipo de Comprobante *</Label>
-                <Select disabled={loadingTipos}>
+                <Select 
+                  disabled={loadingTipos}
+                  value={invoiceData.tipoComprobante}
+                  onValueChange={(value) => setInvoiceData({...invoiceData, tipoComprobante: value})}
+                >
                   <SelectTrigger id="docType">
                     <SelectValue placeholder={loadingTipos ? "Cargando..." : "Seleccione un tipo"} />
                   </SelectTrigger>
@@ -558,11 +571,21 @@ const NewInvoice = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="issueDate">Fecha de Expedición *</Label>
-                  <Input id="issueDate" type="date" defaultValue="2025-01-27" />
+                  <Input 
+                    id="issueDate" 
+                    type="date" 
+                    value={invoiceData.fechaExpedicion}
+                    onChange={(e) => setInvoiceData({...invoiceData, fechaExpedicion: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="dueDate">Fecha de Vencimiento *</Label>
-                  <Input id="dueDate" type="date" />
+                  <Input 
+                    id="dueDate" 
+                    type="date"
+                    value={invoiceData.fechaVencimiento}
+                    onChange={(e) => setInvoiceData({...invoiceData, fechaVencimiento: e.target.value})}
+                  />
                 </div>
               </div>
 
@@ -985,37 +1008,101 @@ const NewInvoice = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-muted-foreground">Número de Factura</Label>
-                <p className="font-mono text-lg font-medium">INV-2025-008</p>
+                <Label className="text-muted-foreground">Tipo de Comprobante</Label>
+                <p className="font-medium">
+                  {tiposComprobante.find(t => t.Codigo.toString() === invoiceData.tipoComprobante)?.Descripcion || "No seleccionado"}
+                </p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Cliente</Label>
-                <p className="font-medium">Cliente_Ejemplo</p>
-                <p className="text-sm text-muted-foreground">NIT: 111111111</p>
+                <p className="font-medium">{clientData.name || "No seleccionado"}</p>
+                <p className="text-sm text-muted-foreground">NIT: {clientData.nit || "N/A"}</p>
+                {clientData.email && (
+                  <p className="text-sm text-muted-foreground">Email: {clientData.email}</p>
+                )}
+                {clientData.phone && (
+                  <p className="text-sm text-muted-foreground">Teléfono: {clientData.phone}</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Fecha Expedición</Label>
-                  <p className="font-medium">27/01/2025</p>
+                  <p className="font-medium">
+                    {invoiceData.fechaExpedicion ? new Date(invoiceData.fechaExpedicion).toLocaleDateString('es-CO') : "No especificada"}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Vencimiento</Label>
-                  <p className="font-medium">27/02/2025</p>
+                  <p className="font-medium">
+                    {invoiceData.fechaVencimiento ? new Date(invoiceData.fechaVencimiento).toLocaleDateString('es-CO') : "No especificada"}
+                  </p>
                 </div>
               </div>
+
+              <div>
+                <Label className="text-muted-foreground mb-2 block">Productos</Label>
+                <div className="space-y-2">
+                  {invoiceLines.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No hay productos agregados</p>
+                  ) : (
+                    invoiceLines.map((line) => (
+                      <div key={line.id} className="flex justify-between text-sm border-b pb-2">
+                        <div className="flex-1">
+                          <p className="font-medium">{line.productName}</p>
+                          <p className="text-muted-foreground">
+                            Cantidad: {line.quantity} × {new Intl.NumberFormat("es-CO", {
+                              style: "currency",
+                              currency: "COP",
+                              minimumFractionDigits: 0,
+                            }).format(line.unitPrice)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">
+                            {new Intl.NumberFormat("es-CO", {
+                              style: "currency",
+                              currency: "COP",
+                              minimumFractionDigits: 0,
+                            }).format(line.total)}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
               <div className="rounded-lg border bg-muted/30 p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">Subtotal:</span>
-                    <span className="font-medium">$0</span>
+                    <span className="font-medium">
+                      {new Intl.NumberFormat("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                        minimumFractionDigits: 0,
+                      }).format(totals.subtotal)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">IVA (19%):</span>
-                    <span className="font-medium">$0</span>
+                    <span className="text-sm">IVA:</span>
+                    <span className="font-medium">
+                      {new Intl.NumberFormat("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                        minimumFractionDigits: 0,
+                      }).format(totals.iva)}
+                    </span>
                   </div>
                   <div className="flex justify-between border-t pt-2">
                     <span className="font-semibold">Total:</span>
-                    <span className="text-xl font-bold text-primary">$0</span>
+                    <span className="text-xl font-bold text-primary">
+                      {new Intl.NumberFormat("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                        minimumFractionDigits: 0,
+                      }).format(totals.total)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1033,6 +1120,8 @@ const NewInvoice = () => {
                   id="notes"
                   placeholder="Notas que solo verás tú..."
                   rows={3}
+                  value={invoiceData.notasInternas}
+                  onChange={(e) => setInvoiceData({...invoiceData, notasInternas: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
@@ -1041,6 +1130,8 @@ const NewInvoice = () => {
                   id="publicNotes"
                   placeholder="Notas que aparecerán en la factura..."
                   rows={3}
+                  value={invoiceData.notasCliente}
+                  onChange={(e) => setInvoiceData({...invoiceData, notasCliente: e.target.value})}
                 />
               </div>
             </CardContent>
