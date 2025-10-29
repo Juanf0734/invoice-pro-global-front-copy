@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/lib/api";
 import { format, subMonths } from "date-fns";
+
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 const monthlyData = [
   { month: "Ene", amount: 12500 },
@@ -13,12 +15,6 @@ const monthlyData = [
   { month: "Abr", amount: 22400 },
   { month: "May", amount: 19600 },
   { month: "Jun", amount: 28900 },
-];
-
-const invoicesByCountry = [
-  { country: "España", count: 45 },
-  { country: "Colombia", count: 32 },
-  { country: "Internacional", count: 23 },
 ];
 
 interface Invoice {
@@ -52,6 +48,7 @@ const Dashboard = () => {
   const [clientsCount, setClientsCount] = useState(0);
   const [productsCount, setProductsCount] = useState(0);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
+  const [invoicesByType, setInvoicesByType] = useState<{name: string, value: number}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -88,6 +85,19 @@ const Dashboard = () => {
             
             // Contar todas las facturas del período
             setInvoicesCount(allInvoices.length);
+
+            // Agrupar por tipo de comprobante para la gráfica
+            const typeCount = allInvoices.reduce((acc, inv) => {
+              const type = inv.TipoComprobante;
+              acc[type] = (acc[type] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+
+            const chartData = Object.entries(typeCount).map(([name, value]) => ({
+              name,
+              value
+            }));
+            setInvoicesByType(chartData);
 
             // Get last 5 invoices
             const sorted = [...allInvoices].sort((a, b) => 
@@ -255,23 +265,28 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg relative overflow-hidden">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-            <div className="text-center">
-              <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Próximamente disponible</p>
-            </div>
-          </div>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Facturas por País</CardTitle>
-            <CardDescription>Distribución de facturas emitidas</CardDescription>
+            <CardTitle>Facturas por Tipo</CardTitle>
+            <CardDescription>Distribución de documentos emitidos</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={invoicesByCountry}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="country" className="text-xs" />
-                <YAxis className="text-xs" />
+              <PieChart>
+                <Pie
+                  data={invoicesByType}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="hsl(var(--primary))"
+                  dataKey="value"
+                >
+                  {invoicesByType.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
@@ -279,8 +294,8 @@ const Dashboard = () => {
                     borderRadius: "var(--radius)",
                   }}
                 />
-                <Bar dataKey="count" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
-              </BarChart>
+                <Legend />
+              </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
