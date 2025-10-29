@@ -30,8 +30,8 @@ const Settings = () => {
 
   const [preferences, setPreferences] = useState({
     language: "es",
-    currency: "EUR",
-    timezone: "Europe/Madrid",
+    currency: "COP",
+    timezone: "America/Bogota",
     dateFormat: "DD/MM/YYYY",
   });
 
@@ -54,7 +54,22 @@ const Settings = () => {
       setDefaultTab("subscription");
     }
     loadUserData();
+    loadPreferences();
   }, [searchParams]);
+
+  const loadPreferences = () => {
+    const savedLanguage = localStorage.getItem("language") || "es";
+    const savedCurrency = localStorage.getItem("currency") || "COP";
+    const savedTimezone = localStorage.getItem("timezone") || "America/Bogota";
+    const savedDateFormat = localStorage.getItem("dateFormat") || "DD/MM/YYYY";
+
+    setPreferences({
+      language: savedLanguage,
+      currency: savedCurrency,
+      timezone: savedTimezone,
+      dateFormat: savedDateFormat,
+    });
+  };
 
   const loadUserData = async () => {
     try {
@@ -157,8 +172,13 @@ const Settings = () => {
   };
 
   const handleSavePreferences = () => {
-    // Save language to localStorage
+    // Save all preferences to localStorage
     localStorage.setItem("language", preferences.language);
+    localStorage.setItem("currency", preferences.currency);
+    localStorage.setItem("timezone", preferences.timezone);
+    localStorage.setItem("dateFormat", preferences.dateFormat);
+    
+    // Apply language change immediately
     i18n.changeLanguage(preferences.language);
     
     toast({
@@ -333,9 +353,9 @@ const Settings = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="EUR">EUR (€)</SelectItem>
-                      <SelectItem value="USD">USD ($)</SelectItem>
                       <SelectItem value="COP">COP ($)</SelectItem>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="EUR">EUR (€)</SelectItem>
                       <SelectItem value="GBP">GBP (£)</SelectItem>
                     </SelectContent>
                   </Select>
@@ -351,8 +371,8 @@ const Settings = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Europe/Madrid">Madrid (GMT+1)</SelectItem>
                       <SelectItem value="America/Bogota">Bogotá (GMT-5)</SelectItem>
+                      <SelectItem value="Europe/Madrid">Madrid (GMT+1)</SelectItem>
                       <SelectItem value="America/New_York">Nueva York (GMT-5)</SelectItem>
                       <SelectItem value="America/Mexico_City">Ciudad de México (GMT-6)</SelectItem>
                     </SelectContent>

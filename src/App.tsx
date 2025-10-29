@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
+import { PreferencesProvider } from "./contexts/PreferencesContext";
 import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
@@ -21,11 +22,12 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <SubscriptionProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <PreferencesProvider>
+      <SubscriptionProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -101,9 +103,10 @@ const App = () => (
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </SubscriptionProvider>
+       </BrowserRouter>
+     </TooltipProvider>
+   </SubscriptionProvider>
+   </PreferencesProvider>
   </QueryClientProvider>
 );
 
