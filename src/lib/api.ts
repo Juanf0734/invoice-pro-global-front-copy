@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.DEV
   : 'https://ebillpymetest.facturaenlinea.co/api'; // En producción usa la URL completa
 
 export const getApiUrl = (endpoint: string) => {
-  // Si el endpoint ya tiene el prefijo /api, lo removemos para evitar duplicados
-  const cleanEndpoint = endpoint.startsWith('/api') ? endpoint.substring(4) : endpoint;
+  // Asegurar que el endpoint empiece con /
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   return `${API_BASE_URL}${cleanEndpoint}`;
 };
