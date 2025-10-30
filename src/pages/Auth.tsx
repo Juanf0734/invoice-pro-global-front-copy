@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ebillLogo from "@/assets/ebill-logo.png";
 import ebillIcon from "@/assets/ebill-icon.png";
+import { getApiUrl } from "@/lib/api";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const Auth = () => {
     try {
       console.log("Intentando login con usuario:", username);
       
-      const response = await fetch("/api/Login/autenticacion", {
+      const response = await fetch(getApiUrl("/Login/autenticacion"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
