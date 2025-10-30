@@ -1,7 +1,5 @@
 // API configuration utility
-const API_BASE_URL = import.meta.env.DEV 
-  ? '/api' // En desarrollo usa el proxy de Vite
-  : 'https://ebillpymetest.facturaenlinea.co/api'; // En producción usa la URL completa
+const API_BASE_URL = 'https://ebillpymetest.facturaenlinea.co/api';
 
 export const getApiUrl = (endpoint: string) => {
   // Asegurar que el endpoint empiece con /
