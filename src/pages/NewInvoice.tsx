@@ -571,7 +571,7 @@ const NewInvoice = () => {
         TipoComprobante: String(invoiceData.tipoComprobante),
         Prefijo: "",
         NumFactura: 0,
-        IDInterno: selectedClientDetail?.IDInterno || clientData.nit,
+        IDInterno: selectedClientDetail?.Id?.toString() || clientData.nit,
         NombreVendedor: "",
         Condiciones_Pago: "14",
         FV_TDO_Codigo_TipoOperacion: "4",
