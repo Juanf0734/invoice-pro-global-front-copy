@@ -7,17 +7,22 @@ import { Badge } from "./ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription, SUBSCRIPTION_PLANS } from "@/contexts/SubscriptionContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { usePreferences } from "@/contexts/PreferencesContext";
 
 const plans = [
   {
     name: "Básico",
-    price: "14,90",
-    productId: "prod_TJd09CpAxikwLx",
-    priceId: "price_1SMzkPRRbSHLnGlJspYyg5q8",
+    monthlyPrice: "85.000",
+    yearlyPrice: "867.000",
+    productIdMonthly: "prod_TKd60UFqKmDlzQ",
+    priceIdMonthly: "price_1SNxppRRbSHLnGlJXYxPhBdR",
+    productIdYearly: "prod_TKd6iG3LlGuirH",
+    priceIdYearly: "price_1SNxq9RRbSHLnGlJENWm1LMA",
     features: [
       "2 usuarios",
       "5 facturas/mes",
-      "€0.07 por factura adicional",
+      "$400 COP por factura adicional",
       "Verifactu incluido",
       "Soporte Estándar",
       "Representación PDF",
@@ -26,14 +31,17 @@ const plans = [
   },
   {
     name: "PRO",
-    price: "29,90",
-    productId: "prod_TJd0D6ySk3RnJq",
-    priceId: "price_1SMzkYRRbSHLnGlJQmN6eeUV",
+    monthlyPrice: "170.500",
+    yearlyPrice: "1.739.100",
+    productIdMonthly: "prod_TKd6CIJiPcB3O6",
+    priceIdMonthly: "price_1SNxqJRRbSHLnGlJU40P5LJN",
+    productIdYearly: "prod_TKd6x4yGqPjBAl",
+    priceIdYearly: "price_1SNxqSRRbSHLnGlJJnuJoyWm",
     popular: true,
     features: [
       "5 usuarios",
       "50 facturas/mes",
-      "€0.05 por factura adicional",
+      "$300 COP por factura adicional",
       "Verifactu incluido",
       "Soporte Premium",
       "Representación PDF",
@@ -43,9 +51,12 @@ const plans = [
   },
   {
     name: "Empresarial",
-    price: "89,00",
-    productId: "prod_TJd0Yhk7ZtTt65",
-    priceId: "price_1SMzkhRRbSHLnGlJdG3yo8od",
+    monthlyPrice: "507.700",
+    yearlyPrice: "5.178.360",
+    productIdMonthly: "prod_TKd69LD8vtK22s",
+    priceIdMonthly: "price_1SNxqlRRbSHLnGlJJNIotcyq",
+    productIdYearly: "prod_TKd7pyQFlwjlXA",
+    priceIdYearly: "price_1SNxr2RRbSHLnGlJQckPCYkh",
     features: [
       "10 usuarios",
       "800 facturas/mes",
@@ -63,7 +74,9 @@ export function SubscriptionPlans() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { productId, checkSubscription } = useSubscription();
+  const { formatCurrency } = usePreferences();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   const handleSubscribe = async (priceId: string, planName: string) => {
     try {
@@ -140,77 +153,94 @@ export function SubscriptionPlans() {
   };
 
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      {plans.map((plan) => {
-        const isCurrentPlan = productId === plan.productId;
+    <div className="space-y-6">
+      <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as "monthly" | "yearly")} className="w-full">
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+          <TabsTrigger value="monthly">Mensual</TabsTrigger>
+          <TabsTrigger value="yearly">
+            Anual
+            <Badge variant="secondary" className="ml-2">-15%</Badge>
+          </TabsTrigger>
+        </TabsList>
         
-        return (
-          <Card
-            key={plan.name}
-            className={`relative ${
-              plan.popular
-                ? "border-primary shadow-lg scale-105"
-                : isCurrentPlan
-                ? "border-green-500 shadow-md"
-                : ""
-            }`}
-          >
-            {plan.popular && (
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                Más Popular
-              </Badge>
-            )}
-            {isCurrentPlan && (
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500">
-                Tu Plan Actual
-              </Badge>
-            )}
-            <CardHeader>
-              <CardTitle className="text-2xl">{plan.name}</CardTitle>
-              <CardDescription>
-                <span className="text-4xl font-bold text-foreground">€{plan.price}</span>
-                <span className="text-muted-foreground">/mes</span>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              {isCurrentPlan ? (
-                <Button
-                  className="w-full"
-                  variant="outline"
-                  onClick={handleManageSubscription}
+        <TabsContent value={billingCycle} className="mt-8">
+          <div className="grid gap-6 md:grid-cols-3">
+            {plans.map((plan) => {
+              const currentProductId = billingCycle === "monthly" ? plan.productIdMonthly : plan.productIdYearly;
+              const currentPriceId = billingCycle === "monthly" ? plan.priceIdMonthly : plan.priceIdYearly;
+              const displayPrice = billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
+              const isCurrentPlan = productId === currentProductId;
+        
+              return (
+                <Card
+                  key={`${plan.name}-${billingCycle}`}
+                  className={`relative ${
+                    plan.popular
+                      ? "border-primary shadow-lg scale-105"
+                      : isCurrentPlan
+                      ? "border-green-500 shadow-md"
+                      : ""
+                  }`}
                 >
-                  Gestionar Suscripción
-                </Button>
-              ) : (
-                <Button
-                  className="w-full"
-                  onClick={() => handleSubscribe(plan.priceId, plan.name)}
-                  disabled={loadingPlan === plan.priceId}
-                >
-                  {loadingPlan === plan.priceId ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Procesando...
-                    </>
-                  ) : (
-                    "Suscribirse"
+                  {plan.popular && (
+                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      Más Popular
+                    </Badge>
                   )}
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
-        );
-      })}
+                  {isCurrentPlan && (
+                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500">
+                      Tu Plan Actual
+                    </Badge>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                    <CardDescription>
+                      <span className="text-4xl font-bold text-foreground">${displayPrice}</span>
+                      <span className="text-muted-foreground">/{billingCycle === "monthly" ? "mes" : "año"}</span>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {plan.features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    {isCurrentPlan ? (
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        onClick={handleManageSubscription}
+                      >
+                        Gestionar Suscripción
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        onClick={() => handleSubscribe(currentPriceId, plan.name)}
+                        disabled={loadingPlan === currentPriceId}
+                      >
+                        {loadingPlan === currentPriceId ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Procesando...
+                          </>
+                        ) : (
+                          "Suscribirse"
+                        )}
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

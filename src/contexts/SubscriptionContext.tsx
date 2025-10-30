@@ -14,9 +14,14 @@ interface SubscriptionContextType {
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 const SUBSCRIPTION_PLANS = {
-  "prod_TJd09CpAxikwLx": { name: "Básico", priceId: "price_1SMzkPRRbSHLnGlJspYyg5q8" },
-  "prod_TJd0D6ySk3RnJq": { name: "PRO", priceId: "price_1SMzkYRRbSHLnGlJQmN6eeUV" },
-  "prod_TJd0Yhk7ZtTt65": { name: "Empresarial", priceId: "price_1SMzkhRRbSHLnGlJdG3yo8od" },
+  // Planes mensuales
+  "prod_TKd60UFqKmDlzQ": { name: "Básico", priceId: "price_1SNxppRRbSHLnGlJXYxPhBdR", interval: "monthly" },
+  "prod_TKd6CIJiPcB3O6": { name: "PRO", priceId: "price_1SNxqJRRbSHLnGlJU40P5LJN", interval: "monthly" },
+  "prod_TKd69LD8vtK22s": { name: "Empresarial", priceId: "price_1SNxqlRRbSHLnGlJJNIotcyq", interval: "monthly" },
+  // Planes anuales
+  "prod_TKd6iG3LlGuirH": { name: "Básico", priceId: "price_1SNxq9RRbSHLnGlJENWm1LMA", interval: "yearly" },
+  "prod_TKd6x4yGqPjBAl": { name: "PRO", priceId: "price_1SNxqSRRbSHLnGlJJnuJoyWm", interval: "yearly" },
+  "prod_TKd7pyQFlwjlXA": { name: "Empresarial", priceId: "price_1SNxr2RRbSHLnGlJQckPCYkh", interval: "yearly" },
 };
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
