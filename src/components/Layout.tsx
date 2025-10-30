@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, LogOut, User, Languages, Sparkles, X, Building2, Settings } from "lucide-react";
+import { Bell, LogOut, User, Languages, Sparkles, X, Building2, Settings, Moon, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Alert, AlertDescription } from "./ui/alert";
@@ -29,6 +29,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [forceStartTour, setForceStartTour] = useState(false);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
   const [companyName, setCompanyName] = useState<string>("");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Load theme preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+    
+    setIsDarkMode(shouldBeDark);
+    if (shouldBeDark) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
 
   // Event listener for restarting the tour
   useEffect(() => {
@@ -68,6 +81,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
     localStorage.setItem("language", lng);
+  };
+
+  const toggleTheme = () => {
+    const newIsDark = !isDarkMode;
+    setIsDarkMode(newIsDark);
+    
+    if (newIsDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   };
 
   const dismissUpgradeBanner = () => {
@@ -126,6 +152,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {planName}
             </Badge>
             <div className="flex-1" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleTheme}
+              className="mr-2"
+              title={isDarkMode ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+            >
+              {isDarkMode ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" data-tour="language">
