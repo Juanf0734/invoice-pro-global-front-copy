@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,6 +79,7 @@ const steps = [
 ];
 
 const NewInvoice = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
@@ -136,8 +138,8 @@ const NewInvoice = () => {
         
         if (!authToken) {
           toast({
-            title: "Error",
-            description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
+            title: t("common.error"),
+            description: t("newInvoice.sessionNotFound"),
             variant: "destructive",
           });
           navigate("/auth");
@@ -165,8 +167,8 @@ const NewInvoice = () => {
       } catch (error) {
         console.error("Error fetching tipos de comprobante:", error);
         toast({
-          title: "Error",
-          description: "No se pudieron cargar los tipos de comprobante",
+          title: t("common.error"),
+          description: t("common.unexpectedError"),
           variant: "destructive",
         });
       } finally {
@@ -209,8 +211,8 @@ const NewInvoice = () => {
       } catch (error) {
         console.error("Error fetching clients:", error);
         toast({
-          title: "Error",
-          description: "No se pudieron cargar los clientes",
+          title: t("common.error"),
+          description: t("newInvoice.loadingClients"),
           variant: "destructive",
         });
       } finally {
@@ -407,8 +409,8 @@ const NewInvoice = () => {
     } catch (error) {
       console.error("Error fetching client details:", error);
       toast({
-        title: "Error",
-        description: "No se pudieron cargar los detalles del cliente",
+        title: t("common.error"),
+        description: t("common.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -488,8 +490,8 @@ const NewInvoice = () => {
       // Validaciones básicas
       if (!invoiceData.tipoComprobante) {
         toast({
-          title: "Error",
-          description: "Debe seleccionar un tipo de comprobante",
+          title: t("common.error"),
+          description: t("newInvoice.selectDocType"),
           variant: "destructive",
         });
         return;
@@ -497,8 +499,8 @@ const NewInvoice = () => {
 
       if (!clientData.name || !clientData.nit) {
         toast({
-          title: "Error",
-          description: "Debe completar los datos del cliente",
+          title: t("common.error"),
+          description: t("newInvoice.completeClientData"),
           variant: "destructive",
         });
         return;
@@ -506,8 +508,8 @@ const NewInvoice = () => {
 
       if (invoiceLines.length === 0) {
         toast({
-          title: "Error",
-          description: "Debe agregar al menos un producto",
+          title: t("common.error"),
+          description: t("newInvoice.addProduct"),
           variant: "destructive",
         });
         return;
@@ -518,8 +520,8 @@ const NewInvoice = () => {
       
       if (!authToken || !companyId) {
         toast({
-          title: "Error",
-          description: "No se encontró la sesión",
+          title: t("common.error"),
+          description: t("newInvoice.sessionNotFound"),
           variant: "destructive",
         });
         return;
@@ -652,8 +654,8 @@ const NewInvoice = () => {
 
       if (data.codResponse === 1 || data.messageResponse?.includes("exitosamente") || data.messageResponse?.includes("registrado")) {
         toast({
-          title: "Éxito",
-          description: data.messageResponse || "Factura creada exitosamente",
+          title: t("newInvoice.success"),
+          description: data.messageResponse || t("newInvoice.invoiceCreated"),
         });
         
         // Redirigir a la lista de facturas
@@ -663,16 +665,16 @@ const NewInvoice = () => {
       } else {
         console.error("Error del servidor:", data);
         toast({
-          title: "Error",
-          description: `${data.messageResponse || "Error al crear la factura"}. Ver consola para detalles.`,
+          title: t("common.error"),
+          description: `${data.messageResponse || t("common.unexpectedError")}. Ver consola para detalles.`,
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast({
-        title: "Error",
-        description: "Error al crear la factura. Por favor intente nuevamente.",
+        title: t("common.error"),
+        description: t("newInvoice.errorCreating"),
         variant: "destructive",
       });
     } finally {
@@ -687,8 +689,8 @@ const NewInvoice = () => {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Nueva Factura</h1>
-          <p className="text-muted-foreground">Crear un nuevo documento de facturación</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("newInvoice.title")}</h1>
+          <p className="text-muted-foreground">{t("newInvoice.subtitle")}</p>
         </div>
       </div>
 
@@ -739,18 +741,18 @@ const NewInvoice = () => {
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Configuración Inicial</CardTitle>
+              <CardTitle>{t("newInvoice.initialConfig")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="docType">Tipo de Comprobante *</Label>
+                <Label htmlFor="docType">{t("newInvoice.docType")} {t("newInvoice.required")}</Label>
                 <Select 
                   disabled={loadingTipos}
                   value={invoiceData.tipoComprobante}
                   onValueChange={(value) => setInvoiceData({...invoiceData, tipoComprobante: value})}
                 >
                   <SelectTrigger id="docType">
-                    <SelectValue placeholder={loadingTipos ? "Cargando..." : "Seleccione un tipo"} />
+                    <SelectValue placeholder={loadingTipos ? t("newInvoice.loading") : t("newInvoice.selectType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {tiposComprobante.map((tipo) => (
@@ -763,22 +765,22 @@ const NewInvoice = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country">Jurisdicción *</Label>
+                <Label htmlFor="country">{t("newInvoice.jurisdiction")} {t("newInvoice.required")}</Label>
                 <Select defaultValue="co">
                   <SelectTrigger id="country">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="co">Colombia (DIAN)</SelectItem>
-                    <SelectItem value="es">España (Verifactu)</SelectItem>
-                    <SelectItem value="int">Internacional</SelectItem>
+                    <SelectItem value="co">{t("newInvoice.colombia")}</SelectItem>
+                    <SelectItem value="es">{t("newInvoice.spain")}</SelectItem>
+                    <SelectItem value="int">{t("newInvoice.international")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="issueDate">Fecha de Expedición *</Label>
+                  <Label htmlFor="issueDate">{t("newInvoice.issueDate")} {t("newInvoice.required")}</Label>
                   <Input 
                     id="issueDate" 
                     type="date" 
@@ -787,7 +789,7 @@ const NewInvoice = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dueDate">Fecha de Vencimiento *</Label>
+                  <Label htmlFor="dueDate">{t("newInvoice.dueDate")} {t("newInvoice.required")}</Label>
                   <Input 
                     id="dueDate" 
                     type="date"
@@ -798,10 +800,10 @@ const NewInvoice = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="invoiceNumber">Número de Factura</Label>
-                <Input id="invoiceNumber" placeholder="Auto-generado" disabled />
+                <Label htmlFor="invoiceNumber">{t("newInvoice.invoiceNumber")}</Label>
+                <Input id="invoiceNumber" placeholder={t("newInvoice.autoGenerated")} disabled />
                 <p className="text-xs text-muted-foreground">
-                  Se generará automáticamente al guardar
+                  {t("newInvoice.autoGeneratedDesc")}
                 </p>
               </div>
             </CardContent>
@@ -809,27 +811,26 @@ const NewInvoice = () => {
 
           <Card className="shadow-lg border-l-4 border-l-primary">
             <CardHeader>
-              <CardTitle>Información</CardTitle>
+              <CardTitle>{t("newInvoice.information")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg bg-muted/50 p-4">
-                <h4 className="font-medium mb-2">Facturación Electrónica</h4>
+                <h4 className="font-medium mb-2">{t("newInvoice.electronicBilling")}</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Esta factura cumplirá con los requisitos legales de facturación electrónica
-                  según la jurisdicción seleccionada.
+                  {t("newInvoice.electronicBillingDesc")}
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-blue-100 text-blue-700">Colombia</Badge>
-                    <span className="text-xs">Validado DIAN</span>
+                    <span className="text-xs">{t("newInvoice.validatedDian")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-green-100 text-green-700">España</Badge>
-                    <span className="text-xs">Verifactu compatible</span>
+                    <span className="text-xs">{t("newInvoice.verifactuCompatible")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-purple-100 text-purple-700">Internacional</Badge>
-                    <span className="text-xs">Formato estándar</span>
+                    <span className="text-xs">{t("newInvoice.standardFormat")}</span>
                   </div>
                 </div>
               </div>
@@ -840,22 +841,22 @@ const NewInvoice = () => {
 
       {currentStep === 2 && (
         <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>Datos del Cliente</CardTitle>
+           <CardHeader>
+            <CardTitle>{t("newInvoice.clientData")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="clientSelect">Seleccionar Cliente Existente</Label>
+              <Label htmlFor="clientSelect">{t("newInvoice.selectClient")}</Label>
               <Select 
                 value={selectedClientId} 
                 onValueChange={handleClientSelect}
                 disabled={loadingClients}
               >
                 <SelectTrigger id="clientSelect">
-                  <SelectValue placeholder={loadingClients ? "Cargando clientes..." : "Seleccione un cliente"} />
+                  <SelectValue placeholder={loadingClients ? t("newInvoice.loadingClients") : t("newInvoice.selectClientPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__new__">-- Nuevo Cliente --</SelectItem>
+                  <SelectItem value="__new__">{t("newInvoice.newClient")}</SelectItem>
                   {clients.map((client) => (
                     <SelectItem key={client.Codigo} value={client.Codigo.toString()}>
                       {client.Descripcion}
@@ -873,13 +874,13 @@ const NewInvoice = () => {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="tipoPersona">Tipo de Persona *</Label>
+                <Label htmlFor="tipoPersona">{t("newInvoice.personType")} {t("newInvoice.required")}</Label>
                 <Select 
                   value={clientData.tipoPersona}
                   onValueChange={(value) => setClientData({...clientData, tipoPersona: value})}
                 >
                   <SelectTrigger id="tipoPersona">
-                    <SelectValue placeholder="Seleccione tipo de persona" />
+                    <SelectValue placeholder={t("newInvoice.selectPersonType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {tiposPersona.map((tipo) => (
@@ -891,13 +892,13 @@ const NewInvoice = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tipoIdentificacion">Tipo de Identificación *</Label>
+                <Label htmlFor="tipoIdentificacion">{t("newInvoice.identificationType")} {t("newInvoice.required")}</Label>
                 <Select 
                   value={clientData.tipoIdentificacion}
                   onValueChange={(value) => setClientData({...clientData, tipoIdentificacion: value})}
                 >
                   <SelectTrigger id="tipoIdentificacion">
-                    <SelectValue placeholder="Seleccione tipo de identificación" />
+                    <SelectValue placeholder={t("newInvoice.selectIdentificationType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {tiposIdentificacion.map((tipo) => (
@@ -912,19 +913,19 @@ const NewInvoice = () => {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="clientName">Nombre del Cliente *</Label>
+                <Label htmlFor="clientName">{t("newInvoice.clientName")} {t("newInvoice.required")}</Label>
                 <Input 
                   id="clientName" 
-                  placeholder="Cliente_Ejemplo"
+                  placeholder={t("newInvoice.clientNamePlaceholder")}
                   value={clientData.name}
                   onChange={(e) => setClientData({...clientData, name: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="clientTax">NIT/CIF *</Label>
+                <Label htmlFor="clientTax">{t("newInvoice.taxId")} {t("newInvoice.required")}</Label>
                 <Input 
                   id="clientTax" 
-                  placeholder="111111111"
+                  placeholder={t("newInvoice.taxIdPlaceholder")}
                   value={clientData.nit}
                   onChange={(e) => setClientData({...clientData, nit: e.target.value})}
                 />
@@ -932,13 +933,13 @@ const NewInvoice = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="regimenFiscal">Régimen Fiscal *</Label>
+              <Label htmlFor="regimenFiscal">{t("newInvoice.taxRegime")} {t("newInvoice.required")}</Label>
               <Select 
                 value={clientData.regimenFiscal}
                 onValueChange={(value) => setClientData({...clientData, regimenFiscal: value})}
               >
                 <SelectTrigger id="regimenFiscal">
-                  <SelectValue placeholder="Seleccione régimen fiscal" />
+                  <SelectValue placeholder={t("newInvoice.selectTaxRegime")} />
                 </SelectTrigger>
                 <SelectContent>
                   {regimenesFiscales.map((regimen) => (
@@ -951,10 +952,10 @@ const NewInvoice = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="clientAddress">Dirección *</Label>
+              <Label htmlFor="clientAddress">{t("newInvoice.address")} {t("newInvoice.required")}</Label>
               <Input 
                 id="clientAddress" 
-                placeholder="CRA 63 NO 17-91"
+                placeholder={t("newInvoice.addressPlaceholder")}
                 value={clientData.address}
                 onChange={(e) => setClientData({...clientData, address: e.target.value})}
               />
@@ -962,7 +963,7 @@ const NewInvoice = () => {
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <Label htmlFor="clientCountry">País *</Label>
+                <Label htmlFor="clientCountry">{t("newInvoice.country")} {t("newInvoice.required")}</Label>
                 <Select 
                   value={clientData.pais}
                   onValueChange={(value) => {
@@ -984,7 +985,7 @@ const NewInvoice = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="clientDepartment">Departamento *</Label>
+                <Label htmlFor="clientDepartment">{t("newInvoice.department")} {t("newInvoice.required")}</Label>
                 <Select 
                   value={clientData.departamento}
                   onValueChange={(value) => {
@@ -994,7 +995,7 @@ const NewInvoice = () => {
                   disabled={!clientData.pais}
                 >
                   <SelectTrigger id="clientDepartment">
-                    <SelectValue placeholder="Seleccione departamento" />
+                    <SelectValue placeholder={t("newInvoice.selectDepartment")} />
                   </SelectTrigger>
                   <SelectContent>
                     {departamentos.map((dept) => (
@@ -1006,14 +1007,14 @@ const NewInvoice = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="clientCity">Ciudad/Municipio *</Label>
+                <Label htmlFor="clientCity">{t("newInvoice.city")} {t("newInvoice.required")}</Label>
                 <Select 
                   value={clientData.municipio}
                   onValueChange={(value) => setClientData({...clientData, municipio: value})}
                   disabled={!clientData.departamento}
                 >
                   <SelectTrigger id="clientCity">
-                    <SelectValue placeholder="Seleccione municipio" />
+                    <SelectValue placeholder={t("newInvoice.selectCity")} />
                   </SelectTrigger>
                   <SelectContent>
                     {municipios.map((mun) => (
@@ -1027,21 +1028,21 @@ const NewInvoice = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="clientPhone">Teléfono</Label>
+              <Label htmlFor="clientPhone">{t("newInvoice.phone")}</Label>
               <Input 
                 id="clientPhone" 
-                placeholder="0"
+                placeholder={t("newInvoice.phonePlaceholder")}
                 value={clientData.phone}
                 onChange={(e) => setClientData({...clientData, phone: e.target.value})}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="clientEmail">Email *</Label>
+              <Label htmlFor="clientEmail">{t("newInvoice.email")} {t("newInvoice.required")}</Label>
               <Input 
                 id="clientEmail" 
                 type="email" 
-                placeholder="alejandranino@fymtech.com"
+                placeholder={t("newInvoice.emailPlaceholder")}
                 value={clientData.email}
                 onChange={(e) => setClientData({...clientData, email: e.target.value})}
               />
