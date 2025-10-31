@@ -15,7 +15,8 @@
     "spanish": "Spanish",
     "english": "English",
     "freePlan": "Free Plan",
-    "upgradeMessage": "You're using the free plan. Upgrade to unlock more features.",
+    "upgradeMessage": "You're using the free plan.",
+    "upgradeDescription": "Upgrade to unlock more invoices, users and premium features.",
     "viewPlans": "View Plans"
   },
   "nav": {

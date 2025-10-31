@@ -117,10 +117,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <AlertDescription className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 flex-1">
                   <span className="font-medium text-sm">
-                    Estás usando el plan gratuito.
+                    {t("common.upgradeMessage")}
                   </span>
                   <span className="text-sm text-muted-foreground hidden md:inline">
-                    Actualiza para desbloquear más facturas, usuarios y funciones premium.
+                    {t("common.upgradeDescription")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     className="gap-2 h-8"
                   >
                     <Sparkles className="h-3 w-3" />
-                    Ver Planes
+                    {t("common.viewPlans")}
                   </Button>
                   <Button
                     size="sm"

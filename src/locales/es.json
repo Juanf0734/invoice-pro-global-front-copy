@@ -15,7 +15,8 @@
     "spanish": "Español",
     "english": "Inglés",
     "freePlan": "Plan Gratuito",
-    "upgradeMessage": "Estás usando el plan gratuito. Actualiza para desbloquear más funciones.",
+    "upgradeMessage": "Estás usando el plan gratuito.",
+    "upgradeDescription": "Actualiza para desbloquear más facturas, usuarios y funciones premium.",
     "viewPlans": "Ver Planes"
   },
   "nav": {
