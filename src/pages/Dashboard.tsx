@@ -254,63 +254,71 @@ const Dashboard = () => {
             <CardDescription>Valor total y cantidad de facturas de los últimos 3 meses</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={monthlyData}>
-                <defs>
-                  <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis 
-                  yAxisId="left" 
-                  className="text-xs"
-                  tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
-                />
-                <YAxis 
-                  yAxisId="right" 
-                  orientation="right" 
-                  className="text-xs"
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)",
-                  }}
-                  formatter={(value: number, name: string) => {
-                    if (name === 'amount') return [formatCurrency(value), 'Valor Total'];
-                    if (name === 'count') return [value, 'Cantidad'];
-                    return [value, name];
-                  }}
-                />
-                <Legend 
-                  formatter={(value) => {
-                    if (value === 'amount') return 'Valor Total';
-                    if (value === 'count') return 'Cantidad de Facturas';
-                    return value;
-                  }}
-                />
-                <Bar
-                  yAxisId="right"
-                  dataKey="count"
-                  fill="hsl(var(--accent))"
-                  radius={[8, 8, 0, 0]}
-                  opacity={0.7}
-                />
-                <Area
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorAmount)"
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
+            {monthlyData.length === 0 || monthlyData.every(d => d.amount === 0 && d.count === 0) ? (
+              <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground">No hay datos disponibles</p>
+                <p className="text-sm text-muted-foreground">Emite tu primera factura para ver las estadísticas</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart data={monthlyData}>
+                  <defs>
+                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="month" className="text-xs" />
+                  <YAxis 
+                    yAxisId="left" 
+                    className="text-xs"
+                    tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
+                  />
+                  <YAxis 
+                    yAxisId="right" 
+                    orientation="right" 
+                    className="text-xs"
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)",
+                    }}
+                    formatter={(value: number, name: string) => {
+                      if (name === 'amount') return [formatCurrency(value), 'Valor Total'];
+                      if (name === 'count') return [value, 'Cantidad'];
+                      return [value, name];
+                    }}
+                  />
+                  <Legend 
+                    formatter={(value) => {
+                      if (value === 'amount') return 'Valor Total';
+                      if (value === 'count') return 'Cantidad de Facturas';
+                      return value;
+                    }}
+                  />
+                  <Bar
+                    yAxisId="right"
+                    dataKey="count"
+                    fill="hsl(var(--accent))"
+                    radius={[8, 8, 0, 0]}
+                    opacity={0.7}
+                  />
+                  <Area
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorAmount)"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -320,32 +328,40 @@ const Dashboard = () => {
             <CardDescription>Distribución de documentos del último mes</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={invoicesByType}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="hsl(var(--primary))"
-                  dataKey="value"
-                >
-                  {invoicesByType.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)",
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            {invoicesByType.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground">No hay datos disponibles</p>
+                <p className="text-sm text-muted-foreground">Emite facturas para ver la distribución por tipo</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={invoicesByType}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="hsl(var(--primary))"
+                    dataKey="value"
+                  >
+                    {invoicesByType.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)",
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
