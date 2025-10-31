@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Building2, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 interface CompanyData {
   Id: number;
@@ -62,6 +63,7 @@ interface Resolucion {
 
 const Company = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [company, setCompany] = useState<CompanyData | null>(null);
@@ -206,13 +208,13 @@ const Company = () => {
       }
 
       toast({
-        title: "Éxito",
-        description: "Parámetros actualizados correctamente",
+        title: t("company.success"),
+        description: t("company.parametersUpdated"),
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "No se pudieron actualizar los parámetros",
+        title: t("company.error"),
+        description: t("company.parametersUpdateError"),
         variant: "destructive",
       });
     } finally {
@@ -231,53 +233,53 @@ const Company = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Mi Empresa</h1>
-        <p className="text-muted-foreground">Configura la información de tu empresa para la facturación</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("company.title")}</h1>
+        <p className="text-muted-foreground">{t("company.subtitle")}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Información General</CardTitle>
-              <CardDescription>Datos principales de tu empresa</CardDescription>
+              <CardTitle>{t("company.generalInfo")}</CardTitle>
+              <CardDescription>{t("company.generalInfoDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nombre de la Empresa *</Label>
+                  <Label htmlFor="name">{t("company.companyName")} *</Label>
                   <Input id="name" value={company?.Nombre || ""} readOnly />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="taxId">NIF/CIF *</Label>
+                  <Label htmlFor="taxId">{t("company.taxId")} *</Label>
                   <Input id="taxId" value={company?.Nit || ""} readOnly />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Dirección *</Label>
+                <Label htmlFor="address">{t("company.address")} *</Label>
                 <Input id="address" value={company?.Direccion || ""} readOnly />
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="city">Ciudad *</Label>
+                  <Label htmlFor="city">{t("company.city")} *</Label>
                   <Input id="city" placeholder="Madrid" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="postalCode">Código Postal *</Label>
+                  <Label htmlFor="postalCode">{t("company.postalCode")} *</Label>
                   <Input id="postalCode" placeholder="28001" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="country">País *</Label>
+                  <Label htmlFor="country">{t("company.country")} *</Label>
                   <Select defaultValue="es">
                     <SelectTrigger id="country">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="es">España</SelectItem>
-                      <SelectItem value="co">Colombia</SelectItem>
-                      <SelectItem value="other">Otro</SelectItem>
+                      <SelectItem value="es">{t("invoices.spain")}</SelectItem>
+                      <SelectItem value="co">{t("invoices.colombia")}</SelectItem>
+                      <SelectItem value="other">{t("invoices.international")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -287,23 +289,23 @@ const Company = () => {
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Información de Contacto</CardTitle>
-              <CardDescription>Datos de contacto que aparecerán en las facturas</CardDescription>
+              <CardTitle>{t("company.contactInfo")}</CardTitle>
+              <CardDescription>{t("company.contactInfoDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">{t("company.email")} *</Label>
                   <Input id="email" type="email" value={company?.Email || ""} readOnly />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Teléfono *</Label>
+                  <Label htmlFor="phone">{t("company.phone")} *</Label>
                   <Input id="phone" value={company?.Telefono || ""} readOnly />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="website">Sitio Web</Label>
+                <Label htmlFor="website">{t("company.website")}</Label>
                 <Input id="website" placeholder="https://www.empresa.com" />
               </div>
             </CardContent>
@@ -311,13 +313,13 @@ const Company = () => {
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Configuración Fiscal</CardTitle>
-              <CardDescription>Parámetros por defecto de la empresa</CardDescription>
+              <CardTitle>{t("company.taxConfig")}</CardTitle>
+              <CardDescription>{t("company.taxConfigDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="idCliente">ID Cliente</Label>
+                  <Label htmlFor="idCliente">{t("company.idClient")}</Label>
                   <Input 
                     id="idCliente" 
                     value={parametros?.IdCliente || ""} 
@@ -325,13 +327,13 @@ const Company = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="moneda">Moneda</Label>
+                  <Label htmlFor="moneda">{t("company.currency")}</Label>
                   <Select 
                     value={parametros?.IdMoneda?.toString() || ""} 
                     onValueChange={(value) => setParametros(prev => prev ? {...prev, IdMoneda: parseInt(value)} : null)}
                   >
                     <SelectTrigger id="moneda">
-                      <SelectValue placeholder="Seleccione moneda" />
+                      <SelectValue placeholder={t("company.selectCurrency")} />
                     </SelectTrigger>
                     <SelectContent>
                       {monedas.map((moneda) => (
@@ -346,13 +348,13 @@ const Company = () => {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="formaPago">Forma de Pago</Label>
+                  <Label htmlFor="formaPago">{t("company.paymentMethod")}</Label>
                   <Select 
                     value={parametros?.IdFormaPago?.toString() || ""} 
                     onValueChange={(value) => setParametros(prev => prev ? {...prev, IdFormaPago: parseInt(value)} : null)}
                   >
                     <SelectTrigger id="formaPago">
-                      <SelectValue placeholder="Seleccione forma de pago" />
+                      <SelectValue placeholder={t("company.selectPaymentMethod")} />
                     </SelectTrigger>
                     <SelectContent>
                       {formasPago.map((forma) => (
@@ -364,13 +366,13 @@ const Company = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="medioPago">Medio de Pago</Label>
+                  <Label htmlFor="medioPago">{t("company.paymentMeans")}</Label>
                   <Select 
                     value={parametros?.IdMedioPago?.toString() || ""} 
                     onValueChange={(value) => setParametros(prev => prev ? {...prev, IdMedioPago: parseInt(value)} : null)}
                   >
                     <SelectTrigger id="medioPago">
-                      <SelectValue placeholder="Seleccione medio de pago" />
+                      <SelectValue placeholder={t("company.selectPaymentMeans")} />
                     </SelectTrigger>
                     <SelectContent>
                       {mediosPago.map((medio) => (
@@ -384,13 +386,13 @@ const Company = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="resolucion">Resolución</Label>
+                <Label htmlFor="resolucion">{t("company.resolution")}</Label>
                 <Select 
                   value={parametros?.IdResolucion?.toString() || ""} 
                   onValueChange={(value) => setParametros(prev => prev ? {...prev, IdResolucion: parseInt(value)} : null)}
                 >
                   <SelectTrigger id="resolucion">
-                    <SelectValue placeholder="Seleccione resolución" />
+                    <SelectValue placeholder={t("company.selectResolution")} />
                   </SelectTrigger>
                   <SelectContent>
                     {resoluciones.map((resolucion) => (
@@ -403,34 +405,34 @@ const Company = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nota1">Nota Fiscal 1</Label>
+                <Label htmlFor="nota1">{t("company.taxNote1")}</Label>
                 <Textarea
                   id="nota1"
                   value={parametros?.Nota1 || ""}
                   onChange={(e) => setParametros(prev => prev ? {...prev, Nota1: e.target.value} : null)}
-                  placeholder="Primera nota fiscal..."
+                  placeholder={t("company.firstTaxNotePlaceholder")}
                   rows={2}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nota2">Nota Fiscal 2</Label>
+                <Label htmlFor="nota2">{t("company.taxNote2")}</Label>
                 <Textarea
                   id="nota2"
                   value={parametros?.Nota2 || ""}
                   onChange={(e) => setParametros(prev => prev ? {...prev, Nota2: e.target.value} : null)}
-                  placeholder="Segunda nota fiscal..."
+                  placeholder={t("company.secondTaxNotePlaceholder")}
                   rows={2}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nota3">Nota Fiscal 3</Label>
+                <Label htmlFor="nota3">{t("company.taxNote3")}</Label>
                 <Textarea
                   id="nota3"
                   value={parametros?.Nota3 || ""}
                   onChange={(e) => setParametros(prev => prev ? {...prev, Nota3: e.target.value} : null)}
-                  placeholder="Tercera nota fiscal..."
+                  placeholder={t("company.thirdTaxNotePlaceholder")}
                   rows={2}
                 />
               </div>
@@ -438,17 +440,17 @@ const Company = () => {
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Button variant="outline">Cancelar</Button>
+            <Button variant="outline">{t("common.cancel")}</Button>
             <Button className="gap-2" onClick={handleSaveParametros} disabled={saving}>
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Guardando...
+                  {t("common.saving")}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Guardar Cambios
+                  {t("company.saveChanges")}
                 </>
               )}
             </Button>
@@ -458,8 +460,8 @@ const Company = () => {
         <div className="space-y-6">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Logo de la Empresa</CardTitle>
-              <CardDescription>Aparecerá en tus facturas</CardDescription>
+              <CardTitle>{t("company.logo")}</CardTitle>
+              <CardDescription>{t("company.logoDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center gap-4">
@@ -471,12 +473,10 @@ const Company = () => {
                   )}
                 </div>
                 <Button variant="outline" size="sm">
-                  Subir Logo
+                  {t("company.uploadLogo")}
                 </Button>
-                <p className="text-center text-xs text-muted-foreground">
-                  PNG, JPG hasta 2MB
-                  <br />
-                  Recomendado: 400x400px
+                <p className="text-center text-xs text-muted-foreground whitespace-pre-line">
+                  {t("company.logoSpecs")}
                 </p>
               </div>
             </CardContent>
@@ -484,26 +484,26 @@ const Company = () => {
 
           <Card className="border-l-4 border-l-primary shadow-lg">
             <CardHeader>
-              <CardTitle className="text-base">Certificados Digitales</CardTitle>
+              <CardTitle className="text-base">{t("company.digitalCertificates")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="rounded-lg border bg-muted/50 p-3 opacity-60">
-                <p className="text-sm font-medium">España (Verifactu)</p>
-                <p className="text-xs text-muted-foreground">Próximamente disponible</p>
+                <p className="text-sm font-medium">{t("company.spainVerifactu")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.comingSoon")}</p>
               </div>
               <div className="rounded-lg border bg-card p-3">
-                <p className="text-sm font-medium">Colombia (DIAN)</p>
+                <p className="text-sm font-medium">{t("company.colombiaDian")}</p>
                 <p className="text-xs text-muted-foreground">
-                  Ambiente: {company?.AmbienteDian === 1 ? "Producción" : "Pruebas"}
+                  {t("company.dianEnvironment")}: {company?.AmbienteDian === 1 ? t("company.production") : t("company.test")}
                 </p>
                 <Button variant="link" size="sm" className="h-auto p-0 text-xs">
-                  Configurar →
+                  {t("company.configure")}
                 </Button>
               </div>
               
               <div className="rounded-lg border bg-muted/50 p-3 space-y-1 opacity-60">
-                <p className="text-sm font-medium">Estadísticas</p>
-                <p className="text-xs text-muted-foreground">Próximamente disponible</p>
+                <p className="text-sm font-medium">{t("company.statistics")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.comingSoon")}</p>
               </div>
             </CardContent>
           </Card>
