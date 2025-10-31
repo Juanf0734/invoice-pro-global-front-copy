@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, PlusCircle, Mail, Phone, MapPin, Building2, User, Hash, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 import {
   Pagination,
   PaginationContent,
@@ -47,6 +48,7 @@ interface ClientDetail {
 }
 
 const Clients = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,12 +209,12 @@ const Clients = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
-          <p className="text-muted-foreground">Gestiona tu base de clientes</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("clients.title")}</h1>
+          <p className="text-muted-foreground">{t("clients.subtitle")}</p>
         </div>
         <Button className="gap-2">
           <PlusCircle className="h-4 w-4" />
-          Nuevo Cliente
+          {t("clients.newClient")}
         </Button>
       </div>
 
@@ -221,7 +223,7 @@ const Clients = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar clientes por identificación o email..."
+              placeholder={t("clients.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -248,7 +250,7 @@ const Clients = () => {
             </div>
           ) : filteredClients.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No se encontraron clientes</p>
+              <p className="text-muted-foreground">{t("clients.noClients")}</p>
             </div>
           ) : (
             <>
@@ -276,7 +278,7 @@ const Clients = () => {
                       </div>
 
                       <Button variant="outline" className="mt-4 w-full" onClick={() => handleViewDetails(client.Codigo)}>
-                        Ver Detalles
+                        {t("clients.viewDetails")}
                       </Button>
                     </CardContent>
                   </Card>
@@ -287,7 +289,7 @@ const Clients = () => {
               {totalPages > 1 && (
                 <div className="mt-8 flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Mostrando {startIndex + 1}-{Math.min(endIndex, filteredClients.length)} de {filteredClients.length} clientes
+                    {t("clients.showing")} {startIndex + 1}-{Math.min(endIndex, filteredClients.length)} {t("clients.of")} {filteredClients.length} {t("clients.clients")}
                   </p>
                   
                   <Pagination>
@@ -301,7 +303,7 @@ const Clients = () => {
                           className="gap-1"
                         >
                           <ChevronLeft className="h-4 w-4" />
-                          Anterior
+                          {t("clients.previous")}
                         </Button>
                       </PaginationItem>
 
@@ -329,7 +331,7 @@ const Clients = () => {
                           disabled={currentPage === totalPages}
                           className="gap-1"
                         >
-                          Siguiente
+                          {t("clients.next")}
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       </PaginationItem>
@@ -345,7 +347,7 @@ const Clients = () => {
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Detalles del Cliente</DialogTitle>
+            <DialogTitle>{t("clients.clientDetails")}</DialogTitle>
           </DialogHeader>
           
           {loadingDetail ? (

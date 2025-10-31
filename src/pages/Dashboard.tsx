@@ -5,7 +5,8 @@ import { TrendingUp, TrendingDown, FileText, Users, Package, DollarSign, Lock } 
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/lib/api";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -36,6 +37,7 @@ interface Product {
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
   const [invoicesCount, setInvoicesCount] = useState(0);
   const [clientsCount, setClientsCount] = useState(0);
   const [productsCount, setProductsCount] = useState(0);
@@ -44,6 +46,7 @@ const Dashboard = () => {
   const [invoicesByType, setInvoicesByType] = useState<{name: string, value: number}[]>([]);
   const [monthlyData, setMonthlyData] = useState<{month: string, amount: number, count: number}[]>([]);
   const [loading, setLoading] = useState(true);
+  const locale = i18n.language === 'es' ? es : enUS;
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -117,7 +120,7 @@ const Dashboard = () => {
               getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${format(monthStart, 'yyyy-MM-dd')}&FechaFinal=${format(monthEnd, 'yyyy-MM-dd')}`),
               { headers }
             ).then(res => res.json()).then(data => ({
-              month: format(monthDate, 'MMM', { locale: es }),
+              month: format(monthDate, 'MMM', { locale }),
               data: data.basePresentationList || []
             }))
           );
@@ -179,14 +182,14 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div data-tour="dashboard">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Resumen de tu actividad de facturación</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.title")}</h1>
+        <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground text-lg">Cargando y calculando datos del dashboard...</p>
+          <p className="text-muted-foreground text-lg">{t("dashboard.loading")}</p>
         </div>
       ) : (
         <>
@@ -195,52 +198,52 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-l-4 border-l-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.monthlyRevenue")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{loading ? "..." : formatCurrency(monthlyRevenue)}</div>
             <p className="text-xs text-muted-foreground">
-              Último mes
+              {t("dashboard.lastMonth")}
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-accent">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Facturas Emitidas</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.invoicesIssued")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{loading ? "..." : invoicesCount}</div>
             <p className="text-xs text-muted-foreground">
-              Último mes
+              {t("dashboard.lastMonth")}
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-chart-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clientes Activos</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.activeClients")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{loading ? "..." : clientsCount}</div>
             <p className="text-xs text-muted-foreground">
-              Total de clientes
+              {t("dashboard.totalClients")}
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-chart-4">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Productos</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.products")}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{loading ? "..." : productsCount}</div>
             <p className="text-xs text-muted-foreground">
-              Total de productos
+              {t("dashboard.totalProducts")}
             </p>
           </CardContent>
         </Card>
@@ -250,15 +253,15 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Facturación Mensual</CardTitle>
-            <CardDescription>Valor total y cantidad de facturas de los últimos 3 meses</CardDescription>
+            <CardTitle>{t("dashboard.monthlyBilling")}</CardTitle>
+            <CardDescription>{t("dashboard.monthlyBillingDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {monthlyData.length === 0 || monthlyData.every(d => d.amount === 0 && d.count === 0) ? (
               <div className="flex flex-col items-center justify-center h-[300px] text-center">
                 <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground">No hay datos disponibles</p>
-                <p className="text-sm text-muted-foreground">Emite tu primera factura para ver las estadísticas</p>
+                <p className="text-muted-foreground">{t("dashboard.noData")}</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.noDataDesc")}</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
@@ -288,15 +291,15 @@ const Dashboard = () => {
                       borderRadius: "var(--radius)",
                     }}
                     formatter={(value: number, name: string) => {
-                      if (name === 'amount') return [formatCurrency(value), 'Valor Total'];
-                      if (name === 'count') return [value, 'Cantidad'];
+                      if (name === 'amount') return [formatCurrency(value), t("dashboard.totalValue")];
+                      if (name === 'count') return [value, t("dashboard.quantity")];
                       return [value, name];
                     }}
                   />
                   <Legend 
                     formatter={(value) => {
-                      if (value === 'amount') return 'Valor Total';
-                      if (value === 'count') return 'Cantidad de Facturas';
+                      if (value === 'amount') return t("dashboard.totalValue");
+                      if (value === 'count') return t("dashboard.quantityInvoices");
                       return value;
                     }}
                   />
@@ -324,15 +327,15 @@ const Dashboard = () => {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Facturas por Tipo</CardTitle>
-            <CardDescription>Distribución de documentos del último mes</CardDescription>
+            <CardTitle>{t("dashboard.invoicesByType")}</CardTitle>
+            <CardDescription>{t("dashboard.invoicesByTypeDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {invoicesByType.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[300px] text-center">
                 <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground">No hay datos disponibles</p>
-                <p className="text-sm text-muted-foreground">Emite facturas para ver la distribución por tipo</p>
+                <p className="text-muted-foreground">{t("dashboard.noData")}</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.noDataByType")}</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
@@ -369,15 +372,15 @@ const Dashboard = () => {
       {/* Recent Invoices */}
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Facturas Recientes</CardTitle>
-          <CardDescription>Últimas 5 facturas emitidas</CardDescription>
+          <CardTitle>{t("dashboard.recentInvoices")}</CardTitle>
+          <CardDescription>{t("dashboard.lastFiveInvoices")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {loading ? (
-              <p className="text-center text-muted-foreground">Cargando...</p>
+              <p className="text-center text-muted-foreground">{t("common.loading")}</p>
             ) : recentInvoices.length === 0 ? (
-              <p className="text-center text-muted-foreground">No hay facturas recientes</p>
+              <p className="text-center text-muted-foreground">{t("dashboard.noRecentInvoices")}</p>
             ) : (
               recentInvoices.map((invoice) => (
                 <div

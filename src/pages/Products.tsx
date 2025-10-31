@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search, PlusCircle, Package, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 interface Product {
   Id: number;
@@ -27,6 +28,7 @@ interface Product {
 }
 
 const Products = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,12 +83,12 @@ const Products = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Productos y Servicios</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">Gestiona tu catálogo de productos</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("products.title")}</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">{t("products.subtitle")}</p>
         </div>
         <Button className="gap-2 w-full sm:w-auto">
           <PlusCircle className="h-4 w-4" />
-          <span className="sm:inline">Nuevo Producto</span>
+          <span className="sm:inline">{t("products.newProduct")}</span>
         </Button>
       </div>
 
@@ -95,7 +97,7 @@ const Products = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar productos..."
+              placeholder={t("products.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -118,11 +120,11 @@ const Products = () => {
           ) : filteredProducts.length === 0 ? (
             <div className="p-12 text-center">
               <Package className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">No se encontraron productos</h3>
+              <h3 className="mt-4 text-lg font-semibold">{t("products.noProducts")}</h3>
               <p className="text-muted-foreground">
                 {searchTerm
-                  ? "Intenta con otros términos de búsqueda"
-                  : "Comienza agregando tu primer producto"}
+                  ? t("products.tryOtherTerms")
+                  : t("products.addFirstProduct")}
               </p>
             </div>
           ) : (
@@ -132,12 +134,12 @@ const Products = () => {
                 <table className="w-full">
                   <thead className="border-b bg-muted/50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">Producto</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">Código Ref.</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">Tipo</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold">Costo</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold">Precio Venta</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold">Acciones</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">{t("products.product")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">{t("products.refCode")}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">{t("products.type")}</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold">{t("products.cost")}</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold">{t("products.salePrice")}</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold">{t("common.actions")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -166,7 +168,7 @@ const Products = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Badge variant="outline">
-                            {product.IdTipo === 1 ? "Servicio" : "Producto"}
+                            {product.IdTipo === 1 ? t("products.service") : t("products.product")}
                           </Badge>
                         </td>
                         <td className="px-6 py-4 text-right">
@@ -215,7 +217,7 @@ const Products = () => {
                               )}
                             </div>
                             <Badge variant="outline" className="flex-shrink-0">
-                              {product.IdTipo === 1 ? "Servicio" : "Producto"}
+                              {product.IdTipo === 1 ? t("products.service") : t("products.product")}
                             </Badge>
                           </div>
 
@@ -237,7 +239,7 @@ const Products = () => {
                           <div className="flex items-center gap-2 mt-4 pt-3 border-t">
                             <Button variant="outline" size="sm" className="flex-1 gap-2">
                               <Edit className="h-4 w-4" />
-                              Editar
+                              {t("common.edit")}
                             </Button>
                             <Button
                               variant="outline"
@@ -245,7 +247,7 @@ const Products = () => {
                               className="flex-1 gap-2 text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
-                              Eliminar
+                              {t("common.delete")}
                             </Button>
                           </div>
                         </div>
