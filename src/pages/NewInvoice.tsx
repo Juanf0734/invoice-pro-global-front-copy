@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Check, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api";
 
 type TipoComprobante = {
   Codigo: number;
@@ -144,7 +145,7 @@ const NewInvoice = () => {
         }
 
         const response = await fetch(
-          "/api/Auxiliar/ListaTiposComprobante?IncluirSoloPrincipales=true",
+          getApiUrl("/Auxiliar/ListaTiposComprobante?IncluirSoloPrincipales=true"),
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -188,7 +189,7 @@ const NewInvoice = () => {
         }
 
         const response = await fetch(
-          `/api/Empresa/TraerClientes?IdEmpresa=${companyId}`,
+          getApiUrl(`/Empresa/TraerClientes?IdEmpresa=${companyId}`),
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -228,10 +229,10 @@ const NewInvoice = () => {
         if (!authToken) return;
 
         const endpoints = [
-          { url: '/api/Auxiliar/ListaTiposPersona', setter: setTiposPersona },
-          { url: '/api/Auxiliar/ListaTiposIdentificacion', setter: setTiposIdentificacion },
-          { url: '/api/Auxiliar/ListaPaises', setter: setPaises },
-          { url: '/api/Auxiliar/ListaRegimenesFiscales', setter: setRegimenesFiscales },
+          { url: getApiUrl('/Auxiliar/ListaTiposPersona'), setter: setTiposPersona },
+          { url: getApiUrl('/Auxiliar/ListaTiposIdentificacion'), setter: setTiposIdentificacion },
+          { url: getApiUrl('/Auxiliar/ListaPaises'), setter: setPaises },
+          { url: getApiUrl('/Auxiliar/ListaRegimenesFiscales'), setter: setRegimenesFiscales },
         ];
 
         for (const endpoint of endpoints) {
@@ -261,7 +262,7 @@ const NewInvoice = () => {
         if (!authToken) return;
 
         const response = await fetch(
-          `/api/Auxiliar/ListaDepartamentosPais?IdPais=${clientData.pais}`,
+          getApiUrl(`/Auxiliar/ListaDepartamentosPais?IdPais=${clientData.pais}`),
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }
@@ -288,7 +289,7 @@ const NewInvoice = () => {
         if (!authToken) return;
 
         const response = await fetch(
-          `/api/Auxiliar/ListaMuniciposDepartamento?IdDepartamento=${clientData.departamento}`,
+          getApiUrl(`/Auxiliar/ListaMuniciposDepartamento?IdDepartamento=${clientData.departamento}`),
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }
@@ -316,7 +317,7 @@ const NewInvoice = () => {
         if (!authToken || !companyId) return;
 
         const response = await fetch(
-          `/api/Producto/TraerProductos?IdEmpresa=${companyId}`,
+          getApiUrl(`/Producto/TraerProductos?IdEmpresa=${companyId}`),
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }
@@ -369,7 +370,7 @@ const NewInvoice = () => {
       }
 
       const response = await fetch(
-        `/api/Cliente/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
+        getApiUrl(`/Cliente/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`),
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -525,7 +526,7 @@ const NewInvoice = () => {
       }
 
       // Obtener parámetros de la empresa para la resolución
-      const paramsResponse = await fetch(`/api/Empresa/TraerParametros?IdEmpresa=${companyId}`, {
+      const paramsResponse = await fetch(getApiUrl(`/Empresa/TraerParametros?IdEmpresa=${companyId}`), {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       const paramsData = await paramsResponse.json();
@@ -535,7 +536,7 @@ const NewInvoice = () => {
       let prefijo = "";
       
       if (paramsData.codResponse === 1 && paramsData.basePresentation?.IdResolucion) {
-        const resResponse = await fetch(`/api/Empresa/TraerResoluciones?IdEmpresa=${companyId}`, {
+        const resResponse = await fetch(getApiUrl(`/Empresa/TraerResoluciones?IdEmpresa=${companyId}`), {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         const resData = await resResponse.json();
@@ -633,7 +634,7 @@ const NewInvoice = () => {
       console.log("Enviando documento:", documentoElectronico);
 
       // Enviar al servidor
-      const response = await fetch("/api/Documento/CreateBilling", {
+      const response = await fetch(getApiUrl("/Documento/CreateBilling"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${authToken}`,

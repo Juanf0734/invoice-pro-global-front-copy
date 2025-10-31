@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, PlusCircle, Package, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { getApiUrl } from "@/lib/api";
 
 interface Product {
   Id: number;
@@ -37,7 +38,7 @@ const Products = () => {
       
       try {
         const response = await fetch(
-          `/api/Producto/TraerProductos?IdEmpresa=${companyId}`,
+          getApiUrl(`/Producto/TraerProductos?IdEmpresa=${companyId}`),
           {
             headers: {
               Authorization: `Bearer ${token}`,

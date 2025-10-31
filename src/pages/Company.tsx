@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api";
 
 interface CompanyData {
   Id: number;
@@ -96,12 +97,12 @@ const Company = () => {
 
         // Fetch all data in parallel
         const [responseEmpresa, responseParametros, responseMediosPago, responseMonedas, responseFormasPago, responseResoluciones] = await Promise.all([
-          fetch(`/api/Empresa/TraerEmpresa?IdEmpresa=${companyId}`, { headers }),
-          fetch(`/api/Empresa/TraerParametros?IdEmpresa=${companyId}`, { headers }),
-          fetch(`/api/Auxiliar/ListaMediosPago`, { headers }),
-          fetch(`/api/Auxiliar/ListaMonedas`, { headers }),
-          fetch(`/api/Auxiliar/ListaFormasPago`, { headers }),
-          fetch(`/api/Empresa/TraerResoluciones?IdEmpresa=${companyId}`, { headers })
+          fetch(getApiUrl(`/Empresa/TraerEmpresa?IdEmpresa=${companyId}`), { headers }),
+          fetch(getApiUrl(`/Empresa/TraerParametros?IdEmpresa=${companyId}`), { headers }),
+          fetch(getApiUrl(`/Auxiliar/ListaMediosPago`), { headers }),
+          fetch(getApiUrl(`/Auxiliar/ListaMonedas`), { headers }),
+          fetch(getApiUrl(`/Auxiliar/ListaFormasPago`), { headers }),
+          fetch(getApiUrl(`/Empresa/TraerResoluciones?IdEmpresa=${companyId}`), { headers })
         ]);
 
         if (!responseEmpresa.ok) {
@@ -188,7 +189,7 @@ const Company = () => {
         throw new Error("No se encontró autenticación");
       }
 
-      const response = await fetch(`/api/Empresa/ActualizarParametros`, {
+      const response = await fetch(getApiUrl(`/Empresa/ActualizarParametros`), {
         method: 'PUT',
         headers: {
           "Authorization": `Bearer ${authToken}`,

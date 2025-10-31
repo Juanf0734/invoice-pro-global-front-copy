@@ -7,6 +7,7 @@ import { Search, Filter, Download, Eye, MoreVertical, PlusCircle, Calendar as Ca
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format, subMonths } from "date-fns";
+import { getApiUrl } from "@/lib/api";
 import { es, enUS } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import {
@@ -91,7 +92,7 @@ const Invoices = () => {
         const fechaFinal = format(dateRange.to, "yyyy-MM-dd");
 
         const response = await fetch(
-          `/api/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`,
+          getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`),
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -153,7 +154,7 @@ const Invoices = () => {
         }
 
         const response = await fetch(
-          `/api/Documento/TraerDatosDocumento?IdDocumento=${selectedInvoice.id}&IdEmpresa=${companyId}`,
+          getApiUrl(`/Documento/TraerDatosDocumento?IdDocumento=${selectedInvoice.id}&IdEmpresa=${companyId}`),
           {
             headers: {
               Authorization: `Bearer ${authToken}`,

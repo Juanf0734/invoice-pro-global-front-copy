@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, PlusCircle, Mail, Phone, MapPin, Building2, User, Hash, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { getApiUrl } from "@/lib/api";
 import {
   Pagination,
   PaginationContent,
@@ -68,7 +69,7 @@ const Clients = () => {
         const companyId = payload.IdEmpresa;
 
         const response = await fetch(
-          `/api/Empresa/TraerClientes?IdEmpresa=${companyId}`,
+          getApiUrl(`/Empresa/TraerClientes?IdEmpresa=${companyId}`),
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -115,7 +116,7 @@ const Clients = () => {
       const companyId = payload.IdEmpresa;
 
       const response = await fetch(
-        `/api/Cliente/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`,
+        getApiUrl(`/Cliente/TraerCliente?IdCliente=${clientId}&IdEmpresa=${companyId}`),
         {
           headers: {
             Authorization: `Bearer ${token}`,
