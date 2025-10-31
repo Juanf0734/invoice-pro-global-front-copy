@@ -84,11 +84,11 @@ export function SubscriptionPlans() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        toast({
-          title: "Error",
-          description: "Debes iniciar sesión para suscribirte",
-          variant: "destructive",
-        });
+      toast({
+        title: t("common.error"),
+        description: t("subscription.loginRequired"),
+        variant: "destructive",
+      });
         return;
       }
 
@@ -109,8 +109,8 @@ export function SubscriptionPlans() {
     } catch (error) {
       console.error("Error creating checkout:", error);
       toast({
-        title: "Error",
-        description: "No se pudo iniciar el proceso de suscripción",
+        title: t("common.error"),
+        description: t("subscription.subscriptionError"),
         variant: "destructive",
       });
     } finally {
@@ -123,11 +123,11 @@ export function SubscriptionPlans() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        toast({
-          title: "Error",
-          description: "Debes iniciar sesión",
-          variant: "destructive",
-        });
+      toast({
+        title: t("common.error"),
+        description: t("subscription.loginRequiredShort"),
+        variant: "destructive",
+      });
         return;
       }
 
@@ -145,8 +145,8 @@ export function SubscriptionPlans() {
     } catch (error) {
       console.error("Error opening customer portal:", error);
       toast({
-        title: "Error",
-        description: "No se pudo abrir el portal de suscripciones",
+        title: t("common.error"),
+        description: t("subscription.portalError"),
         variant: "destructive",
       });
     }
@@ -156,10 +156,10 @@ export function SubscriptionPlans() {
     <div className="space-y-6">
       <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as "monthly" | "yearly")} className="w-full">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-          <TabsTrigger value="monthly">Mensual</TabsTrigger>
+          <TabsTrigger value="monthly">{t("subscription.monthly")}</TabsTrigger>
           <TabsTrigger value="yearly">
-            Anual
-            <Badge variant="secondary" className="ml-2">-15%</Badge>
+            {t("subscription.yearly")}
+            <Badge variant="secondary" className="ml-2">{t("subscription.yearlyDiscount")}</Badge>
           </TabsTrigger>
         </TabsList>
         
@@ -184,19 +184,19 @@ export function SubscriptionPlans() {
                 >
                   {plan.popular && (
                     <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      Más Popular
+                      {t("subscription.mostPopular")}
                     </Badge>
                   )}
                   {isCurrentPlan && (
                     <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500">
-                      Tu Plan Actual
+                      {t("subscription.yourCurrentPlan")}
                     </Badge>
                   )}
                   <CardHeader>
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
                     <CardDescription>
                       <span className="text-4xl font-bold text-foreground">${displayPrice}</span>
-                      <span className="text-muted-foreground">/{billingCycle === "monthly" ? "mes" : "año"}</span>
+                      <span className="text-muted-foreground">/{billingCycle === "monthly" ? t("subscription.month") : t("subscription.year")}</span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -216,7 +216,7 @@ export function SubscriptionPlans() {
                         variant="outline"
                         onClick={handleManageSubscription}
                       >
-                        Gestionar Suscripción
+                        {t("subscription.manageSubscription")}
                       </Button>
                     ) : (
                       <Button
@@ -227,10 +227,10 @@ export function SubscriptionPlans() {
                         {loadingPlan === currentPriceId ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Procesando...
+                            {t("subscription.processing")}
                           </>
                         ) : (
-                          "Suscribirse"
+                          t("subscription.subscribe")
                         )}
                       </Button>
                     )}

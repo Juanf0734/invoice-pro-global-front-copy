@@ -310,5 +310,24 @@
     "step8Title": "Settings",
     "step8Desc": "Customize your profile, preferences and security settings from here.",
     "gotIt": "Got it!"
+  },
+  "subscription": {
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "yearlyDiscount": "-15%",
+    "month": "month",
+    "year": "year",
+    "mostPopular": "Most Popular",
+    "yourCurrentPlan": "Your Current Plan",
+    "subscribe": "Subscribe",
+    "manageSubscription": "Manage Subscription",
+    "processing": "Processing...",
+    "loginRequired": "You must be logged in to subscribe",
+    "loginRequiredShort": "You must be logged in",
+    "subscriptionError": "Could not start the subscription process",
+    "portalError": "Could not open the subscriptions portal",
+    "basic": "Basic",
+    "pro": "PRO",
+    "enterprise": "Enterprise"
   }
 }

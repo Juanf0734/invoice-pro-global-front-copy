@@ -310,5 +310,24 @@
     "step8Title": "Configuración",
     "step8Desc": "Personaliza tu perfil, preferencias y configuración de seguridad desde aquí.",
     "gotIt": "¡Entendido!"
+  },
+  "subscription": {
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "yearlyDiscount": "-15%",
+    "month": "mes",
+    "year": "año",
+    "mostPopular": "Más Popular",
+    "yourCurrentPlan": "Tu Plan Actual",
+    "subscribe": "Suscribirse",
+    "manageSubscription": "Gestionar Suscripción",
+    "processing": "Procesando...",
+    "loginRequired": "Debes iniciar sesión para suscribirte",
+    "loginRequiredShort": "Debes iniciar sesión",
+    "subscriptionError": "No se pudo iniciar el proceso de suscripción",
+    "portalError": "No se pudo abrir el portal de suscripciones",
+    "basic": "Básico",
+    "pro": "PRO",
+    "enterprise": "Empresarial"
   }
 }
