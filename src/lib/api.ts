@@ -1,5 +1,6 @@
 // API configuration utility
-const API_BASE_URL = 'https://ebillpymetest.facturaenlinea.co/api';
+const isDevelopment = import.meta.env.DEV;
+const API_BASE_URL = isDevelopment ? '/api' : 'https://ebillpymetest.facturaenlinea.co/api';
 
 export const getApiUrl = (endpoint: string) => {
   // Asegurar que el endpoint empiece con /
