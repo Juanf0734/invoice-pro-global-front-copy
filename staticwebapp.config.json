@@ -1,7 +1,13 @@
 {
+  "routes": [
+    {
+      "route": "/api/*",
+      "rewrite": "https://ebillpymetest.facturaenlinea.co/api/{*}"
+    }
+  ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.woff2"]
+    "exclude": ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.woff2", "/api/*"]
   },
   "mimeTypes": {
     ".json": "text/json"
