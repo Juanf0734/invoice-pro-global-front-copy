@@ -81,22 +81,21 @@ export function SubscriptionPlans() {
   const handleSubscribe = async (priceId: string, planName: string) => {
     try {
       setLoadingPlan(priceId);
-      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session) {
-      toast({
-        title: t("common.error"),
-        description: t("subscription.loginRequired"),
-        variant: "destructive",
-      });
+      // Get email from localStorage (from external auth)
+      const userEmail = localStorage.getItem("userName"); // This contains the email/username
+      
+      if (!userEmail) {
+        toast({
+          title: t("common.error"),
+          description: "Por favor inicia sesión primero",
+          variant: "destructive",
+        });
         return;
       }
 
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        body: { priceId, email: userEmail },
       });
 
       if (error) throw error;
@@ -120,21 +119,19 @@ export function SubscriptionPlans() {
 
   const handleManageSubscription = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const userEmail = localStorage.getItem("userName");
       
-      if (!session) {
-      toast({
-        title: t("common.error"),
-        description: t("subscription.loginRequiredShort"),
-        variant: "destructive",
-      });
+      if (!userEmail) {
+        toast({
+          title: t("common.error"),
+          description: "Por favor inicia sesión primero",
+          variant: "destructive",
+        });
         return;
       }
 
       const { data, error } = await supabase.functions.invoke("customer-portal", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        body: { email: userEmail },
       });
 
       if (error) throw error;

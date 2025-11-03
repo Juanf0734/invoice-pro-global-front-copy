@@ -33,8 +33,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const checkSubscription = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      // Get email from localStorage (from external auth)
+      const userEmail = localStorage.getItem("userName");
+      
+      if (!userEmail) {
         setSubscribed(false);
         setProductId(null);
         setSubscriptionEnd(null);
@@ -43,9 +45,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       }
 
       const { data, error } = await supabase.functions.invoke("check-subscription", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        body: { email: userEmail },
       });
 
       if (error) throw error;
@@ -66,21 +66,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     checkSubscription();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        checkSubscription();
-      } else if (event === "SIGNED_OUT") {
-        setSubscribed(false);
-        setProductId(null);
-        setSubscriptionEnd(null);
-      }
-    });
-
     // Check subscription every minute
     const interval = setInterval(checkSubscription, 60000);
 
     return () => {
-      subscription.unsubscribe();
       clearInterval(interval);
     };
   }, []);
