@@ -21,7 +21,7 @@ const plans = [
     monthlyPrice: "85.000",
     yearlyPrice: "867.000",
     productIdMonthly: "pro_01k95wh7qf123456789abc",  // Reemplazar con tu Product ID de Paddle
-    priceIdMonthly: "pri_01k95wh7qf123456789abc",     // Reemplazar con tu Price ID de Paddle
+    priceIdMonthly: "pri_01k95wmjvd369cs66ka1p96bpt",
     productIdYearly: "pro_01k95wh8qf123456789def",   // Reemplazar con tu Product ID de Paddle
     priceIdYearly: "pri_01k95wh8qf123456789def",      // Reemplazar con tu Price ID de Paddle
     features: [
