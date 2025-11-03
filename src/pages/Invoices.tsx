@@ -209,13 +209,52 @@ const Invoices = () => {
   const hasActiveFilters = searchTerm || invoiceNumber || dateRange?.from || dateRange?.to;
   const locale = i18n.language === 'es' ? es : enUS;
 
-  const handleViewPDF = () => {
-    if (pdfUrl) {
-      window.open(pdfUrl, '_blank');
-    } else {
+  const handleViewPDF = async () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      const authToken = localStorage.getItem("authToken");
+      const companyId = localStorage.getItem("companyId");
+
+      if (!authToken || !companyId) {
+        toast({
+          title: "Error",
+          description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Obtener un enlace fresco del PDF
+      const response = await fetch(
+        getApiUrl(`/Documento/TraerDatosDocumento?IdDocumento=${selectedInvoice.id}&IdEmpresa=${companyId}`),
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al cargar el PDF");
+      }
+
+      const data = await response.json();
+      
+      if (data.codResponse === 1 && data.basePresentation?.RutaPDF) {
+        window.open(data.basePresentation.RutaPDF, '_blank');
+      } else {
+        toast({
+          title: "PDF no disponible",
+          description: "No hay PDF disponible para esta factura",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error viewing PDF:", error);
       toast({
-        title: "PDF no disponible",
-        description: "No hay PDF disponible para esta factura",
+        title: "Error",
+        description: "No se pudo cargar el PDF",
         variant: "destructive",
       });
     }
@@ -497,14 +536,40 @@ const Invoices = () => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            if (invoice.pdfUrl) {
-                              window.open(invoice.pdfUrl, '_blank');
-                            } else {
+                            try {
+                              const authToken = localStorage.getItem("authToken");
+                              const companyId = localStorage.getItem("companyId");
+                              
+                              if (!authToken || !companyId) return;
+
+                              const response = await fetch(
+                                getApiUrl(`/Documento/TraerDatosDocumento?IdDocumento=${invoice.id}&IdEmpresa=${companyId}`),
+                                {
+                                  headers: {
+                                    Authorization: `Bearer ${authToken}`,
+                                  },
+                                }
+                              );
+
+                              if (response.ok) {
+                                const data = await response.json();
+                                if (data.codResponse === 1 && data.basePresentation?.RutaPDF) {
+                                  window.open(data.basePresentation.RutaPDF, '_blank');
+                                  return;
+                                }
+                              }
+                              
                               toast({
                                 title: "PDF no disponible",
                                 description: "No hay PDF disponible para esta factura",
+                                variant: "destructive",
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "No se pudo cargar el PDF",
                                 variant: "destructive",
                               });
                             }
@@ -587,14 +652,40 @@ const Invoices = () => {
                         variant="ghost" 
                         size="icon"
                         className="h-8 w-8"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          if (invoice.pdfUrl) {
-                            window.open(invoice.pdfUrl, '_blank');
-                          } else {
+                          try {
+                            const authToken = localStorage.getItem("authToken");
+                            const companyId = localStorage.getItem("companyId");
+                            
+                            if (!authToken || !companyId) return;
+
+                            const response = await fetch(
+                              getApiUrl(`/Documento/TraerDatosDocumento?IdDocumento=${invoice.id}&IdEmpresa=${companyId}`),
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${authToken}`,
+                                },
+                              }
+                            );
+
+                            if (response.ok) {
+                              const data = await response.json();
+                              if (data.codResponse === 1 && data.basePresentation?.RutaPDF) {
+                                window.open(data.basePresentation.RutaPDF, '_blank');
+                                return;
+                              }
+                            }
+                            
                             toast({
                               title: "PDF no disponible",
                               description: "No hay PDF disponible para esta factura",
+                              variant: "destructive",
+                            });
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "No se pudo cargar el PDF",
                               variant: "destructive",
                             });
                           }
