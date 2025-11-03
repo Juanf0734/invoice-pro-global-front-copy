@@ -328,7 +328,6 @@ const Clients = () => {
         Nombre: formData.Nombre,
         Nit: formData.Nit,
         DigitoVerificacion: formData.DigitoVerificacion || "0",
-        IDInterno: formData.Nit,
         TipoPersona: formData.TipoPersona,
         TipoIdentificacion: formData.TipoIdentificacion,
         IdRegimenFiscal: formData.IdRegimenFiscal,
