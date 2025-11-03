@@ -43,6 +43,7 @@ const statusConfig = {
 
 type Invoice = {
   id: string;
+  number: string;
   client: string;
   date: string;
   amount: string;
@@ -109,6 +110,7 @@ const Invoices = () => {
         if (data.codResponse === 1 && data.basePresentationList) {
           const mappedInvoices: Invoice[] = data.basePresentationList.map((item: any) => ({
             id: item.Id_CFD?.toString() || "N/A",
+            number: item.Numero?.toString() || "N/A",
             client: item.NombreCliente || "Cliente desconocido",
             date: item.FechaExpedicion ? format(new Date(item.FechaExpedicion), "dd/MM/yyyy") : "",
             amount: item.ValorTotal ? `$${item.ValorTotal.toLocaleString('es-CO', { minimumFractionDigits: 2 })}` : "$0.00",
@@ -219,11 +221,47 @@ const Invoices = () => {
     }
   };
 
-  const handleSendEmail = () => {
-    toast({
-      title: "Enviando correo",
-      description: `Notificación enviada a ${selectedInvoice?.client}`,
-    });
+  const handleSendEmail = async () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      const authToken = localStorage.getItem("authToken");
+      
+      if (!authToken) {
+        toast({
+          title: "Error",
+          description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch(
+        getApiUrl(`/Documento/NotificarDocumentoCliente?IdDocumento=${selectedInvoice.id}`),
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al enviar la notificación");
+      }
+
+      toast({
+        title: "Correo enviado",
+        description: `Notificación enviada exitosamente a ${selectedInvoice.client}`,
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo enviar la notificación al cliente",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSendToDIAN = () => {
@@ -363,6 +401,7 @@ const Invoices = () => {
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold">ID</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Prefijo</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Número</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Tipo</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Cliente</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
@@ -383,6 +422,9 @@ const Invoices = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm">{invoice.prefix}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium">{invoice.number}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm">{invoice.documentType}</span>
@@ -463,11 +505,11 @@ const Invoices = () => {
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1 flex-1 min-w-0">
-                      <p className="font-mono text-sm font-medium">{invoice.id}</p>
-                      <p className="text-xs text-muted-foreground">{invoice.prefix} - {invoice.documentType}</p>
-                      <p className="font-semibold truncate">{invoice.client}</p>
-                    </div>
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <p className="font-mono text-sm font-medium">{invoice.id}</p>
+                    <p className="text-xs text-muted-foreground">{invoice.prefix} - #{invoice.number} - {invoice.documentType}</p>
+                    <p className="font-semibold truncate">{invoice.client}</p>
+                  </div>
                     <Badge 
                       variant="outline" 
                       className="font-normal text-xs"
