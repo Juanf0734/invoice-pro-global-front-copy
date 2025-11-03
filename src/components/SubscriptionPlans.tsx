@@ -4,6 +4,9 @@ import { Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -76,31 +79,52 @@ export function SubscriptionPlans() {
   const { productId, checkSubscription } = useSubscription();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [selectedPriceId, setSelectedPriceId] = useState("");
+  const [selectedPlanName, setSelectedPlanName] = useState("");
 
-  const handleSubscribeClick = async (priceId: string, planName: string) => {
+  const handleSubscribeClick = (priceId: string, planName: string) => {
+    setSelectedPriceId(priceId);
+    setSelectedPlanName(planName);
+    
+    // Check if email is stored
+    const storedEmail = localStorage.getItem("userEmail");
+    if (storedEmail && storedEmail.includes("@")) {
+      setUserEmail(storedEmail);
+      handleSubscribe(priceId, planName, storedEmail);
+    } else {
+      setShowEmailDialog(true);
+    }
+  };
+
+  const handleEmailSubmit = () => {
+    if (!userEmail || !userEmail.includes("@")) {
+      toast({
+        title: t("common.error"),
+        description: "Por favor ingresa un email válido",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    localStorage.setItem("userEmail", userEmail);
+    setShowEmailDialog(false);
+    handleSubscribe(selectedPriceId, selectedPlanName, userEmail);
+  };
+
+  const handleSubscribe = async (priceId: string, planName: string, email: string) => {
     try {
       setLoadingPlan(priceId);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast({
-          title: t("common.error"),
-          description: "Debes iniciar sesión para suscribirte",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
+        body: { priceId, email },
       });
 
       if (error) throw error;
 
       if (data?.url) {
         window.open(data.url, "_blank");
-        // Check subscription after a delay
         setTimeout(() => checkSubscription(), 5000);
       }
     } catch (error) {
@@ -118,18 +142,21 @@ export function SubscriptionPlans() {
 
   const handleManageSubscription = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const storedEmail = localStorage.getItem("userEmail");
       
-      if (!session) {
+      if (!storedEmail || !storedEmail.includes("@")) {
         toast({
           title: t("common.error"),
-          description: "Debes iniciar sesión para gestionar tu suscripción",
+          description: "Por favor ingresa tu email primero",
           variant: "destructive",
         });
+        setShowEmailDialog(true);
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("customer-portal");
+      const { data, error } = await supabase.functions.invoke("customer-portal", {
+        body: { email: storedEmail },
+      });
 
       if (error) throw error;
 
@@ -235,6 +262,42 @@ export function SubscriptionPlans() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ingresa tu email</DialogTitle>
+            <DialogDescription>
+              Necesitamos tu email para gestionar tu suscripción
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@email.com"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleEmailSubmit();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleEmailSubmit}>
+              Continuar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
