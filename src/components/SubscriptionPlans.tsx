@@ -13,15 +13,17 @@ import { useSubscription, SUBSCRIPTION_PLANS } from "@/contexts/SubscriptionCont
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { usePreferences } from "@/contexts/PreferencesContext";
 
+// NOTA: Debes crear estos productos y precios en tu cuenta de Paddle
+// y reemplazar estos IDs de ejemplo con los IDs reales de Paddle
 const plans = [
   {
     name: "Básico",
     monthlyPrice: "85.000",
     yearlyPrice: "867.000",
-    productIdMonthly: "prod_TKd60UFqKmDlzQ",
-    priceIdMonthly: "price_1SNxppRRbSHLnGlJXYxPhBdR",
-    productIdYearly: "prod_TKd6iG3LlGuirH",
-    priceIdYearly: "price_1SNxq9RRbSHLnGlJENWm1LMA",
+    productIdMonthly: "pro_01k95wh7qf123456789abc",  // Reemplazar con tu Product ID de Paddle
+    priceIdMonthly: "pri_01k95wh7qf123456789abc",     // Reemplazar con tu Price ID de Paddle
+    productIdYearly: "pro_01k95wh8qf123456789def",   // Reemplazar con tu Product ID de Paddle
+    priceIdYearly: "pri_01k95wh8qf123456789def",      // Reemplazar con tu Price ID de Paddle
     features: [
       "2 usuarios",
       "5 facturas/mes",
@@ -36,10 +38,10 @@ const plans = [
     name: "PRO",
     monthlyPrice: "170.500",
     yearlyPrice: "1.739.100",
-    productIdMonthly: "prod_TKd6CIJiPcB3O6",
-    priceIdMonthly: "price_1SNxqJRRbSHLnGlJU40P5LJN",
-    productIdYearly: "prod_TKd6x4yGqPjBAl",
-    priceIdYearly: "price_1SNxqSRRbSHLnGlJJnuJoyWm",
+    productIdMonthly: "pro_01k95wh9qf123456789ghi",  // Reemplazar con tu Product ID de Paddle
+    priceIdMonthly: "pri_01k95wh9qf123456789ghi",     // Reemplazar con tu Price ID de Paddle
+    productIdYearly: "pro_01k95whaqf123456789jkl",   // Reemplazar con tu Product ID de Paddle
+    priceIdYearly: "pri_01k95whaqf123456789jkl",      // Reemplazar con tu Price ID de Paddle
     popular: true,
     features: [
       "5 usuarios",
@@ -56,10 +58,10 @@ const plans = [
     name: "Empresarial",
     monthlyPrice: "507.700",
     yearlyPrice: "5.178.360",
-    productIdMonthly: "prod_TKd69LD8vtK22s",
-    priceIdMonthly: "price_1SNxqlRRbSHLnGlJJNIotcyq",
-    productIdYearly: "prod_TKd7pyQFlwjlXA",
-    priceIdYearly: "price_1SNxr2RRbSHLnGlJQckPCYkh",
+    productIdMonthly: "pro_01k95whbqf123456789mno",  // Reemplazar con tu Product ID de Paddle
+    priceIdMonthly: "pri_01k95whbqf123456789mno",     // Reemplazar con tu Price ID de Paddle
+    productIdYearly: "pro_01k95whcqf123456789pqr",   // Reemplazar con tu Product ID de Paddle
+    priceIdYearly: "pri_01k95whcqf123456789pqr",      // Reemplazar con tu Price ID de Paddle
     features: [
       "10 usuarios",
       "800 facturas/mes",
@@ -271,7 +273,7 @@ export function SubscriptionPlans() {
           <DialogHeader>
             <DialogTitle>Ingresa tu email</DialogTitle>
             <DialogDescription>
-              Necesitamos tu email para procesar la suscripción con Stripe
+              Necesitamos tu email para procesar la suscripción
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

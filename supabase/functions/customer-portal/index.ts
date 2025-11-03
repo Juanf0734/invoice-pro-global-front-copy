@@ -1,6 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,35 +18,41 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    const paddleApiKey = Deno.env.get("PADDLE_API_KEY");
+    if (!paddleApiKey) throw new Error("PADDLE_API_KEY is not set");
+    logStep("Paddle key verified");
 
-    const body = await req.json();
-    const email = body.email;
-    
-    if (!email) {
-      throw new Error("Email is required");
-    }
-    
-    logStep("Managing subscription for email", { email });
+    const { email } = await req.json();
+    if (!email) throw new Error("Email is required");
+    logStep("Email provided", { email });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" as any });
-    const customers = await stripe.customers.list({ email, limit: 1 });
-    if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
-    }
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
-
-    const origin = req.headers.get("origin") || "http://localhost:3000";
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${origin}/settings?tab=subscription`,
+    // Get customer from Paddle
+    const customerResponse = await fetch(`https://api.paddle.com/customers?email=${encodeURIComponent(email)}`, {
+      headers: {
+        "Authorization": `Bearer ${paddleApiKey}`,
+      },
     });
-    logStep("Customer portal session created", { sessionId: portalSession.id, url: portalSession.url });
 
-    return new Response(JSON.stringify({ url: portalSession.url }), {
+    if (!customerResponse.ok) {
+      throw new Error("No Paddle customer found for this user");
+    }
+
+    const customerData = await customerResponse.json();
+    
+    if (!customerData.data || customerData.data.length === 0) {
+      throw new Error("No Paddle customer found for this user");
+    }
+
+    const customerId = customerData.data[0].id;
+    logStep("Found Paddle customer", { customerId });
+
+    // Paddle doesn't have a built-in portal session API like Stripe
+    // Instead, we redirect to Paddle's subscription management page
+    // Users can manage their subscriptions directly at Paddle
+    const portalUrl = `https://checkout.paddle.com/subscription/manage/${customerId}`;
+    logStep("Paddle portal URL created", { url: portalUrl });
+
+    return new Response(JSON.stringify({ url: portalUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

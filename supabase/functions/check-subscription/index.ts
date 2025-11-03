@@ -1,6 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,62 +15,79 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
-
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    const paddleApiKey = Deno.env.get("PADDLE_API_KEY");
+    if (!paddleApiKey) throw new Error("PADDLE_API_KEY is not set");
+    logStep("Paddle key verified");
 
-    // Get email from localStorage (sent by frontend)
-    const body = await req.json();
-    const email = body.email;
+    const { email } = await req.json();
     
     if (!email) {
-      logStep("No email provided, returning unsubscribed state");
-      return new Response(JSON.stringify({ subscribed: false }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-    
-    logStep("Checking subscription for email", { email });
-
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" as any });
-    const customers = await stripe.customers.list({ email, limit: 1 });
-    
-    if (customers.data.length === 0) {
-      logStep("No customer found, returning unsubscribed state");
+      logStep("No email provided");
       return new Response(JSON.stringify({ subscribed: false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
+    logStep("Email provided", { email });
 
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
+    // Get customer from Paddle
+    const customerResponse = await fetch(`https://api.paddle.com/customers?email=${encodeURIComponent(email)}`, {
+      headers: {
+        "Authorization": `Bearer ${paddleApiKey}`,
+      },
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+
+    if (!customerResponse.ok) {
+      logStep("No customer found in Paddle");
+      return new Response(JSON.stringify({ subscribed: false }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    const customerData = await customerResponse.json();
+    
+    if (!customerData.data || customerData.data.length === 0) {
+      logStep("No customer found");
+      return new Response(JSON.stringify({ subscribed: false }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    const customerId = customerData.data[0].id;
+    logStep("Found Paddle customer", { customerId });
+
+    // Get active subscriptions for the customer
+    const subscriptionsResponse = await fetch(`https://api.paddle.com/subscriptions?customer_id=${customerId}&status=active`, {
+      headers: {
+        "Authorization": `Bearer ${paddleApiKey}`,
+      },
+    });
+
+    if (!subscriptionsResponse.ok) {
+      logStep("Error fetching subscriptions");
+      return new Response(JSON.stringify({ subscribed: false }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    const subscriptionsData = await subscriptionsResponse.json();
+    const hasActiveSub = subscriptionsData.data && subscriptionsData.data.length > 0;
     let productId = null;
     let subscriptionEnd = null;
 
     if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      const subscription = subscriptionsData.data[0];
+      subscriptionEnd = subscription.current_billing_period?.ends_at || null;
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-      productId = subscription.items.data[0].price.product as string;
-      logStep("Determined subscription product", { productId });
+      productId = subscription.items[0]?.price?.product_id || null;
+      logStep("Determined subscription tier", { productId });
     } else {
       logStep("No active subscription found");
     }

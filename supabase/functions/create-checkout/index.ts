@@ -1,6 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,41 +10,47 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-  );
-
   try {
     const { priceId, email } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
     if (!email) throw new Error("Email is required");
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
-      apiVersion: "2025-08-27.basil" as any 
+    const paddleApiKey = Deno.env.get("PADDLE_API_KEY");
+    if (!paddleApiKey) throw new Error("PADDLE_API_KEY is not set");
+
+    // Create a transaction with Paddle
+    const response = await fetch("https://api.paddle.com/transactions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${paddleApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items: [
+          {
+            price_id: priceId,
+            quantity: 1,
+          },
+        ],
+        customer_email: email,
+        custom_data: {
+          user_email: email,
+        },
+        checkout: {
+          success_url: `${req.headers.get("origin")}/settings?tab=subscription&success=true`,
+          cancel_url: `${req.headers.get("origin")}/settings?tab=subscription&canceled=true`,
+        },
+      }),
     });
-    
-    const customers = await stripe.customers.list({ email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Paddle API error: ${JSON.stringify(errorData)}`);
     }
 
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : email,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: `${req.headers.get("origin")}/settings?tab=subscription&success=true`,
-      cancel_url: `${req.headers.get("origin")}/settings?tab=subscription&canceled=true`,
-    });
-
-    return new Response(JSON.stringify({ url: session.url }), {
+    const data = await response.json();
+    
+    return new Response(JSON.stringify({ url: data.data.checkout.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
