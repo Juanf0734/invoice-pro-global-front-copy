@@ -322,12 +322,33 @@ const Clients = () => {
       }
 
       const payload = JSON.parse(atob(token.split(".")[1]));
-      const companyId = payload.IdEmpresa;
+      const companyId = parseInt(payload.IdEmpresa);
 
       const clientData = {
-        ...formData,
-        IdEmpresaRegistro: companyId,
+        Nombre: formData.Nombre,
+        Nit: formData.Nit,
+        DigitoVerificacion: formData.DigitoVerificacion || "",
+        IDInterno: formData.Nit, // Usar el NIT como ID Interno si no se proporciona otro
+        TipoPersona: formData.TipoPersona,
+        TipoIdentificacion: formData.TipoIdentificacion,
+        IdRegimenFiscal: formData.IdRegimenFiscal,
+        Telefono: formData.Telefono || "",
+        Correo: formData.Correo || "",
+        Ubicacion: formData.Direccion || "", // El API usa "Ubicacion" no "Direccion"
+        CodigoPostal: formData.CodigoPostal || "",
+        PaisIso: formData.PaisIso || "CO",
+        IdPais: formData.IdPais || 46,
+        DepartamentoDane: formData.DepartamentoDane || "",
+        IdDepartamento: formData.IdDepartamento || 0,
+        MunicipioDane: formData.MunicipioDane || "",
+        IdMunicipio: formData.IdMunicipio || 0,
+        IdUbicacionFiscal: 0,
+        PrimerNombre: formData.PrimerNombre || "",
+        SegundoNombre: formData.SegundoNombre || "",
+        PrimerApellido: formData.PrimerApellido || "",
+        SegundoApellido: formData.SegundoApellido || "",
         ...(isEditMode && selectedClient && { Id: selectedClient.Id }),
+        IdEmpresaRegistro: companyId, // Debe ser número, no string
       };
 
       const endpoint = isEditMode ? "/Cliente/ModificarCliente" : "/Cliente/CrearCliente";
