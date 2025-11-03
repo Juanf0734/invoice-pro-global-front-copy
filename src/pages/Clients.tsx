@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, PlusCircle, Mail, Phone, MapPin, Building2, User, Hash, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, PlusCircle, Mail, Phone, MapPin, Building2, User, Hash, Globe, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
 import { useTranslation } from "react-i18next";
@@ -45,6 +48,33 @@ interface ClientDetail {
   IdMunicipio: number;
   IDInterno: string;
   IdUbicacionFiscal: number;
+  PrimerNombre?: string;
+  SegundoNombre?: string;
+  PrimerApellido?: string;
+  SegundoApellido?: string;
+}
+
+interface ClientFormData {
+  Nombre: string;
+  Nit: string;
+  DigitoVerificacion: string;
+  TipoPersona: number;
+  TipoIdentificacion: number;
+  IdRegimenFiscal: number;
+  Telefono: string;
+  Correo: string;
+  Direccion: string;
+  CodigoPostal: string;
+  PaisIso: string;
+  IdPais: number;
+  DepartamentoDane: string;
+  IdDepartamento: number;
+  MunicipioDane: string;
+  IdMunicipio: number;
+  PrimerNombre?: string;
+  SegundoNombre?: string;
+  PrimerApellido?: string;
+  SegundoApellido?: string;
 }
 
 const Clients = () => {
@@ -55,8 +85,35 @@ const Clients = () => {
   const [selectedClient, setSelectedClient] = useState<ClientDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showFormDialog, setShowFormDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9; // 3 columns x 3 rows
+  
+  const [formData, setFormData] = useState<ClientFormData>({
+    Nombre: "",
+    Nit: "",
+    DigitoVerificacion: "",
+    TipoPersona: 1,
+    TipoIdentificacion: 31,
+    IdRegimenFiscal: 1,
+    Telefono: "",
+    Correo: "",
+    Direccion: "",
+    CodigoPostal: "",
+    PaisIso: "CO",
+    IdPais: 46,
+    DepartamentoDane: "",
+    IdDepartamento: 0,
+    MunicipioDane: "",
+    IdMunicipio: 0,
+    PrimerNombre: "",
+    SegundoNombre: "",
+    PrimerApellido: "",
+    SegundoApellido: "",
+  });
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -141,6 +198,180 @@ const Clients = () => {
     }
   };
 
+  const handleNewClient = () => {
+    setIsEditMode(false);
+    setFormData({
+      Nombre: "",
+      Nit: "",
+      DigitoVerificacion: "",
+      TipoPersona: 1,
+      TipoIdentificacion: 31,
+      IdRegimenFiscal: 1,
+      Telefono: "",
+      Correo: "",
+      Direccion: "",
+      CodigoPostal: "",
+      PaisIso: "CO",
+      IdPais: 46,
+      DepartamentoDane: "",
+      IdDepartamento: 0,
+      MunicipioDane: "",
+      IdMunicipio: 0,
+      PrimerNombre: "",
+      SegundoNombre: "",
+      PrimerApellido: "",
+      SegundoApellido: "",
+    });
+    setShowFormDialog(true);
+  };
+
+  const handleEditClient = () => {
+    if (!selectedClient) return;
+    
+    setIsEditMode(true);
+    setFormData({
+      Nombre: selectedClient.Nombre || "",
+      Nit: selectedClient.Nit || "",
+      DigitoVerificacion: selectedClient.DigitoVerificacion || "",
+      TipoPersona: selectedClient.TipoPersona || 1,
+      TipoIdentificacion: selectedClient.TipoIdentificacion || 31,
+      IdRegimenFiscal: selectedClient.IdRegimenFiscal || 1,
+      Telefono: selectedClient.Telefono || "",
+      Correo: selectedClient.Correo || "",
+      Direccion: selectedClient.Ubicacion || "",
+      CodigoPostal: selectedClient.CodigoPostal || "",
+      PaisIso: selectedClient.PaisIso || "CO",
+      IdPais: selectedClient.IdPais || 46,
+      DepartamentoDane: selectedClient.DepartamentoDane || "",
+      IdDepartamento: selectedClient.IdDepartamento || 0,
+      MunicipioDane: selectedClient.MunicipioDane || "",
+      IdMunicipio: selectedClient.IdMunicipio || 0,
+      PrimerNombre: selectedClient.PrimerNombre || "",
+      SegundoNombre: selectedClient.SegundoNombre || "",
+      PrimerApellido: selectedClient.PrimerApellido || "",
+      SegundoApellido: selectedClient.SegundoApellido || "",
+    });
+    setShowDetailDialog(false);
+    setShowFormDialog(true);
+  };
+
+  const handleDeleteClient = () => {
+    setShowDetailDialog(false);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedClient) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("No se encontró el token de autenticación");
+        return;
+      }
+
+      const response = await fetch(
+        getApiUrl("/Cliente/EliminarCliente"),
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ IdEmpresa: selectedClient.Id }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.codResponse === 1) {
+        toast.success(t("clients.clientDeleted"));
+        setShowDeleteDialog(false);
+        setSelectedClient(null);
+        // Refrescar lista de clientes
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const companyId = payload.IdEmpresa;
+        const clientsResponse = await fetch(
+          getApiUrl(`/Empresa/TraerClientes?IdEmpresa=${companyId}`),
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const clientsData = await clientsResponse.json();
+        if (clientsData.codResponse === 1 && clientsData.basePresentationList) {
+          setClients(clientsData.basePresentationList);
+        }
+      } else {
+        toast.error(t("clients.errorDeleting"));
+      }
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast.error(t("clients.errorDeleting"));
+    }
+  };
+
+  const handleSaveClient = async () => {
+    try {
+      setIsSaving(true);
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("No se encontró el token de autenticación");
+        return;
+      }
+
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const companyId = payload.IdEmpresa;
+
+      const clientData = {
+        ...formData,
+        IdEmpresaRegistro: companyId,
+        ...(isEditMode && selectedClient && { Id: selectedClient.Id }),
+      };
+
+      const endpoint = isEditMode ? "/Cliente/ModificarCliente" : "/Cliente/CrearCliente";
+      const method = isEditMode ? "PUT" : "POST";
+
+      const response = await fetch(getApiUrl(endpoint), {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(clientData),
+      });
+
+      const data = await response.json();
+
+      if (data.codResponse === 1) {
+        toast.success(isEditMode ? t("clients.clientUpdated") : t("clients.clientCreated"));
+        setShowFormDialog(false);
+        
+        // Refrescar lista de clientes
+        const clientsResponse = await fetch(
+          getApiUrl(`/Empresa/TraerClientes?IdEmpresa=${companyId}`),
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const clientsData = await clientsResponse.json();
+        if (clientsData.codResponse === 1 && clientsData.basePresentationList) {
+          setClients(clientsData.basePresentationList);
+        }
+      } else {
+        toast.error(isEditMode ? t("clients.errorUpdating") : t("clients.errorCreating"));
+      }
+    } catch (error) {
+      console.error("Error saving client:", error);
+      toast.error(isEditMode ? t("clients.errorUpdating") : t("clients.errorCreating"));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const filteredClients = clients.filter(
     (client) =>
       client.Descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -212,7 +443,7 @@ const Clients = () => {
           <h1 className="text-3xl font-bold tracking-tight">{t("clients.title")}</h1>
           <p className="text-muted-foreground">{t("clients.subtitle")}</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleNewClient}>
           <PlusCircle className="h-4 w-4" />
           {t("clients.newClient")}
         </Button>
@@ -440,6 +671,17 @@ const Clients = () => {
                   </div>
                 )}
               </div>
+
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={handleEditClient} className="gap-2">
+                  <Edit className="h-4 w-4" />
+                  {t("clients.editClient")}
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteClient} className="gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  {t("clients.deleteClient")}
+                </Button>
+              </DialogFooter>
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
@@ -448,6 +690,206 @@ const Clients = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Form Dialog - Create/Edit */}
+      <Dialog open={showFormDialog} onOpenChange={setShowFormDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditMode ? t("clients.editClient") : t("clients.createClient")}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nombre">{t("newInvoice.clientName")} *</Label>
+                <Input
+                  id="nombre"
+                  value={formData.Nombre}
+                  onChange={(e) => setFormData({ ...formData, Nombre: e.target.value })}
+                  placeholder={t("newInvoice.clientNamePlaceholder")}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nit">{t("newInvoice.taxId")} *</Label>
+                <Input
+                  id="nit"
+                  value={formData.Nit}
+                  onChange={(e) => setFormData({ ...formData, Nit: e.target.value })}
+                  placeholder={t("newInvoice.taxIdPlaceholder")}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="tipoPersona">{t("newInvoice.personType")}</Label>
+                <Select
+                  value={formData.TipoPersona.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, TipoPersona: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Persona Jurídica</SelectItem>
+                    <SelectItem value="2">Persona Natural</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tipoIdentificacion">{t("newInvoice.identificationType")}</Label>
+                <Select
+                  value={formData.TipoIdentificacion.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, TipoIdentificacion: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="31">NIT</SelectItem>
+                    <SelectItem value="13">Cédula</SelectItem>
+                    <SelectItem value="22">Cédula Extranjera</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="regimenFiscal">{t("newInvoice.taxRegime")}</Label>
+                <Select
+                  value={formData.IdRegimenFiscal.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, IdRegimenFiscal: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Régimen Común</SelectItem>
+                    <SelectItem value="2">Régimen Simplificado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {formData.TipoPersona === 2 && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="primerNombre">{t("clients.firstName")}</Label>
+                  <Input
+                    id="primerNombre"
+                    value={formData.PrimerNombre}
+                    onChange={(e) => setFormData({ ...formData, PrimerNombre: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="segundoNombre">{t("clients.secondName")}</Label>
+                  <Input
+                    id="segundoNombre"
+                    value={formData.SegundoNombre}
+                    onChange={(e) => setFormData({ ...formData, SegundoNombre: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="primerApellido">{t("clients.firstLastName")}</Label>
+                  <Input
+                    id="primerApellido"
+                    value={formData.PrimerApellido}
+                    onChange={(e) => setFormData({ ...formData, PrimerApellido: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="segundoApellido">{t("clients.secondLastName")}</Label>
+                  <Input
+                    id="segundoApellido"
+                    value={formData.SegundoApellido}
+                    onChange={(e) => setFormData({ ...formData, SegundoApellido: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="correo">{t("newInvoice.email")}</Label>
+                <Input
+                  id="correo"
+                  type="email"
+                  value={formData.Correo}
+                  onChange={(e) => setFormData({ ...formData, Correo: e.target.value })}
+                  placeholder={t("newInvoice.emailPlaceholder")}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="telefono">{t("newInvoice.phone")}</Label>
+                <Input
+                  id="telefono"
+                  value={formData.Telefono}
+                  onChange={(e) => setFormData({ ...formData, Telefono: e.target.value })}
+                  placeholder={t("newInvoice.phonePlaceholder")}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="direccion">{t("newInvoice.address")}</Label>
+              <Input
+                id="direccion"
+                value={formData.Direccion}
+                onChange={(e) => setFormData({ ...formData, Direccion: e.target.value })}
+                placeholder={t("newInvoice.addressPlaceholder")}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pais">{t("newInvoice.country")}</Label>
+                <Input
+                  id="pais"
+                  value={formData.PaisIso}
+                  onChange={(e) => setFormData({ ...formData, PaisIso: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="codigoPostal">{t("company.postalCode")}</Label>
+                <Input
+                  id="codigoPostal"
+                  value={formData.CodigoPostal}
+                  onChange={(e) => setFormData({ ...formData, CodigoPostal: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFormDialog(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={handleSaveClient} disabled={isSaving}>
+              {isSaving ? t("common.saving") : (isEditMode ? t("clients.updateClient") : t("clients.createClient"))}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("clients.confirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("clients.confirmDeleteDesc")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
