@@ -45,7 +45,14 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Paddle API error: ${JSON.stringify(errorData)}`);
+      console.error("Paddle API error:", errorData);
+      
+      // Handle specific Paddle errors
+      if (errorData.error?.code === "transaction_checkout_not_enabled") {
+        throw new Error("El checkout de Paddle no está habilitado. Por favor completa el proceso de onboarding en Paddle.");
+      }
+      
+      throw new Error(`Error de Paddle: ${errorData.error?.detail || JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();

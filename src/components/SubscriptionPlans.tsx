@@ -134,9 +134,10 @@ export function SubscriptionPlans() {
       }
     } catch (error) {
       console.error("Error creating checkout:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error al crear la suscripción";
       toast({
         title: t("common.error"),
-        description: t("subscription.subscriptionError"),
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
