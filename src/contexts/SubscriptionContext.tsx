@@ -33,10 +33,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const checkSubscription = async () => {
     try {
-      // Get email from localStorage
-      const userEmail = localStorage.getItem("userEmail");
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!userEmail || !userEmail.includes("@")) {
+      if (!session) {
         setSubscribed(false);
         setProductId(null);
         setSubscriptionEnd(null);
@@ -44,9 +43,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("check-subscription", {
-        body: { email: userEmail },
-      });
+      const { data, error } = await supabase.functions.invoke("check-subscription");
 
       if (error) throw error;
 

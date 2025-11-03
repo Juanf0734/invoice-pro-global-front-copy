@@ -4,26 +4,21 @@ import { Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useSubscription, SUBSCRIPTION_PLANS } from "@/contexts/SubscriptionContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { usePreferences } from "@/contexts/PreferencesContext";
 
-// NOTA: Debes crear estos productos y precios en tu cuenta de Paddle
-// y reemplazar estos IDs de ejemplo con los IDs reales de Paddle
+// Planes configurados con Stripe
 const plans = [
   {
     name: "Básico",
     monthlyPrice: "85.000",
     yearlyPrice: "867.000",
-    productIdMonthly: "pro_01k95wh7qf123456789abc",  // Reemplazar con tu Product ID de Paddle
-    priceIdMonthly: "pri_01k95wmjvd369cs66ka1p96bpt",
-    productIdYearly: "pro_01k95wh8qf123456789def",   // Reemplazar con tu Product ID de Paddle
-    priceIdYearly: "pri_01k95wh8qf123456789def",      // Reemplazar con tu Price ID de Paddle
+    productIdMonthly: "prod_TKd60UFqKmDlzQ",
+    priceIdMonthly: "price_1SNxppRRbSHLnGlJXYxPhBdR",
+    productIdYearly: "prod_TKd6iG3LlGuirH",
+    priceIdYearly: "price_1SNxq9RRbSHLnGlJENWm1LMA",
     features: [
       "2 usuarios",
       "5 facturas/mes",
@@ -38,10 +33,10 @@ const plans = [
     name: "PRO",
     monthlyPrice: "170.500",
     yearlyPrice: "1.739.100",
-    productIdMonthly: "pro_01k95wh9qf123456789ghi",  // Reemplazar con tu Product ID de Paddle
-    priceIdMonthly: "pri_01k95wh9qf123456789ghi",     // Reemplazar con tu Price ID de Paddle
-    productIdYearly: "pro_01k95whaqf123456789jkl",   // Reemplazar con tu Product ID de Paddle
-    priceIdYearly: "pri_01k95whaqf123456789jkl",      // Reemplazar con tu Price ID de Paddle
+    productIdMonthly: "prod_TKd6CIJiPcB3O6",
+    priceIdMonthly: "price_1SNxqJRRbSHLnGlJU40P5LJN",
+    productIdYearly: "prod_TKd6x4yGqPjBAl",
+    priceIdYearly: "price_1SNxqSRRbSHLnGlJJnuJoyWm",
     popular: true,
     features: [
       "5 usuarios",
@@ -58,10 +53,10 @@ const plans = [
     name: "Empresarial",
     monthlyPrice: "507.700",
     yearlyPrice: "5.178.360",
-    productIdMonthly: "pro_01k95whbqf123456789mno",  // Reemplazar con tu Product ID de Paddle
-    priceIdMonthly: "pri_01k95whbqf123456789mno",     // Reemplazar con tu Price ID de Paddle
-    productIdYearly: "pro_01k95whcqf123456789pqr",   // Reemplazar con tu Product ID de Paddle
-    priceIdYearly: "pri_01k95whcqf123456789pqr",      // Reemplazar con tu Price ID de Paddle
+    productIdMonthly: "prod_TKd69LD8vtK22s",
+    priceIdMonthly: "price_1SNxqlRRbSHLnGlJJNIotcyq",
+    productIdYearly: "prod_TKd7pyQFlwjlXA",
+    priceIdYearly: "price_1SNxr2RRbSHLnGlJQckPCYkh",
     features: [
       "10 usuarios",
       "800 facturas/mes",
@@ -79,50 +74,26 @@ export function SubscriptionPlans() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { productId, checkSubscription } = useSubscription();
-  const { formatCurrency } = usePreferences();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
-  const [showEmailDialog, setShowEmailDialog] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const [selectedPriceId, setSelectedPriceId] = useState<string>("");
-  const [selectedPlanName, setSelectedPlanName] = useState<string>("");
 
-  const handleSubscribeClick = (priceId: string, planName: string) => {
-    setSelectedPriceId(priceId);
-    setSelectedPlanName(planName);
-    
-    // Check if email is already stored
-    const storedEmail = localStorage.getItem("userEmail");
-    if (storedEmail && storedEmail.includes("@")) {
-      setUserEmail(storedEmail);
-      handleSubscribe(priceId, planName, storedEmail);
-    } else {
-      setShowEmailDialog(true);
-    }
-  };
-
-  const handleEmailSubmit = () => {
-    if (!userEmail || !userEmail.includes("@")) {
-      toast({
-        title: t("common.error"),
-        description: "Por favor ingresa un email válido",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Save email for future use
-    localStorage.setItem("userEmail", userEmail);
-    setShowEmailDialog(false);
-    handleSubscribe(selectedPriceId, selectedPlanName, userEmail);
-  };
-
-  const handleSubscribe = async (priceId: string, planName: string, email: string) => {
+  const handleSubscribeClick = async (priceId: string, planName: string) => {
     try {
       setLoadingPlan(priceId);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: t("common.error"),
+          description: "Debes iniciar sesión para suscribirte",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId, email },
+        body: { priceId },
       });
 
       if (error) throw error;
@@ -147,21 +118,18 @@ export function SubscriptionPlans() {
 
   const handleManageSubscription = async () => {
     try {
-      const storedEmail = localStorage.getItem("userEmail");
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!storedEmail || !storedEmail.includes("@")) {
+      if (!session) {
         toast({
           title: t("common.error"),
-          description: "Por favor ingresa tu email en la configuración de suscripción",
+          description: "Debes iniciar sesión para gestionar tu suscripción",
           variant: "destructive",
         });
-        setShowEmailDialog(true);
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("customer-portal", {
-        body: { email: storedEmail },
-      });
+      const { data, error } = await supabase.functions.invoke("customer-portal");
 
       if (error) throw error;
 
@@ -267,43 +235,6 @@ export function SubscriptionPlans() {
           </div>
         </TabsContent>
       </Tabs>
-
-      {/* Email Dialog */}
-      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Ingresa tu email</DialogTitle>
-            <DialogDescription>
-              Necesitamos tu email para procesar la suscripción
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleEmailSubmit();
-                  }
-                }}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleEmailSubmit}>
-              Continuar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
