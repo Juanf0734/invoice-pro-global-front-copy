@@ -327,14 +327,14 @@ const Clients = () => {
       const clientData = {
         Nombre: formData.Nombre,
         Nit: formData.Nit,
-        DigitoVerificacion: formData.DigitoVerificacion || "",
-        IDInterno: formData.Nit, // Usar el NIT como ID Interno si no se proporciona otro
+        DigitoVerificacion: formData.DigitoVerificacion || "0",
+        IDInterno: formData.Nit,
         TipoPersona: formData.TipoPersona,
         TipoIdentificacion: formData.TipoIdentificacion,
         IdRegimenFiscal: formData.IdRegimenFiscal,
-        Telefono: formData.Telefono || "",
+        Telefono: formData.Telefono || "0",
         Correo: formData.Correo || "",
-        Ubicacion: formData.Direccion || "", // El API usa "Ubicacion" no "Direccion"
+        Ubicacion: formData.Direccion || "",
         CodigoPostal: formData.CodigoPostal || "",
         PaisIso: formData.PaisIso || "CO",
         IdPais: formData.IdPais || 46,
@@ -347,8 +347,16 @@ const Clients = () => {
         SegundoNombre: formData.SegundoNombre || "",
         PrimerApellido: formData.PrimerApellido || "",
         SegundoApellido: formData.SegundoApellido || "",
+        SalarioIntegral: false,
+        NombreBanco: "",
+        TipoCuenta: 0,
+        NumeroCuenta: "",
         ...(isEditMode && selectedClient && { Id: selectedClient.Id }),
-        IdEmpresaRegistro: companyId, // Debe ser número, no string
+      };
+
+      const requestBody = isEditMode ? clientData : {
+        ...clientData,
+        IdEmpresaRegistro: companyId
       };
 
       const endpoint = isEditMode ? "/Cliente/ModificarCliente" : "/Cliente/CrearCliente";
@@ -360,7 +368,7 @@ const Clients = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(clientData),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
