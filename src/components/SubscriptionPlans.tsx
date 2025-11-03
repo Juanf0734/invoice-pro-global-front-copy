@@ -4,6 +4,9 @@ import { Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription, SUBSCRIPTION_PLANS } from "@/contexts/SubscriptionContext";
@@ -77,25 +80,47 @@ export function SubscriptionPlans() {
   const { formatCurrency } = usePreferences();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [selectedPriceId, setSelectedPriceId] = useState<string>("");
+  const [selectedPlanName, setSelectedPlanName] = useState<string>("");
 
-  const handleSubscribe = async (priceId: string, planName: string) => {
+  const handleSubscribeClick = (priceId: string, planName: string) => {
+    setSelectedPriceId(priceId);
+    setSelectedPlanName(planName);
+    
+    // Check if email is already stored
+    const storedEmail = localStorage.getItem("userEmail");
+    if (storedEmail && storedEmail.includes("@")) {
+      setUserEmail(storedEmail);
+      handleSubscribe(priceId, planName, storedEmail);
+    } else {
+      setShowEmailDialog(true);
+    }
+  };
+
+  const handleEmailSubmit = () => {
+    if (!userEmail || !userEmail.includes("@")) {
+      toast({
+        title: t("common.error"),
+        description: "Por favor ingresa un email válido",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Save email for future use
+    localStorage.setItem("userEmail", userEmail);
+    setShowEmailDialog(false);
+    handleSubscribe(selectedPriceId, selectedPlanName, userEmail);
+  };
+
+  const handleSubscribe = async (priceId: string, planName: string, email: string) => {
     try {
       setLoadingPlan(priceId);
-      
-      // Get email from localStorage (from external auth)
-      const userEmail = localStorage.getItem("userName"); // This contains the email/username
-      
-      if (!userEmail) {
-        toast({
-          title: t("common.error"),
-          description: "Por favor inicia sesión primero",
-          variant: "destructive",
-        });
-        return;
-      }
 
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId, email: userEmail },
+        body: { priceId, email },
       });
 
       if (error) throw error;
@@ -119,19 +144,20 @@ export function SubscriptionPlans() {
 
   const handleManageSubscription = async () => {
     try {
-      const userEmail = localStorage.getItem("userName");
+      const storedEmail = localStorage.getItem("userEmail");
       
-      if (!userEmail) {
+      if (!storedEmail || !storedEmail.includes("@")) {
         toast({
           title: t("common.error"),
-          description: "Por favor inicia sesión primero",
+          description: "Por favor ingresa tu email en la configuración de suscripción",
           variant: "destructive",
         });
+        setShowEmailDialog(true);
         return;
       }
 
       const { data, error } = await supabase.functions.invoke("customer-portal", {
-        body: { email: userEmail },
+        body: { email: storedEmail },
       });
 
       if (error) throw error;
@@ -218,7 +244,7 @@ export function SubscriptionPlans() {
                     ) : (
                       <Button
                         className="w-full"
-                        onClick={() => handleSubscribe(currentPriceId, plan.name)}
+                        onClick={() => handleSubscribeClick(currentPriceId, plan.name)}
                         disabled={loadingPlan === currentPriceId}
                       >
                         {loadingPlan === currentPriceId ? (
@@ -238,6 +264,43 @@ export function SubscriptionPlans() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Email Dialog */}
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ingresa tu email</DialogTitle>
+            <DialogDescription>
+              Necesitamos tu email para procesar la suscripción con Stripe
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@email.com"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleEmailSubmit();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleEmailSubmit}>
+              Continuar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

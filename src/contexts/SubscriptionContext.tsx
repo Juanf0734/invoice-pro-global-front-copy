@@ -33,10 +33,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const checkSubscription = async () => {
     try {
-      // Get email from localStorage (from external auth)
-      const userEmail = localStorage.getItem("userName");
+      // Get email from localStorage
+      const userEmail = localStorage.getItem("userEmail");
       
-      if (!userEmail) {
+      if (!userEmail || !userEmail.includes("@")) {
         setSubscribed(false);
         setProductId(null);
         setSubscriptionEnd(null);
