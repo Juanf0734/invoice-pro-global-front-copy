@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import i18n from '@/i18n';
 
 interface Preferences {
@@ -17,7 +17,7 @@ interface PreferencesContextType {
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
 
-export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<Preferences>({
     language: 'es',
     currency: 'COP',
@@ -113,7 +113,7 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {children}
     </PreferencesContext.Provider>
   );
-};
+}
 
 export const usePreferences = () => {
   const context = useContext(PreferencesContext);
