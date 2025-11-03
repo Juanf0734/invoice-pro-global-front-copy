@@ -264,11 +264,52 @@ const Invoices = () => {
     }
   };
 
-  const handleSendToDIAN = () => {
-    toast({
-      title: "Enviando a DIAN",
-      description: "La factura está siendo enviada a la DIAN de Colombia...",
-    });
+  const handleSendToDIAN = async () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      const authToken = localStorage.getItem("authToken");
+      
+      if (!authToken) {
+        toast({
+          title: "Error",
+          description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Enviando a DIAN",
+        description: "La factura está siendo enviada a la DIAN de Colombia...",
+      });
+
+      const response = await fetch(
+        getApiUrl(`/Documento/EnviarDocumentoaDIAN?IdDocumento=${selectedInvoice.id}`),
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al enviar la factura a la DIAN");
+      }
+
+      toast({
+        title: "Enviado exitosamente",
+        description: "La factura ha sido enviada a la DIAN correctamente",
+      });
+    } catch (error) {
+      console.error("Error sending to DIAN:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo enviar la factura a la DIAN",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
