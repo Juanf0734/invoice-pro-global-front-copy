@@ -342,12 +342,9 @@ const Clients = () => {
         ...(isEditMode && selectedClient && { Id: selectedClient.Id }),
       };
 
-      const requestBody = isEditMode ? clientData : {
-        ...clientData,
-        IdEmpresaRegistro: companyId
-      };
-
-      const endpoint = isEditMode ? "/Cliente/ModificarCliente" : "/Cliente/CrearCliente";
+      const endpoint = isEditMode 
+        ? `/Cliente/ModificarCliente` 
+        : `/Cliente/CrearCliente?IdEmpresa=${companyId}`;
       const method = isEditMode ? "PUT" : "POST";
 
       const response = await fetch(getApiUrl(endpoint), {
@@ -356,7 +353,7 @@ const Clients = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(clientData),
       });
 
       const data = await response.json();
