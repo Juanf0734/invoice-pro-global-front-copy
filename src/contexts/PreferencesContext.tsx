@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import i18n from '@/i18n';
+import { getApiUrl } from '@/lib/api';
+import { format, startOfMonth } from 'date-fns';
 
 interface Preferences {
   language: string;
@@ -13,6 +15,8 @@ interface PreferencesContextType {
   updatePreferences: (newPreferences: Partial<Preferences>) => void;
   formatCurrency: (amount: number) => string;
   formatDate: (date: Date) => string;
+  monthlyInvoicesCount: number;
+  refreshInvoicesCount: () => Promise<void>;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -24,6 +28,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     timezone: 'America/Bogota',
     dateFormat: 'DD/MM/YYYY',
   });
+  const [monthlyInvoicesCount, setMonthlyInvoicesCount] = useState(0);
 
   useEffect(() => {
     // Load preferences from localStorage on mount
@@ -41,6 +46,48 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
 
     // Apply language
     i18n.changeLanguage(savedLanguage);
+  }, []);
+
+  const refreshInvoicesCount = async () => {
+    const companyId = localStorage.getItem("companyId");
+    const authToken = localStorage.getItem("authToken");
+
+    if (!companyId || !authToken) {
+      return;
+    }
+
+    try {
+      const now = new Date();
+      const monthStart = startOfMonth(now);
+      const fechaInicial = format(monthStart, 'yyyy-MM-dd');
+      const fechaFinal = format(now, 'yyyy-MM-dd');
+
+      const response = await fetch(
+        getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`),
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setMonthlyInvoicesCount(data.basePresentationList.length);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching monthly invoices:", error);
+    }
+  };
+
+  useEffect(() => {
+    refreshInvoicesCount();
+    
+    // Refresh every 5 minutes
+    const interval = setInterval(refreshInvoicesCount, 300000);
+    return () => clearInterval(interval);
   }, []);
 
   const updatePreferences = (newPreferences: Partial<Preferences>) => {
@@ -108,6 +155,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         updatePreferences,
         formatCurrency,
         formatDate,
+        monthlyInvoicesCount,
+        refreshInvoicesCount,
       }}
     >
       {children}

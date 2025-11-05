@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useSubscription } from "@/contexts/SubscriptionContext";
+import { usePreferences } from "@/contexts/PreferencesContext";
 import { getApiUrl } from "@/lib/api";
 import { format, startOfMonth } from "date-fns";
 import {
@@ -28,13 +29,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const { planName, subscribed } = useSubscription();
+  const { monthlyInvoicesCount } = usePreferences();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [forceStartTour, setForceStartTour] = useState(false);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
   const [companyName, setCompanyName] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [monthlyInvoicesCount, setMonthlyInvoicesCount] = useState(0);
-  const [loadingInvoices, setLoadingInvoices] = useState(false);
 
   // Load theme preference
   useEffect(() => {
@@ -67,50 +67,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Fetch monthly invoices count
+
+  // Event listener for restarting the tour
   useEffect(() => {
-    const fetchMonthlyInvoices = async () => {
-      const companyId = localStorage.getItem("companyId");
-      const authToken = localStorage.getItem("authToken");
-
-      if (!companyId || !authToken) {
-        return;
-      }
-
-      setLoadingInvoices(true);
-      try {
-        const now = new Date();
-        const monthStart = startOfMonth(now);
-        const fechaInicial = format(monthStart, 'yyyy-MM-dd');
-        const fechaFinal = format(now, 'yyyy-MM-dd');
-
-        const response = await fetch(
-          getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`),
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.codResponse === 1 && data.basePresentationList) {
-            setMonthlyInvoicesCount(data.basePresentationList.length);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching monthly invoices:", error);
-      } finally {
-        setLoadingInvoices(false);
-      }
+    const handleRestartTour = () => {
+      setForceStartTour(true);
+      setShowOnboarding(true);
     };
 
-    fetchMonthlyInvoices();
-    
-    // Refresh every 5 minutes
-    const interval = setInterval(fetchMonthlyInvoices, 300000);
-    return () => clearInterval(interval);
+    window.addEventListener('restart-tour', handleRestartTour);
+    return () => window.removeEventListener('restart-tour', handleRestartTour);
   }, []);
 
   const handleLogout = () => {
@@ -213,20 +179,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Badge variant="secondary" className="font-semibold">
                 {planName}
               </Badge>
-              {!loadingInvoices && (
-                <div className="flex flex-col gap-1 min-w-[180px]">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Documentos del mes</span>
-                    <span className="font-medium">
-                      {monthlyInvoicesCount} / {getPlanLimit(planName)}
-                    </span>
-                  </div>
-                  <Progress 
-                    value={(monthlyInvoicesCount / getPlanLimit(planName)) * 100} 
-                    className="h-2"
-                  />
+              <div className="flex flex-col gap-1 min-w-[180px]">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Documentos del mes</span>
+                  <span className="font-medium">
+                    {monthlyInvoicesCount} / {getPlanLimit(planName)}
+                  </span>
                 </div>
-              )}
+                <Progress 
+                  value={(monthlyInvoicesCount / getPlanLimit(planName)) * 100} 
+                  className="h-2"
+                />
+              </div>
             </div>
             <div className="flex-1" />
             <Button 

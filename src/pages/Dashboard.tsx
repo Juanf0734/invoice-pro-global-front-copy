@@ -7,6 +7,7 @@ import { getApiUrl } from "@/lib/api";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
+import { usePreferences } from "@/contexts/PreferencesContext";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -38,6 +39,7 @@ interface Product {
 const Dashboard = () => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const { refreshInvoicesCount } = usePreferences();
   const [invoicesCount, setInvoicesCount] = useState(0);
   const [clientsCount, setClientsCount] = useState(0);
   const [productsCount, setProductsCount] = useState(0);
@@ -119,6 +121,9 @@ const Dashboard = () => {
               new Date(b.FechaGeneracion).getTime() - new Date(a.FechaGeneracion).getTime()
             );
             setRecentInvoices(sorted.slice(0, 5));
+            
+            // Refresh the invoices count in the header
+            refreshInvoicesCount();
           }
         }
 
