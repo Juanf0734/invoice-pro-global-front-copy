@@ -29,8 +29,9 @@ interface Client {
 }
 
 interface AuxList {
-  Id: number;
+  Codigo: number;
   Descripcion: string;
+  InfoAdicional?: string;
 }
 
 interface ClientDetail {
@@ -158,11 +159,11 @@ const Clients = () => {
   const handleCountryChange = async (countryId: number) => {
     try {
       // Actualizar el país y limpiar departamento y municipio
-      const selectedCountry = countries.find(c => c.Id === countryId);
+      const selectedCountry = countries.find(c => c.Codigo === countryId);
       setFormData({
         ...formData,
         IdPais: countryId,
-        PaisIso: selectedCountry?.Descripcion || "CO",
+        PaisIso: selectedCountry?.InfoAdicional || selectedCountry?.Descripcion || "CO",
         IdDepartamento: 0,
         DepartamentoDane: "",
         IdMunicipio: 0,
@@ -195,7 +196,7 @@ const Clients = () => {
   const handleDepartmentChange = async (deptId: number) => {
     try {
       // Actualizar el departamento y limpiar municipio
-      const selectedDept = departments.find(d => d.Id === deptId);
+      const selectedDept = departments.find(d => d.Codigo === deptId);
       setFormData({
         ...formData,
         IdDepartamento: deptId,
@@ -227,7 +228,7 @@ const Clients = () => {
 
   // Actualizar municipio
   const handleMunicipalityChange = (muniId: number) => {
-    const selectedMuni = municipalities.find(m => m.Id === muniId);
+    const selectedMuni = municipalities.find(m => m.Codigo === muniId);
     setFormData({
       ...formData,
       IdMunicipio: muniId,
@@ -980,8 +981,8 @@ const Clients = () => {
                     <SelectValue placeholder="Seleccionar país" />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-[200px]">
-                    {countries.filter(c => c && c.Id).map((country) => (
-                      <SelectItem key={country.Id} value={country.Id.toString()}>
+                    {countries.filter(c => c && c.Codigo).map((country) => (
+                      <SelectItem key={country.Codigo} value={country.Codigo.toString()}>
                         {country.Descripcion}
                       </SelectItem>
                     ))}
@@ -1000,8 +1001,8 @@ const Clients = () => {
                     <SelectValue placeholder={departments.length === 0 ? "Primero selecciona país" : "Seleccionar departamento"} />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-[200px]">
-                    {departments.filter(d => d && d.Id).map((dept) => (
-                      <SelectItem key={dept.Id} value={dept.Id.toString()}>
+                    {departments.filter(d => d && d.Codigo).map((dept) => (
+                      <SelectItem key={dept.Codigo} value={dept.Codigo.toString()}>
                         {dept.Descripcion}
                       </SelectItem>
                     ))}
@@ -1020,8 +1021,8 @@ const Clients = () => {
                     <SelectValue placeholder={municipalities.length === 0 ? "Primero selecciona departamento" : "Seleccionar municipio"} />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-[200px]">
-                    {municipalities.filter(m => m && m.Id).map((muni) => (
-                      <SelectItem key={muni.Id} value={muni.Id.toString()}>
+                    {municipalities.filter(m => m && m.Codigo).map((muni) => (
+                      <SelectItem key={muni.Codigo} value={muni.Codigo.toString()}>
                         {muni.Descripcion}
                       </SelectItem>
                     ))}
