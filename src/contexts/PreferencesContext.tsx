@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import i18n from '@/i18n';
 import { getApiUrl } from '@/lib/api';
-import { format, startOfMonth } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 
 interface Preferences {
   language: string;
@@ -58,8 +58,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
 
     try {
       const now = new Date();
-      const monthStart = startOfMonth(now);
-      const fechaInicial = format(monthStart, 'yyyy-MM-dd');
+      const lastMonth = subMonths(now, 1);
+      const fechaInicial = format(lastMonth, 'yyyy-MM-dd');
       const fechaFinal = format(now, 'yyyy-MM-dd');
 
       const response = await fetch(

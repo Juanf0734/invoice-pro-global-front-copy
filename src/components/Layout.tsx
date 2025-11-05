@@ -181,7 +181,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Badge>
               <div className="flex flex-col gap-1 min-w-[180px]">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Documentos del mes</span>
+                  <span className="text-muted-foreground">Último mes</span>
                   <span className="font-medium">
                     {monthlyInvoicesCount} / {getPlanLimit(planName)}
                   </span>
