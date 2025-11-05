@@ -8,6 +8,7 @@ interface Preferences {
   currency: string;
   timezone: string;
   dateFormat: string;
+  operationCountries: string[];
 }
 
 interface PreferencesContextType {
@@ -29,6 +30,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     currency: 'COP',
     timezone: 'America/Bogota',
     dateFormat: 'DD/MM/YYYY',
+    operationCountries: ['CO'],
   });
   const [monthlyInvoicesCount, setMonthlyInvoicesCount] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(startOfMonth(new Date()));
@@ -39,12 +41,15 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     const savedCurrency = localStorage.getItem('currency') || 'COP';
     const savedTimezone = localStorage.getItem('timezone') || 'America/Bogota';
     const savedDateFormat = localStorage.getItem('dateFormat') || 'DD/MM/YYYY';
+    const savedCountries = localStorage.getItem('operationCountries');
+    const operationCountries = savedCountries ? JSON.parse(savedCountries) : ['CO'];
 
     setPreferences({
       language: savedLanguage,
       currency: savedCurrency,
       timezone: savedTimezone,
       dateFormat: savedDateFormat,
+      operationCountries,
     });
 
     // Apply language
@@ -102,6 +107,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('currency', updated.currency);
       localStorage.setItem('timezone', updated.timezone);
       localStorage.setItem('dateFormat', updated.dateFormat);
+      localStorage.setItem('operationCountries', JSON.stringify(updated.operationCountries));
       
       // Apply language change
       if (newPreferences.language) {

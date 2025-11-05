@@ -11,78 +11,104 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { usePreferences } from "@/contexts/PreferencesContext";
 
-// Planes configurados con Stripe
-const plans = [
-  {
-    name: "Básico",
-    monthlyPrice: "85.000",
-    yearlyPrice: "867.000",
-    productIdMonthly: "prod_TKd60UFqKmDlzQ",
-    priceIdMonthly: "price_1SNxppRRbSHLnGlJXYxPhBdR",
-    productIdYearly: "prod_TKd6iG3LlGuirH",
-    priceIdYearly: "price_1SNxq9RRbSHLnGlJENWm1LMA",
-    features: [
-      "2 usuarios",
-      "5 documentos/mes",
-      "$400 COP por documento adicional",
-      "Verifactu incluido",
-      "Soporte Estándar",
-      "Representación PDF",
-      "Almacenamiento en Nube",
-    ],
-  },
-  {
-    name: "PRO",
-    monthlyPrice: "170.500",
-    yearlyPrice: "1.739.100",
-    productIdMonthly: "prod_TKd6CIJiPcB3O6",
-    priceIdMonthly: "price_1SNxqJRRbSHLnGlJU40P5LJN",
-    productIdYearly: "prod_TKd6x4yGqPjBAl",
-    priceIdYearly: "price_1SNxqSRRbSHLnGlJJnuJoyWm",
-    popular: true,
-    features: [
-      "5 usuarios",
-      "50 documentos/mes",
-      "$300 COP por documento adicional",
-      "Verifactu incluido",
-      "Soporte Premium",
-      "Representación PDF",
-      "Dashboard completo",
-      "Almacenamiento en Nube",
-    ],
-  },
-  {
-    name: "Empresarial",
-    monthlyPrice: "507.700",
-    yearlyPrice: "5.178.360",
-    productIdMonthly: "prod_TKd69LD8vtK22s",
-    priceIdMonthly: "price_1SNxqlRRbSHLnGlJJNIotcyq",
-    productIdYearly: "prod_TKd7pyQFlwjlXA",
-    priceIdYearly: "price_1SNxr2RRbSHLnGlJQckPCYkh",
-    features: [
-      "10 usuarios",
-      "800 documentos/mes",
-      "Verifactu incluido",
-      "Soporte Premium",
-      "Representación PDF",
-      "Dashboard completo",
-      "Almacenamiento en Nube",
-      "Integraciones (API)",
-    ],
-  },
-];
+// Helper function to get country-specific features
+const getCountrySpecificFeatures = (countries: string[]) => {
+  const standards = [];
+  
+  if (countries.includes("CO")) {
+    standards.push("Cumplimiento DIAN Colombia");
+  }
+  if (countries.includes("ES")) {
+    standards.push("Verifactu España");
+  }
+  if (countries.includes("MX")) {
+    standards.push("Cumplimiento SAT México");
+  }
+  if (countries.includes("INT")) {
+    standards.push("Estándar Internacional");
+  }
+  
+  return standards.length > 0 ? standards : ["Estándar Internacional"];
+};
+
+// Planes configurados con Stripe - Base features sin mención específica de país
+const getBasePlan = (name: string) => {
+  const basePlans: Record<string, any> = {
+    "Básico": {
+      name: "Básico",
+      monthlyPrice: "85.000",
+      yearlyPrice: "867.000",
+      productIdMonthly: "prod_TKd60UFqKmDlzQ",
+      priceIdMonthly: "price_1SNxppRRbSHLnGlJXYxPhBdR",
+      productIdYearly: "prod_TKd6iG3LlGuirH",
+      priceIdYearly: "price_1SNxq9RRbSHLnGlJENWm1LMA",
+      baseFeatures: [
+        "2 usuarios",
+        "5 documentos/mes",
+        "$400 COP por documento adicional",
+        "Soporte Estándar",
+        "Representación PDF",
+        "Almacenamiento en Nube",
+      ],
+    },
+    "PRO": {
+      name: "PRO",
+      monthlyPrice: "170.500",
+      yearlyPrice: "1.739.100",
+      productIdMonthly: "prod_TKd6CIJiPcB3O6",
+      priceIdMonthly: "price_1SNxqJRRbSHLnGlJU40P5LJN",
+      productIdYearly: "prod_TKd6x4yGqPjBAl",
+      priceIdYearly: "price_1SNxqSRRbSHLnGlJJnuJoyWm",
+      popular: true,
+      baseFeatures: [
+        "5 usuarios",
+        "50 documentos/mes",
+        "$300 COP por documento adicional",
+        "Soporte Premium",
+        "Representación PDF",
+        "Dashboard completo",
+        "Almacenamiento en Nube",
+      ],
+    },
+    "Empresarial": {
+      name: "Empresarial",
+      monthlyPrice: "507.700",
+      yearlyPrice: "5.178.360",
+      productIdMonthly: "prod_TKd69LD8vtK22s",
+      priceIdMonthly: "price_1SNxqlRRbSHLnGlJJNIotcyq",
+      productIdYearly: "prod_TKd7pyQFlwjlXA",
+      priceIdYearly: "price_1SNxr2RRbSHLnGlJQckPCYkh",
+      baseFeatures: [
+        "10 usuarios",
+        "800 documentos/mes",
+        "Soporte Premium",
+        "Representación PDF",
+        "Dashboard completo",
+        "Almacenamiento en Nube",
+        "Integraciones (API)",
+      ],
+    },
+  };
+  
+  return basePlans[name];
+};
 
 export function SubscriptionPlans() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { productId, checkSubscription } = useSubscription();
+  const { preferences } = usePreferences();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [selectedPriceId, setSelectedPriceId] = useState("");
   const [selectedPlanName, setSelectedPlanName] = useState("");
+
+  // Get country-specific standards
+  const countryStandards = getCountrySpecificFeatures(preferences.operationCountries);
 
   const handleSubscribeClick = (priceId: string, planName: string) => {
     setSelectedPriceId(priceId);
@@ -186,7 +212,9 @@ export function SubscriptionPlans() {
         
         <TabsContent value={billingCycle} className="mt-8">
           <div className="grid gap-6 md:grid-cols-3">
-            {plans.map((plan) => {
+            {["Básico", "PRO", "Empresarial"].map((planName) => {
+              const plan = getBasePlan(planName);
+              const features = [...plan.baseFeatures, ...countryStandards];
               const currentProductId = billingCycle === "monthly" ? plan.productIdMonthly : plan.productIdYearly;
               const currentPriceId = billingCycle === "monthly" ? plan.priceIdMonthly : plan.priceIdYearly;
               const displayPrice = billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
@@ -222,8 +250,8 @@ export function SubscriptionPlans() {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2">
+                      {features.map((feature, idx) => (
+                        <li key={`${feature}-${idx}`} className="flex items-start gap-2">
                           <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                           <span className="text-sm">{feature}</span>
                         </li>

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Save, Shield, Globe, CreditCard } from "lucide-react";
@@ -29,6 +30,7 @@ const Settings = () => {
     currency: "COP",
     timezone: "America/Bogota",
     dateFormat: "DD/MM/YYYY",
+    operationCountries: ["CO"] as string[],
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -50,12 +52,15 @@ const Settings = () => {
     const savedCurrency = localStorage.getItem("currency") || "COP";
     const savedTimezone = localStorage.getItem("timezone") || "America/Bogota";
     const savedDateFormat = localStorage.getItem("dateFormat") || "DD/MM/YYYY";
+    const savedCountries = localStorage.getItem("operationCountries");
+    const operationCountries = savedCountries ? JSON.parse(savedCountries) : ["CO"];
 
     setPreferences({
       language: savedLanguage,
       currency: savedCurrency,
       timezone: savedTimezone,
       dateFormat: savedDateFormat,
+      operationCountries,
     });
   };
 
@@ -113,6 +118,7 @@ const Settings = () => {
     localStorage.setItem("currency", preferences.currency);
     localStorage.setItem("timezone", preferences.timezone);
     localStorage.setItem("dateFormat", preferences.dateFormat);
+    localStorage.setItem("operationCountries", JSON.stringify(preferences.operationCountries));
     
     // Apply language change immediately
     i18n.changeLanguage(preferences.language);
@@ -259,6 +265,48 @@ const Settings = () => {
                       <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              <Separator className="my-6" />
+
+              {/* Países de operación */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-base font-semibold">Países de Operación</Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Selecciona los países donde operarás la facturación electrónica
+                  </p>
+                </div>
+                
+                <div className="grid gap-3">
+                  {[
+                    { code: "CO", name: "Colombia", standard: "DIAN" },
+                    { code: "ES", name: "España", standard: "Verifactu" },
+                    { code: "MX", name: "México", standard: "SAT" },
+                    { code: "INT", name: "Internacional", standard: "Estándar Internacional" },
+                  ].map((country) => (
+                    <div key={country.code} className="flex items-center space-x-3 border rounded-lg p-3">
+                      <Checkbox
+                        id={country.code}
+                        checked={preferences.operationCountries.includes(country.code)}
+                        onCheckedChange={(checked) => {
+                          const newCountries = checked
+                            ? [...preferences.operationCountries, country.code]
+                            : preferences.operationCountries.filter((c) => c !== country.code);
+                          setPreferences({ ...preferences, operationCountries: newCountries });
+                        }}
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor={country.code} className="font-medium cursor-pointer">
+                          {country.name}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Normativa: {country.standard}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
