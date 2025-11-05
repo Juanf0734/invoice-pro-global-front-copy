@@ -8,6 +8,7 @@ import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { usePreferences } from "@/contexts/PreferencesContext";
+import { MonthSelector } from "@/components/MonthSelector";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -39,7 +40,7 @@ interface Product {
 const Dashboard = () => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
-  const { refreshInvoicesCount, selectedMonth } = usePreferences();
+  const { refreshInvoicesCount, selectedMonth, setSelectedMonth } = usePreferences();
   const [invoicesCount, setInvoicesCount] = useState(0);
   const [clientsCount, setClientsCount] = useState(0);
   const [productsCount, setProductsCount] = useState(0);
@@ -201,9 +202,15 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div data-tour="dashboard">
-        <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.title")}</h1>
-        <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
+      <div data-tour="dashboard" className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.title")}</h1>
+          <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
+        </div>
+        <MonthSelector 
+          selectedMonth={selectedMonth} 
+          onMonthChange={setSelectedMonth}
+        />
       </div>
 
       {loading ? (
