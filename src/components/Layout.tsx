@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useSubscription } from "@/contexts/SubscriptionContext";
+import { getApiUrl } from "@/lib/api";
+import { format, startOfMonth } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +32,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
   const [companyName, setCompanyName] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [monthlyInvoicesCount, setMonthlyInvoicesCount] = useState(0);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
 
   // Load theme preference
   useEffect(() => {
@@ -60,6 +64,52 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (storedCompanyName) {
       setCompanyName(storedCompanyName);
     }
+  }, []);
+
+  // Fetch monthly invoices count
+  useEffect(() => {
+    const fetchMonthlyInvoices = async () => {
+      const companyId = localStorage.getItem("companyId");
+      const authToken = localStorage.getItem("authToken");
+
+      if (!companyId || !authToken) {
+        return;
+      }
+
+      setLoadingInvoices(true);
+      try {
+        const now = new Date();
+        const monthStart = startOfMonth(now);
+        const fechaInicial = format(monthStart, 'yyyy-MM-dd');
+        const fechaFinal = format(now, 'yyyy-MM-dd');
+
+        const response = await fetch(
+          getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`),
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.codResponse === 1 && data.basePresentationList) {
+            setMonthlyInvoicesCount(data.basePresentationList.length);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching monthly invoices:", error);
+      } finally {
+        setLoadingInvoices(false);
+      }
+    };
+
+    fetchMonthlyInvoices();
+    
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchMonthlyInvoices, 300000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
@@ -102,6 +152,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       localStorage.setItem(`upgrade_banner_dismissed_${userName}`, "true");
       setShowUpgradeBanner(false);
     }
+  };
+
+  const getPlanLimit = (plan: string): number => {
+    const limits: Record<string, number> = {
+      "Gratis": 10,
+      "Básico": 50,
+      "PRO": 200,
+      "Empresarial": 1000,
+    };
+    return limits[plan] || 10;
   };
 
   const shouldShowBanner = planName === "Gratis" && !subscribed && showUpgradeBanner;
@@ -148,9 +208,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
             <SidebarTrigger />
             <img src={ebillLogo} alt="eBill Pro" className="h-12 w-auto" />
-            <Badge variant="secondary" className="ml-2 font-semibold">
-              {planName}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="font-semibold">
+                {planName}
+              </Badge>
+              {!loadingInvoices && (
+                <Badge variant="outline" className="font-normal text-xs">
+                  {monthlyInvoicesCount} / {getPlanLimit(planName)} documentos
+                </Badge>
+              )}
+            </div>
             <div className="flex-1" />
             <Button 
               variant="ghost" 
