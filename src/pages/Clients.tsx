@@ -139,10 +139,6 @@ const Clients = () => {
         );
         const data = await response.json();
         
-        console.log("=== RESPUESTA COMPLETA DE PAÍSES ===");
-        console.log(JSON.stringify(data, null, 2));
-        console.log("=== FIN RESPUESTA PAÍSES ===");
-        
         if (data.codResponse === 1 && data.basePresentationList) {
           setCountries(data.basePresentationList);
         }
