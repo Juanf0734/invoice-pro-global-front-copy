@@ -1,7 +1,13 @@
 {
+  "routes": [
+    {
+      "route": "/api/*",
+      "allowedRoles": ["anonymous", "authenticated"]
+    }
+  ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.woff2", "/api/*"]
+    "exclude": ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.woff2"]
   },
   "mimeTypes": {
     ".json": "application/json"
@@ -14,5 +20,8 @@
   },
   "globalHeaders": {
     "Access-Control-Allow-Origin": "*"
+  },
+  "platform": {
+    "apiRuntime": "node:18"
   }
 }
