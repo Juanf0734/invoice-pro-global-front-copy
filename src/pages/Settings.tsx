@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Save, User, Bell, Shield, Globe, Mail, CreditCard } from "lucide-react";
+import { Loader2, Save, Shield, Globe, CreditCard } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { SubscriptionPlans } from "@/components/SubscriptionPlans";
@@ -21,25 +21,13 @@ const Settings = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [defaultTab, setDefaultTab] = useState("profile");
-  const [profile, setProfile] = useState({
-    full_name: "",
-    company_name: "",
-    email: "",
-  });
+  const [defaultTab, setDefaultTab] = useState("preferences");
 
   const [preferences, setPreferences] = useState({
     language: "es",
     currency: "COP",
     timezone: "America/Bogota",
     dateFormat: "DD/MM/YYYY",
-  });
-
-  const [notifications, setNotifications] = useState({
-    emailInvoices: true,
-    emailPayments: true,
-    emailReminders: true,
-    pushNotifications: false,
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -53,7 +41,6 @@ const Settings = () => {
     if (tab === "subscription") {
       setDefaultTab("subscription");
     }
-    loadUserData();
     loadPreferences();
   }, [searchParams]);
 
@@ -69,58 +56,6 @@ const Settings = () => {
       timezone: savedTimezone,
       dateFormat: savedDateFormat,
     });
-  };
-
-  const loadUserData = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        if (profileData) {
-          setProfile({
-            full_name: profileData.full_name || "",
-            company_name: profileData.company_name || "",
-            email: user.email || "",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error loading user data:", error);
-    }
-  };
-
-  const handleUpdateProfile = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          full_name: profile.full_name,
-          company_name: profile.company_name,
-        })
-        .eq("id", user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: t("settings.profileUpdated"),
-        description: t("settings.profileUpdatedDesc"),
-      });
-    } catch (error: any) {
-      toast({
-        title: t("common.error"),
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleUpdatePassword = async () => {
@@ -187,13 +122,6 @@ const Settings = () => {
     });
   };
 
-  const handleSaveNotifications = () => {
-    toast({
-      title: t("settings.notificationsUpdated"),
-      description: t("settings.notificationsUpdatedDesc"),
-    });
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -202,22 +130,14 @@ const Settings = () => {
       </div>
 
       <Tabs value={defaultTab} onValueChange={setDefaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="profile" className="gap-2">
-            <User className="h-4 w-4" />
-            {t("settings.profile")}
-          </TabsTrigger>
-          <TabsTrigger value="subscription" className="gap-2">
-            <CreditCard className="h-4 w-4" />
-            Suscripción
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="preferences" className="gap-2">
             <Globe className="h-4 w-4" />
             {t("settings.preferences")}
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-2">
-            <Bell className="h-4 w-4" />
-            {t("settings.notifications")}
+          <TabsTrigger value="subscription" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            Suscripción
           </TabsTrigger>
           <TabsTrigger value="security" className="gap-2">
             <Shield className="h-4 w-4" />
@@ -225,70 +145,7 @@ const Settings = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-4">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>{t("settings.personalInfo")}</CardTitle>
-              <CardDescription>{t("settings.personalInfoDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">{t("auth.fullName")}</Label>
-                <Input
-                  id="fullName"
-                  value={profile.full_name}
-                  onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                  placeholder="Juan Pérez"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="companyName">{t("auth.companyName")}</Label>
-                <Input
-                  id="companyName"
-                  value={profile.company_name}
-                  onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
-                  placeholder="Mi Empresa S.L."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">{t("auth.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t("settings.emailCannotChange")}
-                </p>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-end">
-                <Button onClick={handleUpdateProfile} disabled={loading} className="gap-2">
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {t("common.saving")}
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      {t("settings.saveChanges")}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Subscription Tab */}
+        {/* Preferences Tab */}
         <TabsContent value="subscription" className="space-y-4">
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">Planes de Suscripción</h2>
@@ -403,112 +260,6 @@ const Settings = () => {
                 <Button onClick={handleSavePreferences} className="gap-2">
                   <Save className="h-4 w-4" />
                   {t("settings.savePreferences")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-4">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>{t("settings.notificationsTitle")}</CardTitle>
-              <CardDescription>{t("settings.notificationsDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="emailInvoices" className="text-base">
-                        {t("settings.emailInvoices")}
-                      </Label>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {t("settings.emailInvoicesDesc")}
-                    </p>
-                  </div>
-                  <Switch
-                    id="emailInvoices"
-                    checked={notifications.emailInvoices}
-                    onCheckedChange={(checked) =>
-                      setNotifications({ ...notifications, emailInvoices: checked })
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="emailPayments" className="text-base">
-                        {t("settings.emailPayments")}
-                      </Label>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {t("settings.emailPaymentsDesc")}
-                    </p>
-                  </div>
-                  <Switch
-                    id="emailPayments"
-                    checked={notifications.emailPayments}
-                    onCheckedChange={(checked) =>
-                      setNotifications({ ...notifications, emailPayments: checked })
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="emailReminders" className="text-base">
-                        {t("settings.emailReminders")}
-                      </Label>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {t("settings.emailRemindersDesc")}
-                    </p>
-                  </div>
-                  <Switch
-                    id="emailReminders"
-                    checked={notifications.emailReminders}
-                    onCheckedChange={(checked) =>
-                      setNotifications({ ...notifications, emailReminders: checked })
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="pushNotifications" className="text-base">
-                        {t("settings.pushNotifications")}
-                      </Label>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {t("settings.pushNotificationsDesc")}
-                    </p>
-                  </div>
-                  <Switch
-                    id="pushNotifications"
-                    checked={notifications.pushNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotifications({ ...notifications, pushNotifications: checked })
-                    }
-                  />
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-end">
-                <Button onClick={handleSaveNotifications} className="gap-2">
-                  <Save className="h-4 w-4" />
-                  {t("settings.saveNotifications")}
                 </Button>
               </div>
             </CardContent>
