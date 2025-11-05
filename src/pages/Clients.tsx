@@ -28,6 +28,11 @@ interface Client {
   InfoAdicional: string;
 }
 
+interface AuxList {
+  Id: number;
+  Descripcion: string;
+}
+
 interface ClientDetail {
   Id: number;
   Nombre: string;
@@ -92,6 +97,11 @@ const Clients = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9; // 3 columns x 3 rows
   
+  // Auxiliary lists
+  const [countries, setCountries] = useState<AuxList[]>([]);
+  const [departments, setDepartments] = useState<AuxList[]>([]);
+  const [municipalities, setMunicipalities] = useState<AuxList[]>([]);
+  
   const [formData, setFormData] = useState<ClientFormData>({
     Nombre: "",
     Nit: "",
@@ -114,6 +124,53 @@ const Clients = () => {
     PrimerApellido: "",
     SegundoApellido: "",
   });
+
+  // Fetch auxiliary lists
+  useEffect(() => {
+    const fetchAuxiliaryLists = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const companyId = payload.IdEmpresa;
+
+        // Fetch countries
+        const countriesResponse = await fetch(
+          getApiUrl(`/ListasAuxiliares/TraerPaises?IdEmpresa=${companyId}`),
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const countriesData = await countriesResponse.json();
+        if (countriesData.codResponse === 1 && countriesData.basePresentationList) {
+          setCountries(countriesData.basePresentationList);
+        }
+
+        // Fetch departments
+        const deptsResponse = await fetch(
+          getApiUrl(`/ListasAuxiliares/TraerDepartamentos?IdEmpresa=${companyId}`),
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const deptsData = await deptsResponse.json();
+        if (deptsData.codResponse === 1 && deptsData.basePresentationList) {
+          setDepartments(deptsData.basePresentationList);
+        }
+
+        // Fetch municipalities
+        const muniResponse = await fetch(
+          getApiUrl(`/ListasAuxiliares/TraerMunicipios?IdEmpresa=${companyId}`),
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const muniData = await muniResponse.json();
+        if (muniData.codResponse === 1 && muniData.basePresentationList) {
+          setMunicipalities(muniData.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching auxiliary lists:", error);
+      }
+    };
+
+    fetchAuxiliaryLists();
+  }, []);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -855,23 +912,93 @@ const Clients = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="pais">{t("newInvoice.country")}</Label>
-                <Input
-                  id="pais"
-                  value={formData.PaisIso}
-                  onChange={(e) => setFormData({ ...formData, PaisIso: e.target.value })}
-                />
+                <Select
+                  value={formData.IdPais.toString()}
+                  onValueChange={(value) => {
+                    const selectedCountry = countries.find(c => c.Id === parseInt(value));
+                    setFormData({ 
+                      ...formData, 
+                      IdPais: parseInt(value),
+                      PaisIso: selectedCountry?.Descripcion || "CO"
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar país" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.Id} value={country.Id.toString()}>
+                        {country.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="codigoPostal">{t("company.postalCode")}</Label>
-                <Input
-                  id="codigoPostal"
-                  value={formData.CodigoPostal}
-                  onChange={(e) => setFormData({ ...formData, CodigoPostal: e.target.value })}
-                />
+                <Label htmlFor="departamento">{t("newInvoice.department")}</Label>
+                <Select
+                  value={formData.IdDepartamento.toString()}
+                  onValueChange={(value) => {
+                    const selectedDept = departments.find(d => d.Id === parseInt(value));
+                    setFormData({ 
+                      ...formData, 
+                      IdDepartamento: parseInt(value),
+                      DepartamentoDane: selectedDept?.Descripcion || ""
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar departamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.Id} value={dept.Id.toString()}>
+                        {dept.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="municipio">{t("newInvoice.municipality")}</Label>
+                <Select
+                  value={formData.IdMunicipio.toString()}
+                  onValueChange={(value) => {
+                    const selectedMuni = municipalities.find(m => m.Id === parseInt(value));
+                    setFormData({ 
+                      ...formData, 
+                      IdMunicipio: parseInt(value),
+                      MunicipioDane: selectedMuni?.Descripcion || ""
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar municipio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {municipalities.map((muni) => (
+                      <SelectItem key={muni.Id} value={muni.Id.toString()}>
+                        {muni.Descripcion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="codigoPostal">{t("company.postalCode")}</Label>
+              <Input
+                id="codigoPostal"
+                value={formData.CodigoPostal}
+                onChange={(e) => setFormData({ ...formData, CodigoPostal: e.target.value })}
+              />
             </div>
           </div>
 
