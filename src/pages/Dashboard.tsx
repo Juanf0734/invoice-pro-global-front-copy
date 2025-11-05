@@ -44,6 +44,7 @@ const Dashboard = () => {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
   const [invoicesByType, setInvoicesByType] = useState<{name: string, value: number}[]>([]);
+  const [invoicesByDianStatus, setInvoicesByDianStatus] = useState<{name: string, value: number}[]>([]);
   const [monthlyData, setMonthlyData] = useState<{month: string, amount: number, count: number}[]>([]);
   const [loading, setLoading] = useState(true);
   const locale = i18n.language === 'es' ? es : enUS;
@@ -99,6 +100,19 @@ const Dashboard = () => {
               value
             }));
             setInvoicesByType(chartData);
+
+            // Agrupar por estado DIAN para la gráfica
+            const dianStatusCount = allInvoices.reduce((acc, inv) => {
+              const status = inv.EstadoDian || 'Sin Estado';
+              acc[status] = (acc[status] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+
+            const dianChartData = Object.entries(dianStatusCount).map(([name, value]) => ({
+              name,
+              value
+            }));
+            setInvoicesByDianStatus(dianChartData);
 
             // Get last 5 invoices
             const sorted = [...allInvoices].sort((a, b) => 
@@ -363,6 +377,63 @@ const Dashboard = () => {
                   />
                   <Legend />
                 </PieChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg md:col-span-2">
+          <CardHeader>
+            <CardTitle>Documentos por Estado DIAN</CardTitle>
+            <CardDescription>Distribución de documentos del último mes según estado DIAN</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {invoicesByDianStatus.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground">No hay datos disponibles</p>
+                <p className="text-sm text-muted-foreground">Aún no hay documentos con estados DIAN registrados</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={invoicesByDianStatus}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="name" 
+                    className="text-xs"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis className="text-xs" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)",
+                    }}
+                    formatter={(value: number) => [value, 'Documentos']}
+                  />
+                  <Legend formatter={() => 'Cantidad de Documentos'} />
+                  <Bar 
+                    dataKey="value" 
+                    fill="hsl(var(--primary))" 
+                    radius={[8, 8, 0, 0]}
+                  >
+                    {invoicesByDianStatus.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={
+                          entry.name.toUpperCase().includes('EXITOSA') 
+                            ? 'hsl(var(--chart-3))' 
+                            : entry.name.toUpperCase().includes('FALLIDA')
+                            ? 'hsl(var(--chart-5))'
+                            : 'hsl(var(--primary))'
+                        } 
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             )}
           </CardContent>
