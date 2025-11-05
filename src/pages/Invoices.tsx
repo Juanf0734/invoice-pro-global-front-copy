@@ -356,6 +356,16 @@ const Invoices = () => {
   const handleDownloadXML = async () => {
     if (!selectedInvoice) return;
     
+    // Validar que el estado DIAN contenga "EXITOSA"
+    if (!selectedInvoice.estadoDian.toUpperCase().includes("EXITOSA")) {
+      toast({
+        title: "XML no disponible",
+        description: "No se puede descargar el XML porque el documento no tiene estado exitoso en la DIAN",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       const authToken = localStorage.getItem("authToken");
       
