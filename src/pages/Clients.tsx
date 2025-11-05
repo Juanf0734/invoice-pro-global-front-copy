@@ -133,7 +133,7 @@ const Clients = () => {
         if (!token) return;
 
         const response = await fetch(
-          getApiUrl(`/ListasAuxiliares/ListaPaises`),
+          getApiUrl(`/Auxiliar/ListaPaises`),
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await response.json();
@@ -162,7 +162,7 @@ const Clients = () => {
         if (!token) return;
 
         const response = await fetch(
-          getApiUrl(`/ListasAuxiliares/ListaDepartamentosPais?IdPais=${formData.IdPais}`),
+          getApiUrl(`/Auxiliar/ListaDepartamentosPais?IdPais=${formData.IdPais}`),
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await response.json();
@@ -190,7 +190,7 @@ const Clients = () => {
         if (!token) return;
 
         const response = await fetch(
-          getApiUrl(`/ListasAuxiliares/ListaMuniciposDepartamento?IdDepartamento=${formData.IdDepartamento}`),
+          getApiUrl(`/Auxiliar/ListaMuniciposDepartamento?IdDepartamento=${formData.IdDepartamento}`),
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await response.json();
