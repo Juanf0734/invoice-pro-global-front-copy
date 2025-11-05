@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Save, Shield, Globe, CreditCard } from "lucide-react";
@@ -154,21 +155,28 @@ const Settings = () => {
             </p>
           </div>
           <SubscriptionPlans />
-          <Card className="mt-6 shadow-lg border-blue-200">
+          <Card className="mt-6 shadow-lg border-muted-foreground/20 opacity-60">
             <CardHeader>
-              <CardTitle>Complemento PEPPOL</CardTitle>
-              <CardDescription>Interoperabilidad PEPPOL disponible</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                Complemento PEPPOL
+                <Badge variant="outline" className="text-xs">No disponible</Badge>
+              </CardTitle>
+              <CardDescription>
+                Funcionalidad exclusiva para facturación electrónica europea
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-lg">€39,00 / mes</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Valor por documento: €0,01
-                    </p>
-                  </div>
-                  <Button variant="outline">Próximamente</Button>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  PEPPOL (Pan-European Public Procurement On-Line) es un estándar de interoperabilidad 
+                  para la facturación electrónica en Europa. Esta funcionalidad está disponible 
+                  únicamente para empresas que emiten facturas en países de la Unión Europea.
+                </p>
+                <div className="flex items-center gap-2 text-sm">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    Cumple con normativas europeas de facturación electrónica
+                  </span>
                 </div>
               </div>
             </CardContent>
