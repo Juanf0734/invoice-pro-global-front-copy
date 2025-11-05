@@ -951,7 +951,7 @@ const Clients = () => {
                 <Select
                   value={formData.IdPais.toString()}
                   onValueChange={(value) => {
-                    const selectedCountry = countries.find(c => c.Id === parseInt(value));
+                    const selectedCountry = countries.find(c => c && c.Id === parseInt(value));
                     setFormData({ 
                       ...formData, 
                       IdPais: parseInt(value),
@@ -967,7 +967,7 @@ const Clients = () => {
                     <SelectValue placeholder="Seleccionar país" />
                   </SelectTrigger>
                   <SelectContent>
-                    {countries.map((country) => (
+                    {countries.filter(country => country && country.Id).map((country) => (
                       <SelectItem key={country.Id} value={country.Id.toString()}>
                         {country.Descripcion}
                       </SelectItem>
@@ -981,7 +981,7 @@ const Clients = () => {
                 <Select
                   value={formData.IdDepartamento.toString()}
                   onValueChange={(value) => {
-                    const selectedDept = departments.find(d => d.Id === parseInt(value));
+                    const selectedDept = departments.find(d => d && d.Id === parseInt(value));
                     setFormData({ 
                       ...formData, 
                       IdDepartamento: parseInt(value),
@@ -996,7 +996,7 @@ const Clients = () => {
                     <SelectValue placeholder="Seleccionar departamento" />
                   </SelectTrigger>
                   <SelectContent>
-                    {departments.map((dept) => (
+                    {departments.filter(dept => dept && dept.Id).map((dept) => (
                       <SelectItem key={dept.Id} value={dept.Id.toString()}>
                         {dept.Descripcion}
                       </SelectItem>
@@ -1010,7 +1010,7 @@ const Clients = () => {
                 <Select
                   value={formData.IdMunicipio.toString()}
                   onValueChange={(value) => {
-                    const selectedMuni = municipalities.find(m => m.Id === parseInt(value));
+                    const selectedMuni = municipalities.find(m => m && m.Id === parseInt(value));
                     setFormData({ 
                       ...formData, 
                       IdMunicipio: parseInt(value),
@@ -1023,7 +1023,7 @@ const Clients = () => {
                     <SelectValue placeholder="Seleccionar municipio" />
                   </SelectTrigger>
                   <SelectContent>
-                    {municipalities.map((muni) => (
+                    {municipalities.filter(muni => muni && muni.Id).map((muni) => (
                       <SelectItem key={muni.Id} value={muni.Id.toString()}>
                         {muni.Descripcion}
                       </SelectItem>
