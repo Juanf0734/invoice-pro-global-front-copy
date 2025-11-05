@@ -125,7 +125,7 @@ const Clients = () => {
     SegundoApellido: "",
   });
 
-  // Fetch countries on mount
+  // Cargar países al montar el componente
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -137,94 +137,99 @@ const Clients = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await response.json();
-        console.log("Países API Response:", data);
         
         if (data.codResponse === 1 && data.basePresentationList) {
-          console.log("Países cargados:", data.basePresentationList);
           setCountries(data.basePresentationList);
-        } else {
-          console.log("No se encontraron países o estructura diferente");
-          toast.error("Error al cargar la lista de países");
         }
       } catch (error) {
-        console.error("Error fetching countries:", error);
-        toast.error("Error al cargar la lista de países");
+        console.error("Error cargando países:", error);
+        toast.error("Error al cargar países");
       }
     };
 
     fetchCountries();
   }, []);
 
-  // Fetch departments when country changes
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      if (!formData.IdPais) {
-        setDepartments([]);
-        setMunicipalities([]);
-        return;
+  // Cargar departamentos cuando cambia el país
+  const handleCountryChange = async (countryId: number) => {
+    try {
+      // Actualizar el país y limpiar departamento y municipio
+      const selectedCountry = countries.find(c => c.Id === countryId);
+      setFormData({
+        ...formData,
+        IdPais: countryId,
+        PaisIso: selectedCountry?.Descripcion || "CO",
+        IdDepartamento: 0,
+        DepartamentoDane: "",
+        IdMunicipio: 0,
+        MunicipioDane: ""
+      });
+      
+      // Limpiar y cargar nuevos departamentos
+      setDepartments([]);
+      setMunicipalities([]);
+
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+
+      const response = await fetch(
+        getApiUrl(`/Auxiliar/ListaDepartamentosPais?IdPais=${countryId}`),
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await response.json();
+      
+      if (data.codResponse === 1 && data.basePresentationList) {
+        setDepartments(data.basePresentationList);
       }
+    } catch (error) {
+      console.error("Error cargando departamentos:", error);
+      toast.error("Error al cargar departamentos");
+    }
+  };
 
-      try {
-        const token = localStorage.getItem("authToken");
-        if (!token) return;
+  // Cargar municipios cuando cambia el departamento
+  const handleDepartmentChange = async (deptId: number) => {
+    try {
+      // Actualizar el departamento y limpiar municipio
+      const selectedDept = departments.find(d => d.Id === deptId);
+      setFormData({
+        ...formData,
+        IdDepartamento: deptId,
+        DepartamentoDane: selectedDept?.Descripcion || "",
+        IdMunicipio: 0,
+        MunicipioDane: ""
+      });
+      
+      // Limpiar y cargar nuevos municipios
+      setMunicipalities([]);
 
-        const response = await fetch(
-          getApiUrl(`/Auxiliar/ListaDepartamentosPais?IdPais=${formData.IdPais}`),
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const data = await response.json();
-        console.log(`Departamentos para país ${formData.IdPais}:`, data);
-        
-        if (data.codResponse === 1 && data.basePresentationList) {
-          console.log("Departamentos cargados:", data.basePresentationList);
-          setDepartments(data.basePresentationList);
-        } else {
-          console.log("No se encontraron departamentos o estructura diferente");
-          setDepartments([]);
-        }
-      } catch (error) {
-        console.error("Error fetching departments:", error);
-        setDepartments([]);
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+
+      const response = await fetch(
+        getApiUrl(`/Auxiliar/ListaMuniciposDepartamento?IdDepartamento=${deptId}`),
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await response.json();
+      
+      if (data.codResponse === 1 && data.basePresentationList) {
+        setMunicipalities(data.basePresentationList);
       }
-    };
+    } catch (error) {
+      console.error("Error cargando municipios:", error);
+      toast.error("Error al cargar municipios");
+    }
+  };
 
-    fetchDepartments();
-  }, [formData.IdPais]);
-
-  // Fetch municipalities when department changes
-  useEffect(() => {
-    const fetchMunicipalities = async () => {
-      if (!formData.IdDepartamento) {
-        setMunicipalities([]);
-        return;
-      }
-
-      try {
-        const token = localStorage.getItem("authToken");
-        if (!token) return;
-
-        const response = await fetch(
-          getApiUrl(`/Auxiliar/ListaMuniciposDepartamento?IdDepartamento=${formData.IdDepartamento}`),
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const data = await response.json();
-        console.log(`Municipios para departamento ${formData.IdDepartamento}:`, data);
-        
-        if (data.codResponse === 1 && data.basePresentationList) {
-          console.log("Municipios cargados:", data.basePresentationList);
-          setMunicipalities(data.basePresentationList);
-        } else {
-          console.log("No se encontraron municipios o estructura diferente");
-          setMunicipalities([]);
-        }
-      } catch (error) {
-        console.error("Error fetching municipalities:", error);
-        setMunicipalities([]);
-      }
-    };
-
-    fetchMunicipalities();
-  }, [formData.IdDepartamento]);
+  // Actualizar municipio
+  const handleMunicipalityChange = (muniId: number) => {
+    const selectedMuni = municipalities.find(m => m.Id === muniId);
+    setFormData({
+      ...formData,
+      IdMunicipio: muniId,
+      MunicipioDane: selectedMuni?.Descripcion || ""
+    });
+  };
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -249,15 +254,9 @@ const Clients = () => {
 
         const data = await response.json();
         
-        console.log("API Response:", data);
-        console.log("basePresentationList:", data.basePresentationList);
-        console.log("Primer cliente:", data.basePresentationList?.[0]);
-        
         if (data.codResponse === 1 && data.basePresentationList) {
           setClients(data.basePresentationList);
-          console.log("Clientes cargados:", data.basePresentationList.length);
         } else {
-          console.log("No se encontraron clientes o error en respuesta");
           toast.error("Error al cargar los clientes");
         }
       } catch (error) {
@@ -968,101 +967,60 @@ const Clients = () => {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="pais">País ({countries.length} opciones)</Label>
+                <Label htmlFor="pais">País *</Label>
                 <Select
-                  value={formData.IdPais > 0 ? formData.IdPais.toString() : ""}
-                  onValueChange={(value) => {
-                    console.log("País seleccionado:", value);
-                    const selectedCountry = countries.find(c => c && c.Id === parseInt(value));
-                    console.log("País encontrado:", selectedCountry);
-                    setFormData({ 
-                      ...formData, 
-                      IdPais: parseInt(value),
-                      PaisIso: selectedCountry?.Descripcion || "CO",
-                      IdDepartamento: 0,
-                      DepartamentoDane: "",
-                      IdMunicipio: 0,
-                      MunicipioDane: ""
-                    });
-                  }}
+                  value={formData.IdPais > 0 ? formData.IdPais.toString() : undefined}
+                  onValueChange={(value) => handleCountryChange(parseInt(value))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="pais">
                     <SelectValue placeholder="Seleccionar país" />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover z-[100] max-h-[300px]" position="popper">
-                    {countries.filter(country => country && country.Id).length > 0 ? (
-                      countries.filter(country => country && country.Id).map((country) => (
-                        <SelectItem key={country.Id} value={country.Id.toString()}>
-                          {country.Descripcion}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-2 text-sm text-muted-foreground">No hay países disponibles</div>
-                    )}
+                  <SelectContent position="popper" className="max-h-[200px]">
+                    {countries.map((country) => (
+                      <SelectItem key={country.Id} value={country.Id.toString()}>
+                        {country.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="departamento">Departamento ({departments.length} opciones)</Label>
+                <Label htmlFor="departamento">Departamento *</Label>
                 <Select
-                  value={formData.IdDepartamento > 0 ? formData.IdDepartamento.toString() : ""}
-                  onValueChange={(value) => {
-                    const selectedDept = departments.find(d => d && d.Id === parseInt(value));
-                    setFormData({ 
-                      ...formData, 
-                      IdDepartamento: parseInt(value),
-                      DepartamentoDane: selectedDept?.Descripcion || "",
-                      IdMunicipio: 0,
-                      MunicipioDane: ""
-                    });
-                  }}
+                  value={formData.IdDepartamento > 0 ? formData.IdDepartamento.toString() : undefined}
+                  onValueChange={(value) => handleDepartmentChange(parseInt(value))}
                   disabled={!formData.IdPais || departments.length === 0}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar departamento" />
+                  <SelectTrigger id="departamento">
+                    <SelectValue placeholder={departments.length === 0 ? "Primero selecciona país" : "Seleccionar departamento"} />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover z-[100] max-h-[300px]" position="popper">
-                    {departments.filter(dept => dept && dept.Id).length > 0 ? (
-                      departments.filter(dept => dept && dept.Id).map((dept) => (
-                        <SelectItem key={dept.Id} value={dept.Id.toString()}>
-                          {dept.Descripcion}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-2 text-sm text-muted-foreground">No hay departamentos disponibles</div>
-                    )}
+                  <SelectContent position="popper" className="max-h-[200px]">
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.Id} value={dept.Id.toString()}>
+                        {dept.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="municipio">Municipio ({municipalities.length} opciones)</Label>
+                <Label htmlFor="municipio">Municipio *</Label>
                 <Select
-                  value={formData.IdMunicipio > 0 ? formData.IdMunicipio.toString() : ""}
-                  onValueChange={(value) => {
-                    const selectedMuni = municipalities.find(m => m && m.Id === parseInt(value));
-                    setFormData({ 
-                      ...formData, 
-                      IdMunicipio: parseInt(value),
-                      MunicipioDane: selectedMuni?.Descripcion || ""
-                    });
-                  }}
+                  value={formData.IdMunicipio > 0 ? formData.IdMunicipio.toString() : undefined}
+                  onValueChange={(value) => handleMunicipalityChange(parseInt(value))}
                   disabled={!formData.IdDepartamento || municipalities.length === 0}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar municipio" />
+                  <SelectTrigger id="municipio">
+                    <SelectValue placeholder={municipalities.length === 0 ? "Primero selecciona departamento" : "Seleccionar municipio"} />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover z-[100] max-h-[300px]" position="popper">
-                    {municipalities.filter(muni => muni && muni.Id).length > 0 ? (
-                      municipalities.filter(muni => muni && muni.Id).map((muni) => (
-                        <SelectItem key={muni.Id} value={muni.Id.toString()}>
-                          {muni.Descripcion}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-2 text-sm text-muted-foreground">No hay municipios disponibles</div>
-                    )}
+                  <SelectContent position="popper" className="max-h-[200px]">
+                    {municipalities.map((muni) => (
+                      <SelectItem key={muni.Id} value={muni.Id.toString()}>
+                        {muni.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
