@@ -127,7 +127,7 @@ const Invoices = () => {
         console.error("Error fetching invoices:", error);
         toast({
           title: "Error",
-          description: "No se pudieron cargar las facturas",
+          description: "No se pudieron cargar los documentos",
           variant: "destructive",
         });
         setInvoices([]);
@@ -246,7 +246,7 @@ const Invoices = () => {
       } else {
         toast({
           title: "PDF no disponible",
-          description: "No hay PDF disponible para esta factura",
+          description: "No hay PDF disponible para este documento",
           variant: "destructive",
         });
       }
@@ -320,7 +320,7 @@ const Invoices = () => {
 
       toast({
         title: "Enviando a DIAN",
-        description: "La factura está siendo enviada a la DIAN de Colombia...",
+        description: "El documento está siendo enviado a la DIAN de Colombia...",
       });
 
       const response = await fetch(
@@ -339,13 +339,13 @@ const Invoices = () => {
 
       toast({
         title: "Enviado exitosamente",
-        description: "La factura ha sido enviada a la DIAN correctamente",
+        description: "El documento ha sido enviado a la DIAN correctamente",
       });
     } catch (error) {
       console.error("Error sending to DIAN:", error);
-      toast({
+        toast({
         title: "Error",
-        description: "No se pudo enviar la factura a la DIAN",
+        description: "No se pudo enviar el documento a la DIAN",
         variant: "destructive",
       });
     }
@@ -459,17 +459,17 @@ const Invoices = () => {
             <div className="flex items-center justify-center p-12">
               <div className="text-center space-y-3">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                <p className="text-muted-foreground">Cargando facturas...</p>
+                <p className="text-muted-foreground">Cargando documentos...</p>
               </div>
             </div>
           ) : filteredInvoices.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <div className="flex flex-col items-center justify-center p-12 text-center">
               <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No se encontraron facturas</h3>
+              <h3 className="text-lg font-semibold mb-2">No se encontraron documentos</h3>
               <p className="text-muted-foreground">
                 {hasActiveFilters
                   ? "Intenta ajustar los filtros de búsqueda"
-                  : "No hay facturas en el período seleccionado"}
+                  : "No hay documentos en el período seleccionado"}
               </p>
             </div>
           ) : (

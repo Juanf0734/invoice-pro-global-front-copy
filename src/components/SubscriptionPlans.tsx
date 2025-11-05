@@ -24,8 +24,8 @@ const plans = [
     priceIdYearly: "price_1SNxq9RRbSHLnGlJENWm1LMA",
     features: [
       "2 usuarios",
-      "5 facturas/mes",
-      "$400 COP por factura adicional",
+      "5 documentos/mes",
+      "$400 COP por documento adicional",
       "Verifactu incluido",
       "Soporte Estándar",
       "Representación PDF",
@@ -43,8 +43,8 @@ const plans = [
     popular: true,
     features: [
       "5 usuarios",
-      "50 facturas/mes",
-      "$300 COP por factura adicional",
+      "50 documentos/mes",
+      "$300 COP por documento adicional",
       "Verifactu incluido",
       "Soporte Premium",
       "Representación PDF",
@@ -62,7 +62,7 @@ const plans = [
     priceIdYearly: "price_1SNxr2RRbSHLnGlJQckPCYkh",
     features: [
       "10 usuarios",
-      "800 facturas/mes",
+      "800 documentos/mes",
       "Verifactu incluido",
       "Soporte Premium",
       "Representación PDF",

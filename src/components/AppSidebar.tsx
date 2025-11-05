@@ -44,7 +44,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        {/* Nueva Factura - Acción destacada */}
+        {/* Nuevo Documento - Acción destacada */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
