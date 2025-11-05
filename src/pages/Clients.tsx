@@ -968,9 +968,9 @@ const Clients = () => {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="pais">{t("newInvoice.country")}</Label>
+                <Label htmlFor="pais">País</Label>
                 <Select
-                  value={formData.IdPais.toString()}
+                  value={formData.IdPais > 0 ? formData.IdPais.toString() : ""}
                   onValueChange={(value) => {
                     const selectedCountry = countries.find(c => c && c.Id === parseInt(value));
                     setFormData({ 
@@ -987,7 +987,7 @@ const Clients = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar país" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     {countries.filter(country => country && country.Id).map((country) => (
                       <SelectItem key={country.Id} value={country.Id.toString()}>
                         {country.Descripcion}
@@ -998,9 +998,9 @@ const Clients = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="departamento">{t("newInvoice.department")}</Label>
+                <Label htmlFor="departamento">Departamento</Label>
                 <Select
-                  value={formData.IdDepartamento.toString()}
+                  value={formData.IdDepartamento > 0 ? formData.IdDepartamento.toString() : ""}
                   onValueChange={(value) => {
                     const selectedDept = departments.find(d => d && d.Id === parseInt(value));
                     setFormData({ 
@@ -1016,7 +1016,7 @@ const Clients = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar departamento" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     {departments.filter(dept => dept && dept.Id).map((dept) => (
                       <SelectItem key={dept.Id} value={dept.Id.toString()}>
                         {dept.Descripcion}
@@ -1027,9 +1027,9 @@ const Clients = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="municipio">{t("newInvoice.municipality")}</Label>
+                <Label htmlFor="municipio">Municipio</Label>
                 <Select
-                  value={formData.IdMunicipio.toString()}
+                  value={formData.IdMunicipio > 0 ? formData.IdMunicipio.toString() : ""}
                   onValueChange={(value) => {
                     const selectedMuni = municipalities.find(m => m && m.Id === parseInt(value));
                     setFormData({ 
@@ -1043,7 +1043,7 @@ const Clients = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar municipio" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     {municipalities.filter(muni => muni && muni.Id).map((muni) => (
                       <SelectItem key={muni.Id} value={muni.Id.toString()}>
                         {muni.Descripcion}
