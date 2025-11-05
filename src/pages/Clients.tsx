@@ -466,7 +466,18 @@ const Clients = () => {
         body: JSON.stringify(clientData),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("Error parsing JSON response:", text);
+        throw new Error("Respuesta inválida del servidor");
+      }
 
       if (data.codResponse === 1) {
         toast.success(isEditMode ? t("clients.clientUpdated") : t("clients.clientCreated"));
