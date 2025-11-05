@@ -968,11 +968,13 @@ const Clients = () => {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="pais">País</Label>
+                <Label htmlFor="pais">País ({countries.length} opciones)</Label>
                 <Select
                   value={formData.IdPais > 0 ? formData.IdPais.toString() : ""}
                   onValueChange={(value) => {
+                    console.log("País seleccionado:", value);
                     const selectedCountry = countries.find(c => c && c.Id === parseInt(value));
+                    console.log("País encontrado:", selectedCountry);
                     setFormData({ 
                       ...formData, 
                       IdPais: parseInt(value),
@@ -987,18 +989,22 @@ const Clients = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar país" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    {countries.filter(country => country && country.Id).map((country) => (
-                      <SelectItem key={country.Id} value={country.Id.toString()}>
-                        {country.Descripcion}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-popover z-[100] max-h-[300px]" position="popper">
+                    {countries.filter(country => country && country.Id).length > 0 ? (
+                      countries.filter(country => country && country.Id).map((country) => (
+                        <SelectItem key={country.Id} value={country.Id.toString()}>
+                          {country.Descripcion}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-sm text-muted-foreground">No hay países disponibles</div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="departamento">Departamento</Label>
+                <Label htmlFor="departamento">Departamento ({departments.length} opciones)</Label>
                 <Select
                   value={formData.IdDepartamento > 0 ? formData.IdDepartamento.toString() : ""}
                   onValueChange={(value) => {
@@ -1016,18 +1022,22 @@ const Clients = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar departamento" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    {departments.filter(dept => dept && dept.Id).map((dept) => (
-                      <SelectItem key={dept.Id} value={dept.Id.toString()}>
-                        {dept.Descripcion}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-popover z-[100] max-h-[300px]" position="popper">
+                    {departments.filter(dept => dept && dept.Id).length > 0 ? (
+                      departments.filter(dept => dept && dept.Id).map((dept) => (
+                        <SelectItem key={dept.Id} value={dept.Id.toString()}>
+                          {dept.Descripcion}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-sm text-muted-foreground">No hay departamentos disponibles</div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="municipio">Municipio</Label>
+                <Label htmlFor="municipio">Municipio ({municipalities.length} opciones)</Label>
                 <Select
                   value={formData.IdMunicipio > 0 ? formData.IdMunicipio.toString() : ""}
                   onValueChange={(value) => {
@@ -1043,12 +1053,16 @@ const Clients = () => {
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar municipio" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    {municipalities.filter(muni => muni && muni.Id).map((muni) => (
-                      <SelectItem key={muni.Id} value={muni.Id.toString()}>
-                        {muni.Descripcion}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-popover z-[100] max-h-[300px]" position="popper">
+                    {municipalities.filter(muni => muni && muni.Id).length > 0 ? (
+                      municipalities.filter(muni => muni && muni.Id).map((muni) => (
+                        <SelectItem key={muni.Id} value={muni.Id.toString()}>
+                          {muni.Descripcion}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-sm text-muted-foreground">No hay municipios disponibles</div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
