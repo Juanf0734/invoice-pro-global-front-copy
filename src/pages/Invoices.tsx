@@ -539,7 +539,8 @@ const Invoices = () => {
                       <th className="px-6 py-4 text-left text-sm font-semibold">Cliente</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Monto</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">Estado</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Estado DIAN</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">Estado Cliente</th>
                       <th className="px-6 py-4 text-right text-sm font-semibold">Acciones</th>
                     </tr>
                   </thead>
@@ -565,6 +566,11 @@ const Invoices = () => {
                     <td className="px-6 py-4 text-sm text-muted-foreground">{invoice.date}</td>
                     <td className="px-6 py-4">
                       <span className="font-semibold">{invoice.amount}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant="outline" className="font-normal">
+                        {invoice.estadoDian}
+                      </Badge>
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant="outline" className="font-normal">
@@ -650,12 +656,20 @@ const Invoices = () => {
                     <p className="text-xs text-muted-foreground">{invoice.documentType}</p>
                     <p className="font-semibold truncate">{invoice.client}</p>
                   </div>
-                    <Badge 
-                      variant="outline" 
-                      className="font-normal text-xs"
-                    >
-                      {invoice.status}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge 
+                        variant="outline" 
+                        className="font-normal text-xs text-center"
+                      >
+                        {invoice.estadoDian}
+                      </Badge>
+                      <Badge 
+                        variant="outline" 
+                        className="font-normal text-xs text-center"
+                      >
+                        {invoice.status}
+                      </Badge>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-2 text-sm">
@@ -666,6 +680,14 @@ const Invoices = () => {
                     <div>
                       <p className="text-muted-foreground text-xs">Monto</p>
                       <p className="font-semibold">{invoice.amount}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-muted-foreground text-xs">Estados</p>
+                      <div className="flex gap-2 mt-1">
+                        <span className="text-xs">DIAN: <span className="font-medium">{invoice.estadoDian}</span></span>
+                        <span className="text-xs">•</span>
+                        <span className="text-xs">Cliente: <span className="font-medium">{invoice.status}</span></span>
+                      </div>
                     </div>
                   </div>
 
@@ -817,7 +839,18 @@ const Invoices = () => {
                   <p className="font-bold text-lg md:text-xl">{selectedInvoice?.amount}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs md:text-sm text-muted-foreground">Estado</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Estado DIAN</p>
+                  {selectedInvoice && (
+                    <Badge 
+                      variant="outline" 
+                      className="w-fit text-xs"
+                    >
+                      {selectedInvoice.estadoDian}
+                    </Badge>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs md:text-sm text-muted-foreground">Estado Cliente</p>
                   {selectedInvoice && (
                     <Badge 
                       variant="outline" 
