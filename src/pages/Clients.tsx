@@ -125,52 +125,85 @@ const Clients = () => {
     SegundoApellido: "",
   });
 
-  // Fetch auxiliary lists
+  // Fetch countries on mount
   useEffect(() => {
-    const fetchAuxiliaryLists = async () => {
+    const fetchCountries = async () => {
       try {
         const token = localStorage.getItem("authToken");
         if (!token) return;
 
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const companyId = payload.IdEmpresa;
-
-        // Fetch countries
-        const countriesResponse = await fetch(
-          getApiUrl(`/ListasAuxiliares/TraerPaises?IdEmpresa=${companyId}`),
+        const response = await fetch(
+          getApiUrl(`/ListasAuxiliares/ListaPaises`),
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const countriesData = await countriesResponse.json();
-        if (countriesData.codResponse === 1 && countriesData.basePresentationList) {
-          setCountries(countriesData.basePresentationList);
-        }
-
-        // Fetch departments
-        const deptsResponse = await fetch(
-          getApiUrl(`/ListasAuxiliares/TraerDepartamentos?IdEmpresa=${companyId}`),
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const deptsData = await deptsResponse.json();
-        if (deptsData.codResponse === 1 && deptsData.basePresentationList) {
-          setDepartments(deptsData.basePresentationList);
-        }
-
-        // Fetch municipalities
-        const muniResponse = await fetch(
-          getApiUrl(`/ListasAuxiliares/TraerMunicipios?IdEmpresa=${companyId}`),
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const muniData = await muniResponse.json();
-        if (muniData.codResponse === 1 && muniData.basePresentationList) {
-          setMunicipalities(muniData.basePresentationList);
+        const data = await response.json();
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setCountries(data.basePresentationList);
         }
       } catch (error) {
-        console.error("Error fetching auxiliary lists:", error);
+        console.error("Error fetching countries:", error);
       }
     };
 
-    fetchAuxiliaryLists();
+    fetchCountries();
   }, []);
+
+  // Fetch departments when country changes
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      if (!formData.IdPais) {
+        setDepartments([]);
+        setMunicipalities([]);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
+        const response = await fetch(
+          getApiUrl(`/ListasAuxiliares/ListaDepartamentosPais?IdPais=${formData.IdPais}`),
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await response.json();
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setDepartments(data.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      }
+    };
+
+    fetchDepartments();
+  }, [formData.IdPais]);
+
+  // Fetch municipalities when department changes
+  useEffect(() => {
+    const fetchMunicipalities = async () => {
+      if (!formData.IdDepartamento) {
+        setMunicipalities([]);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
+        const response = await fetch(
+          getApiUrl(`/ListasAuxiliares/ListaMuniciposDepartamento?IdDepartamento=${formData.IdDepartamento}`),
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await response.json();
+        if (data.codResponse === 1 && data.basePresentationList) {
+          setMunicipalities(data.basePresentationList);
+        }
+      } catch (error) {
+        console.error("Error fetching municipalities:", error);
+      }
+    };
+
+    fetchMunicipalities();
+  }, [formData.IdDepartamento]);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -922,7 +955,11 @@ const Clients = () => {
                     setFormData({ 
                       ...formData, 
                       IdPais: parseInt(value),
-                      PaisIso: selectedCountry?.Descripcion || "CO"
+                      PaisIso: selectedCountry?.Descripcion || "CO",
+                      IdDepartamento: 0,
+                      DepartamentoDane: "",
+                      IdMunicipio: 0,
+                      MunicipioDane: ""
                     });
                   }}
                 >
@@ -948,9 +985,12 @@ const Clients = () => {
                     setFormData({ 
                       ...formData, 
                       IdDepartamento: parseInt(value),
-                      DepartamentoDane: selectedDept?.Descripcion || ""
+                      DepartamentoDane: selectedDept?.Descripcion || "",
+                      IdMunicipio: 0,
+                      MunicipioDane: ""
                     });
                   }}
+                  disabled={!formData.IdPais || departments.length === 0}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar departamento" />
@@ -977,6 +1017,7 @@ const Clients = () => {
                       MunicipioDane: selectedMuni?.Descripcion || ""
                     });
                   }}
+                  disabled={!formData.IdDepartamento || municipalities.length === 0}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar municipio" />
