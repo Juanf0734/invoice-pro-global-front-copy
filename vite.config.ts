@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/api': {
-        target: 'https://ebillpymetest.facturaenlinea.co',
+        target: 'https://0d1eb018dccf.ngrok-free.app',
         changeOrigin: true,
         secure: false,
       }

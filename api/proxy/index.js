@@ -2,7 +2,7 @@ const https = require('https');
 const http = require('http');
 
 module.exports = async function (context, req) {
-  const targetUrl = 'https://ebillpymetest.facturaenlinea.co';
+  const targetUrl = 'https://0d1eb018dccf.ngrok-free.app';
   const path = context.bindingData.path || '';
   const fullUrl = `${targetUrl}/${path}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
 
