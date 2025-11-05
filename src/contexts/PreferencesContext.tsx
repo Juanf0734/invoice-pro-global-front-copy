@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import i18n from '@/i18n';
 import { getApiUrl } from '@/lib/api';
-import { format, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 interface Preferences {
   language: string;
@@ -17,6 +17,8 @@ interface PreferencesContextType {
   formatDate: (date: Date) => string;
   monthlyInvoicesCount: number;
   refreshInvoicesCount: () => Promise<void>;
+  selectedMonth: Date;
+  setSelectedMonth: (date: Date) => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -29,6 +31,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     dateFormat: 'DD/MM/YYYY',
   });
   const [monthlyInvoicesCount, setMonthlyInvoicesCount] = useState(0);
+  const [selectedMonth, setSelectedMonth] = useState(startOfMonth(new Date()));
 
   useEffect(() => {
     // Load preferences from localStorage on mount
@@ -57,10 +60,10 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const now = new Date();
-      const lastMonth = subMonths(now, 1);
-      const fechaInicial = format(lastMonth, 'yyyy-MM-dd');
-      const fechaFinal = format(now, 'yyyy-MM-dd');
+      const monthStart = startOfMonth(selectedMonth);
+      const monthEnd = endOfMonth(selectedMonth);
+      const fechaInicial = format(monthStart, 'yyyy-MM-dd');
+      const fechaFinal = format(monthEnd, 'yyyy-MM-dd');
 
       const response = await fetch(
         getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`),
@@ -88,7 +91,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     // Refresh every 5 minutes
     const interval = setInterval(refreshInvoicesCount, 300000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedMonth]);
 
   const updatePreferences = (newPreferences: Partial<Preferences>) => {
     setPreferences((prev) => {
@@ -157,6 +160,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         formatDate,
         monthlyInvoicesCount,
         refreshInvoicesCount,
+        selectedMonth,
+        setSelectedMonth,
       }}
     >
       {children}

@@ -11,8 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { usePreferences } from "@/contexts/PreferencesContext";
-import { getApiUrl } from "@/lib/api";
-import { format, startOfMonth } from "date-fns";
+import { MonthSelector } from "@/components/MonthSelector";
+import { format } from "date-fns";
+import { es, enUS } from "date-fns/locale";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +30,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const { planName, subscribed } = useSubscription();
-  const { monthlyInvoicesCount } = usePreferences();
+  const { monthlyInvoicesCount, selectedMonth, setSelectedMonth } = usePreferences();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [forceStartTour, setForceStartTour] = useState(false);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
@@ -175,21 +176,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
             <SidebarTrigger />
             <img src={ebillLogo} alt="eBill Pro" className="h-12 w-auto" />
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="font-semibold">
-                {planName}
-              </Badge>
-              <div className="flex flex-col gap-1 min-w-[180px]">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Último mes</span>
-                  <span className="font-medium">
-                    {monthlyInvoicesCount} / {getPlanLimit(planName)}
-                  </span>
+            <div className="flex items-center gap-4">
+              <MonthSelector 
+                selectedMonth={selectedMonth} 
+                onMonthChange={setSelectedMonth}
+              />
+              
+              <div className="flex items-center gap-3 border rounded-lg px-4 py-2">
+                <Badge variant="outline" className="flex items-center gap-2 py-1 px-3">
+                  {planName}
+                </Badge>
+                <div className="flex flex-col gap-1 min-w-[180px]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      {format(selectedMonth, 'MMMM yyyy', { locale: i18n.language === 'es' ? es : enUS })}
+                    </span>
+                    <span className="font-medium">
+                      {monthlyInvoicesCount} / {getPlanLimit(planName)}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={(monthlyInvoicesCount / getPlanLimit(planName)) * 100} 
+                    className="h-2"
+                  />
                 </div>
-                <Progress 
-                  value={(monthlyInvoicesCount / getPlanLimit(planName)) * 100} 
-                  className="h-2"
-                />
               </div>
             </div>
             <div className="flex-1" />

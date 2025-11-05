@@ -39,7 +39,7 @@ interface Product {
 const Dashboard = () => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
-  const { refreshInvoicesCount } = usePreferences();
+  const { refreshInvoicesCount, selectedMonth } = usePreferences();
   const [invoicesCount, setInvoicesCount] = useState(0);
   const [clientsCount, setClientsCount] = useState(0);
   const [productsCount, setProductsCount] = useState(0);
@@ -67,13 +67,13 @@ const Dashboard = () => {
       };
 
       try {
-        // Calcular fechas del último mes
-        const now = new Date();
-        const lastMonth = subMonths(now, 1);
-        const fechaInicial = format(lastMonth, 'yyyy-MM-dd');
-        const fechaFinal = format(now, 'yyyy-MM-dd');
+        // Calcular fechas del mes seleccionado
+        const monthStart = startOfMonth(selectedMonth);
+        const monthEnd = endOfMonth(selectedMonth);
+        const fechaInicial = format(monthStart, 'yyyy-MM-dd');
+        const fechaFinal = format(monthEnd, 'yyyy-MM-dd');
 
-        // Fetch invoices del último mes
+        // Fetch invoices del mes seleccionado
         const invoicesResponse = await fetch(
           getApiUrl(`/Documento/TraerDatosDocumentosPeriodo?IdEmpresa=${companyId}&FechaInicial=${fechaInicial}&FechaFinal=${fechaFinal}`),
           { headers }
@@ -129,6 +129,7 @@ const Dashboard = () => {
 
         // Fetch datos de los últimos 3 meses para la gráfica mensual
         const monthlyPromises = [];
+        const now = new Date();
         for (let i = 2; i >= 0; i--) {
           const monthDate = subMonths(now, i);
           const monthStart = startOfMonth(monthDate);
@@ -185,7 +186,7 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [selectedMonth]);
 
   const formatCurrency = (value: number | null | undefined) => {
     if (value === null || value === undefined || isNaN(value)) {
@@ -223,7 +224,7 @@ const Dashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{loading ? "..." : formatCurrency(monthlyRevenue)}</div>
             <p className="text-xs text-muted-foreground">
-              {t("dashboard.lastMonth")}
+              {format(selectedMonth, 'MMMM yyyy', { locale })}
             </p>
           </CardContent>
         </Card>
@@ -236,7 +237,7 @@ const Dashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{loading ? "..." : invoicesCount}</div>
             <p className="text-xs text-muted-foreground">
-              {t("dashboard.lastMonth")}
+              {format(selectedMonth, 'MMMM yyyy', { locale })}
             </p>
           </CardContent>
         </Card>
