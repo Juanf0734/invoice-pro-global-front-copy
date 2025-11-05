@@ -137,11 +137,18 @@ const Clients = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await response.json();
+        console.log("Países API Response:", data);
+        
         if (data.codResponse === 1 && data.basePresentationList) {
+          console.log("Países cargados:", data.basePresentationList);
           setCountries(data.basePresentationList);
+        } else {
+          console.log("No se encontraron países o estructura diferente");
+          toast.error("Error al cargar la lista de países");
         }
       } catch (error) {
         console.error("Error fetching countries:", error);
+        toast.error("Error al cargar la lista de países");
       }
     };
 
@@ -166,11 +173,18 @@ const Clients = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await response.json();
+        console.log(`Departamentos para país ${formData.IdPais}:`, data);
+        
         if (data.codResponse === 1 && data.basePresentationList) {
+          console.log("Departamentos cargados:", data.basePresentationList);
           setDepartments(data.basePresentationList);
+        } else {
+          console.log("No se encontraron departamentos o estructura diferente");
+          setDepartments([]);
         }
       } catch (error) {
         console.error("Error fetching departments:", error);
+        setDepartments([]);
       }
     };
 
@@ -194,11 +208,18 @@ const Clients = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await response.json();
+        console.log(`Municipios para departamento ${formData.IdDepartamento}:`, data);
+        
         if (data.codResponse === 1 && data.basePresentationList) {
+          console.log("Municipios cargados:", data.basePresentationList);
           setMunicipalities(data.basePresentationList);
+        } else {
+          console.log("No se encontraron municipios o estructura diferente");
+          setMunicipalities([]);
         }
       } catch (error) {
         console.error("Error fetching municipalities:", error);
+        setMunicipalities([]);
       }
     };
 
