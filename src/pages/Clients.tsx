@@ -976,7 +976,7 @@ const Clients = () => {
                     <SelectValue placeholder="Seleccionar país" />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-[200px]">
-                    {countries.map((country) => (
+                    {countries.filter(c => c && c.Id).map((country) => (
                       <SelectItem key={country.Id} value={country.Id.toString()}>
                         {country.Descripcion}
                       </SelectItem>
@@ -996,7 +996,7 @@ const Clients = () => {
                     <SelectValue placeholder={departments.length === 0 ? "Primero selecciona país" : "Seleccionar departamento"} />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-[200px]">
-                    {departments.map((dept) => (
+                    {departments.filter(d => d && d.Id).map((dept) => (
                       <SelectItem key={dept.Id} value={dept.Id.toString()}>
                         {dept.Descripcion}
                       </SelectItem>
@@ -1016,7 +1016,7 @@ const Clients = () => {
                     <SelectValue placeholder={municipalities.length === 0 ? "Primero selecciona departamento" : "Seleccionar municipio"} />
                   </SelectTrigger>
                   <SelectContent position="popper" className="max-h-[200px]">
-                    {municipalities.map((muni) => (
+                    {municipalities.filter(m => m && m.Id).map((muni) => (
                       <SelectItem key={muni.Id} value={muni.Id.toString()}>
                         {muni.Descripcion}
                       </SelectItem>
