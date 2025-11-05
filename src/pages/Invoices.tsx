@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, Eye, MoreVertical, PlusCircle, Calendar as CalendarIcon, X, Mail, FileText, Send } from "lucide-react";
+import { Search, Filter, Download, Eye, PlusCircle, Calendar as CalendarIcon, X, Mail, FileText, Send, FileCode } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format, subMonths } from "date-fns";
@@ -51,6 +51,7 @@ type Invoice = {
   prefix: string;
   documentType: string;
   pdfUrl: string;
+  estadoDian: string;
 };
 
 const Invoices = () => {
@@ -118,6 +119,7 @@ const Invoices = () => {
             prefix: item.Prefijo || "",
             documentType: item.TipoComprobante || "",
             pdfUrl: item.RutaPDF || "",
+            estadoDian: item.EstadoDian || "",
           }));
           setInvoices(mappedInvoices);
         } else {
@@ -351,6 +353,58 @@ const Invoices = () => {
     }
   };
 
+  const handleDownloadXML = async () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      const authToken = localStorage.getItem("authToken");
+      
+      if (!authToken) {
+        toast({
+          title: "Error",
+          description: "No se encontró la sesión. Por favor, inicie sesión nuevamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch(
+        getApiUrl(`/Documento/TraerXMLDocumento?IdDocumento=${selectedInvoice.id}&EstadoDian=${selectedInvoice.estadoDian}`),
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al descargar el XML");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `documento-${selectedInvoice.prefix}-${selectedInvoice.number}.xml`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "XML descargado",
+        description: "El archivo XML se ha descargado correctamente",
+      });
+    } catch (error) {
+      console.error("Error downloading XML:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo descargar el archivo XML",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-4 md:space-y-6 p-4 md:p-0">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -479,7 +533,6 @@ const Invoices = () => {
                 <table className="w-full">
                   <thead className="border-b bg-muted/50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">ID</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Prefijo</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Número</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Tipo</th>
@@ -497,9 +550,6 @@ const Invoices = () => {
                     className="border-b transition-colors hover:bg-muted/50 cursor-pointer"
                     onClick={() => setSelectedInvoice(invoice)}
                   >
-                    <td className="px-6 py-4">
-                      <span className="font-mono text-sm font-medium">{invoice.id}</span>
-                    </td>
                     <td className="px-6 py-4">
                       <span className="text-sm">{invoice.prefix}</span>
                     </td>
@@ -577,22 +627,6 @@ const Invoices = () => {
                         >
                           <Download className="h-4 w-4" />
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Editar</DropdownMenuItem>
-                            <DropdownMenuItem>Duplicar</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Anular</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>
@@ -612,8 +646,8 @@ const Invoices = () => {
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1 flex-1 min-w-0">
-                    <p className="font-mono text-sm font-medium">{invoice.id}</p>
-                    <p className="text-xs text-muted-foreground">{invoice.prefix} - #{invoice.number} - {invoice.documentType}</p>
+                    <p className="font-mono text-sm font-medium">{invoice.prefix} - #{invoice.number}</p>
+                    <p className="text-xs text-muted-foreground">{invoice.documentType}</p>
                     <p className="font-semibold truncate">{invoice.client}</p>
                   </div>
                     <Badge 
@@ -725,6 +759,15 @@ const Invoices = () => {
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Ver PDF</span>
                 <span className="sm:hidden">PDF</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="gap-2 flex-1 sm:flex-none text-sm"
+                onClick={handleDownloadXML}
+              >
+                <FileCode className="h-4 w-4" />
+                <span className="hidden sm:inline">Descargar XML</span>
+                <span className="sm:hidden">XML</span>
               </Button>
               <Button 
                 variant="outline" 
