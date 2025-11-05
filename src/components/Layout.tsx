@@ -4,6 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { Bell, LogOut, User, Languages, Sparkles, X, Building2, Settings, Moon, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Progress } from "./ui/progress";
 import { Alert, AlertDescription } from "./ui/alert";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -208,14 +209,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
             <SidebarTrigger />
             <img src={ebillLogo} alt="eBill Pro" className="h-12 w-auto" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Badge variant="secondary" className="font-semibold">
                 {planName}
               </Badge>
               {!loadingInvoices && (
-                <Badge variant="outline" className="font-normal text-xs">
-                  {monthlyInvoicesCount} / {getPlanLimit(planName)} documentos
-                </Badge>
+                <div className="flex flex-col gap-1 min-w-[180px]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Documentos del mes</span>
+                    <span className="font-medium">
+                      {monthlyInvoicesCount} / {getPlanLimit(planName)}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={(monthlyInvoicesCount / getPlanLimit(planName)) * 100} 
+                    className="h-2"
+                  />
+                </div>
               )}
             </div>
             <div className="flex-1" />
