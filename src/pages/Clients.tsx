@@ -415,7 +415,7 @@ const Clients = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ IdEmpresa: selectedClient.Id }),
+          body: JSON.stringify({ Id: selectedClient.Id }),
         }
       );
 
