@@ -19,7 +19,7 @@ module.exports = async function (context, req) {
       method: req.method,
       headers: {
         ...req.headers,
-        host: urlObj.hostname,
+        'ngrok-skip-browser-warning': 'true',
       },
     };
 
