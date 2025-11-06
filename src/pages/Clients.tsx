@@ -196,7 +196,7 @@ const Clients = () => {
       setFormData({
         ...formData,
         IdDepartamento: deptId,
-        DepartamentoDane: selectedDept?.Descripcion || "",
+        DepartamentoDane: selectedDept?.InfoAdicional || selectedDept?.Descripcion || "",
         IdMunicipio: 0,
         MunicipioDane: ""
       });
@@ -228,7 +228,7 @@ const Clients = () => {
     setFormData({
       ...formData,
       IdMunicipio: muniId,
-      MunicipioDane: selectedMuni?.Descripcion || ""
+      MunicipioDane: selectedMuni?.InfoAdicional || selectedMuni?.Descripcion || ""
     });
   };
 
@@ -456,6 +456,8 @@ const Clients = () => {
         ? `/Cliente/ModificarCliente` 
         : `/Cliente/CrearCliente?IdEmpresa=${companyId}`;
       const method = isEditMode ? "PUT" : "POST";
+
+      console.log("JSON enviado para crear/modificar cliente:", JSON.stringify(clientData, null, 2));
 
       const response = await fetch(getApiUrl(endpoint), {
         method,
