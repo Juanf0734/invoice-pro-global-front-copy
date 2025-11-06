@@ -102,6 +102,7 @@ const Clients = () => {
   const [countries, setCountries] = useState<AuxList[]>([]);
   const [departments, setDepartments] = useState<AuxList[]>([]);
   const [municipalities, setMunicipalities] = useState<AuxList[]>([]);
+  const [tiposIdentificacion, setTiposIdentificacion] = useState<AuxList[]>([]);
   
   const [formData, setFormData] = useState<ClientFormData>({
     Nombre: "",
@@ -126,29 +127,41 @@ const Clients = () => {
     SegundoApellido: "",
   });
 
-  // Cargar países al montar el componente
+  // Cargar países y tipos de identificación al montar el componente
   useEffect(() => {
-    const fetchCountries = async () => {
+    const fetchAuxiliaryData = async () => {
       try {
         const token = localStorage.getItem("authToken");
         if (!token) return;
 
-        const response = await fetch(
+        // Cargar países
+        const countriesResponse = await fetch(
           getApiUrl(`/Auxiliar/ListaPaises`),
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const data = await response.json();
+        const countriesData = await countriesResponse.json();
         
-        if (data.codResponse === 1 && data.basePresentationList) {
-          setCountries(data.basePresentationList);
+        if (countriesData.codResponse === 1 && countriesData.basePresentationList) {
+          setCountries(countriesData.basePresentationList);
+        }
+
+        // Cargar tipos de identificación
+        const tiposIdResponse = await fetch(
+          getApiUrl(`/Auxiliar/ListaTiposIdentificacion`),
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const tiposIdData = await tiposIdResponse.json();
+        
+        if (tiposIdData.codResponse === 1 && tiposIdData.basePresentationList) {
+          setTiposIdentificacion(tiposIdData.basePresentationList);
         }
       } catch (error) {
-        console.error("Error cargando países:", error);
-        toast.error("Error al cargar países");
+        console.error("Error cargando datos auxiliares:", error);
+        toast.error("Error al cargar datos auxiliares");
       }
     };
 
-    fetchCountries();
+    fetchAuxiliaryData();
   }, []);
 
   // Cargar departamentos cuando cambia el país
@@ -886,9 +899,11 @@ const Clients = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="31">NIT</SelectItem>
-                    <SelectItem value="13">Cédula</SelectItem>
-                    <SelectItem value="22">Cédula Extranjera</SelectItem>
+                    {tiposIdentificacion.map((tipo) => (
+                      <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
+                        {tipo.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
