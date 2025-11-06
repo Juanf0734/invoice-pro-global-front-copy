@@ -103,6 +103,8 @@ const Clients = () => {
   const [departments, setDepartments] = useState<AuxList[]>([]);
   const [municipalities, setMunicipalities] = useState<AuxList[]>([]);
   const [tiposIdentificacion, setTiposIdentificacion] = useState<AuxList[]>([]);
+  const [tiposPersona, setTiposPersona] = useState<AuxList[]>([]);
+  const [regimenesFiscales, setRegimenesFiscales] = useState<AuxList[]>([]);
   
   const [formData, setFormData] = useState<ClientFormData>({
     Nombre: "",
@@ -127,33 +129,44 @@ const Clients = () => {
     SegundoApellido: "",
   });
 
-  // Cargar países y tipos de identificación al montar el componente
+  // Cargar datos auxiliares al montar el componente
   useEffect(() => {
     const fetchAuxiliaryData = async () => {
       try {
         const token = localStorage.getItem("authToken");
         if (!token) return;
 
-        // Cargar países
-        const countriesResponse = await fetch(
-          getApiUrl(`/Auxiliar/ListaPaises`),
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const countriesData = await countriesResponse.json();
+        const headers = { Authorization: `Bearer ${token}` };
+
+        // Cargar todos los datos auxiliares en paralelo
+        const [countriesRes, tiposIdRes, tiposPersonaRes, regimenesFiscalesRes] = await Promise.all([
+          fetch(getApiUrl(`/Auxiliar/ListaPaises`), { headers }),
+          fetch(getApiUrl(`/Auxiliar/ListaTiposIdentificacion`), { headers }),
+          fetch(getApiUrl(`/Auxiliar/ListaTiposPersona`), { headers }),
+          fetch(getApiUrl(`/Auxiliar/ListaRegimenesFiscales`), { headers })
+        ]);
+
+        const [countriesData, tiposIdData, tiposPersonaData, regimenesFiscalesData] = await Promise.all([
+          countriesRes.json(),
+          tiposIdRes.json(),
+          tiposPersonaRes.json(),
+          regimenesFiscalesRes.json()
+        ]);
         
         if (countriesData.codResponse === 1 && countriesData.basePresentationList) {
           setCountries(countriesData.basePresentationList);
         }
 
-        // Cargar tipos de identificación
-        const tiposIdResponse = await fetch(
-          getApiUrl(`/Auxiliar/ListaTiposIdentificacion`),
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const tiposIdData = await tiposIdResponse.json();
-        
         if (tiposIdData.codResponse === 1 && tiposIdData.basePresentationList) {
           setTiposIdentificacion(tiposIdData.basePresentationList);
+        }
+
+        if (tiposPersonaData.codResponse === 1 && tiposPersonaData.basePresentationList) {
+          setTiposPersona(tiposPersonaData.basePresentationList);
+        }
+
+        if (regimenesFiscalesData.codResponse === 1 && regimenesFiscalesData.basePresentationList) {
+          setRegimenesFiscales(regimenesFiscalesData.basePresentationList);
         }
       } catch (error) {
         console.error("Error cargando datos auxiliares:", error);
@@ -883,8 +896,11 @@ const Clients = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Persona Jurídica</SelectItem>
-                    <SelectItem value="2">Persona Natural</SelectItem>
+                    {tiposPersona.map((tipo) => (
+                      <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
+                        {tipo.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -918,8 +934,11 @@ const Clients = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Régimen Común</SelectItem>
-                    <SelectItem value="2">Régimen Simplificado</SelectItem>
+                    {regimenesFiscales.map((regimen) => (
+                      <SelectItem key={regimen.Codigo} value={regimen.Codigo.toString()}>
+                        {regimen.Descripcion}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
