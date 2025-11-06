@@ -407,8 +407,11 @@ const Clients = () => {
         return;
       }
 
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const companyId = parseInt(payload.IdEmpresa);
+
       const response = await fetch(
-        getApiUrl("/Cliente/EliminarCliente"),
+        getApiUrl(`/Cliente/EliminarCliente?IdEmpresa=${companyId}`),
         {
           method: "DELETE",
           headers: {
