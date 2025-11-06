@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
         target: 'https://0d1eb018dccf.ngrok-free.app',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       }
     }
   },

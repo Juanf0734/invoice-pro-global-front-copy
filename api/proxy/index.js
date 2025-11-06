@@ -3,7 +3,11 @@ const http = require('http');
 
 module.exports = async function (context, req) {
   const targetUrl = 'https://0d1eb018dccf.ngrok-free.app';
-  const path = context.bindingData.path || '';
+  let path = context.bindingData.path || '';
+  
+  // Remove /api prefix if present
+  path = path.replace(/^api\//, '');
+  
   const fullUrl = `${targetUrl}/${path}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
 
   context.log('Proxying request to:', fullUrl);
