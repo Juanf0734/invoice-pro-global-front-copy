@@ -15,6 +15,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -57,9 +65,14 @@ const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState({
     Descripcion: "",
     DescripcionCorta: "",
@@ -198,6 +211,135 @@ const Products = () => {
     }
 
     return items;
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setShowEditDialog(true);
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingProduct) return;
+
+    if (!editingProduct.Descripcion || !editingProduct.CodigoReferencia) {
+      toast.error("Descripción y código de referencia son obligatorios");
+      return;
+    }
+
+    setIsSaving(true);
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await fetch(getApiUrl("/Producto/ModificarProducto"), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          Id: editingProduct.Id,
+          Descripcion: editingProduct.Descripcion,
+          DescripcionCorta: editingProduct.DescripcionCorta || "",
+          CodigoReferencia: editingProduct.CodigoReferencia,
+          IdUnidadMedida: editingProduct.IdUnidadMedida,
+          Costo: editingProduct.Costo,
+          PrecioVenta: editingProduct.PrecioVenta,
+          IdTipoImpuesto: editingProduct.IdTipoImpuesto,
+          IdTipo: editingProduct.IdTipo,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.codResponse === 1) {
+        toast.success("Producto actualizado exitosamente");
+        setShowEditDialog(false);
+        setEditingProduct(null);
+        
+        // Recargar productos
+        const companyId = localStorage.getItem("companyId");
+        const fetchResponse = await fetch(
+          getApiUrl(`/Producto/TraerProductos?IdEmpresa=${companyId}`),
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const fetchData = await fetchResponse.json();
+        if (fetchData.codResponse === 1 && fetchData.basePresentationList) {
+          setProducts(fetchData.basePresentationList);
+        }
+      } else {
+        toast.error(data.messageResponse || "Error al actualizar producto");
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast.error("Error al actualizar producto");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteProduct = (product: Product) => {
+    setProductToDelete(product);
+    setDeleteConfirmationText("");
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteConfirmationText !== "ELIMINAR") {
+      toast.error("Debes escribir ELIMINAR para confirmar");
+      return;
+    }
+
+    if (!productToDelete) return;
+
+    setIsSaving(true);
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await fetch(
+        getApiUrl(`/Producto/EliminarProducto?Id=${productToDelete.Id}`),
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.codResponse === 1) {
+        toast.success("Producto eliminado exitosamente");
+        setShowDeleteDialog(false);
+        setProductToDelete(null);
+        setDeleteConfirmationText("");
+        
+        // Recargar productos
+        const companyId = localStorage.getItem("companyId");
+        const fetchResponse = await fetch(
+          getApiUrl(`/Producto/TraerProductos?IdEmpresa=${companyId}`),
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const fetchData = await fetchResponse.json();
+        if (fetchData.codResponse === 1 && fetchData.basePresentationList) {
+          setProducts(fetchData.basePresentationList);
+        }
+      } else {
+        toast.error(data.messageResponse || "Error al eliminar producto");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Error al eliminar producto");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -372,13 +514,18 @@ const Products = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="icon">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleEditProduct(product)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteProduct(product)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -430,7 +577,12 @@ const Products = () => {
                           </div>
 
                           <div className="flex items-center gap-2 mt-4 pt-3 border-t">
-                            <Button variant="outline" size="sm" className="flex-1 gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-1 gap-2"
+                              onClick={() => handleEditProduct(product)}
+                            >
                               <Edit className="h-4 w-4" />
                               {t("common.edit")}
                             </Button>
@@ -438,6 +590,7 @@ const Products = () => {
                               variant="outline"
                               size="sm"
                               className="flex-1 gap-2 text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteProduct(product)}
                             >
                               <Trash2 className="h-4 w-4" />
                               {t("common.delete")}
@@ -580,6 +733,157 @@ const Products = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Diálogo de edición */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Producto</DialogTitle>
+          </DialogHeader>
+          {editingProduct && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-descripcion">Descripción *</Label>
+                <Input
+                  id="edit-descripcion"
+                  value={editingProduct.Descripcion}
+                  onChange={(e) =>
+                    setEditingProduct({ ...editingProduct, Descripcion: e.target.value })
+                  }
+                  placeholder="Nombre del producto o servicio"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-descripcionCorta">Descripción Corta</Label>
+                <Input
+                  id="edit-descripcionCorta"
+                  value={editingProduct.DescripcionCorta || ""}
+                  onChange={(e) =>
+                    setEditingProduct({ ...editingProduct, DescripcionCorta: e.target.value })
+                  }
+                  placeholder="Descripción breve (opcional)"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-codigoReferencia">Código de Referencia *</Label>
+                <Input
+                  id="edit-codigoReferencia"
+                  value={editingProduct.CodigoReferencia}
+                  onChange={(e) =>
+                    setEditingProduct({ ...editingProduct, CodigoReferencia: e.target.value })
+                  }
+                  placeholder="Código único del producto"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-tipo">Tipo</Label>
+                <Select
+                  value={editingProduct.IdTipo.toString()}
+                  onValueChange={(value) =>
+                    setEditingProduct({ ...editingProduct, IdTipo: parseInt(value) })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Servicio</SelectItem>
+                    <SelectItem value="2">Producto</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-costo">Costo</Label>
+                  <Input
+                    id="edit-costo"
+                    type="number"
+                    step="0.01"
+                    value={editingProduct.Costo}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, Costo: parseFloat(e.target.value) || 0 })
+                    }
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-precioVenta">Precio de Venta</Label>
+                  <Input
+                    id="edit-precioVenta"
+                    type="number"
+                    step="0.01"
+                    value={editingProduct.PrecioVenta}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, PrecioVenta: parseFloat(e.target.value) || 0 })
+                    }
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditDialog(false);
+                setEditingProduct(null);
+              }}
+              disabled={isSaving}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={handleUpdateProduct} disabled={isSaving}>
+              {isSaving ? "Guardando..." : "Guardar Cambios"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de eliminación */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente el producto{" "}
+              <strong>{productToDelete?.Descripcion}</strong>.
+              <div className="mt-4">
+                <Label htmlFor="delete-confirmation">
+                  Escribe <strong>ELIMINAR</strong> para confirmar
+                </Label>
+                <Input
+                  id="delete-confirmation"
+                  value={deleteConfirmationText}
+                  onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                  placeholder="ELIMINAR"
+                  className="mt-2"
+                />
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setProductToDelete(null);
+                setDeleteConfirmationText("");
+              }}
+              disabled={isSaving}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleteConfirmationText !== "ELIMINAR" || isSaving}
+            >
+              {isSaving ? "Eliminando..." : "Eliminar Producto"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
