@@ -2,7 +2,7 @@ const https = require('https');
 const http = require('http');
 
 module.exports = async function (context, req) {
-  const targetUrl = 'https://0d1eb018dccf.ngrok-free.app';
+  const targetUrl = 'https://b4e87f0a30e1.ngrok-free.app';
   const path = context.bindingData.path || '';
   // Remove '/api' prefix if present since ngrok endpoint doesn't expect it
   const cleanPath = path.startsWith('api/') ? path.substring(4) : path;
