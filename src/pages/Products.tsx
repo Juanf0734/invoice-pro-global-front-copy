@@ -8,6 +8,21 @@ import { Search, PlusCircle, Package, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
 import { useTranslation } from "react-i18next";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Product {
   Id: number;
@@ -32,6 +47,18 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    Descripcion: "",
+    DescripcionCorta: "",
+    CodigoReferencia: "",
+    IdUnidadMedida: 29980,
+    Costo: "",
+    PrecioVenta: "",
+    IdTipoImpuesto: 16413,
+    IdTipo: 1,
+  });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -79,6 +106,70 @@ const Products = () => {
     }).format(price);
   };
 
+  const handleCreateProduct = async () => {
+    if (!newProduct.Descripcion || !newProduct.CodigoReferencia) {
+      toast.error("Descripción y código de referencia son obligatorios");
+      return;
+    }
+
+    setIsSaving(true);
+    const token = localStorage.getItem("authToken");
+    const companyId = localStorage.getItem("companyId");
+
+    try {
+      const response = await fetch(getApiUrl("/Producto/AgregarProducto"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...newProduct,
+          IdEmpresa: parseInt(companyId || "0"),
+          Costo: parseFloat(newProduct.Costo) || 0,
+          PrecioVenta: parseFloat(newProduct.PrecioVenta) || 0,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.codResponse === 1) {
+        toast.success("Producto creado exitosamente");
+        setShowCreateDialog(false);
+        setNewProduct({
+          Descripcion: "",
+          DescripcionCorta: "",
+          CodigoReferencia: "",
+          IdUnidadMedida: 29980,
+          Costo: "",
+          PrecioVenta: "",
+          IdTipoImpuesto: 16413,
+          IdTipo: 1,
+        });
+        // Recargar productos
+        const fetchResponse = await fetch(
+          getApiUrl(`/Producto/TraerProductos?IdEmpresa=${companyId}`),
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const fetchData = await fetchResponse.json();
+        if (fetchData.codResponse === 1 && fetchData.basePresentationList) {
+          setProducts(fetchData.basePresentationList);
+        }
+      } else {
+        toast.error(data.messageResponse || "Error al crear producto");
+      }
+    } catch (error) {
+      console.error("Error creating product:", error);
+      toast.error("Error al crear producto");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -86,7 +177,7 @@ const Products = () => {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("products.title")}</h1>
           <p className="text-muted-foreground text-sm sm:text-base">{t("products.subtitle")}</p>
         </div>
-        <Button className="gap-2 w-full sm:w-auto">
+        <Button className="gap-2 w-full sm:w-auto" onClick={() => setShowCreateDialog(true)}>
           <PlusCircle className="h-4 w-4" />
           <span className="sm:inline">{t("products.newProduct")}</span>
         </Button>
@@ -260,6 +351,107 @@ const Products = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Diálogo de creación */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t("products.newProduct")}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="descripcion">Descripción *</Label>
+              <Input
+                id="descripcion"
+                value={newProduct.Descripcion}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, Descripcion: e.target.value })
+                }
+                placeholder="Nombre del producto o servicio"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="descripcionCorta">Descripción Corta</Label>
+              <Input
+                id="descripcionCorta"
+                value={newProduct.DescripcionCorta}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, DescripcionCorta: e.target.value })
+                }
+                placeholder="Descripción breve (opcional)"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="codigoReferencia">Código de Referencia *</Label>
+              <Input
+                id="codigoReferencia"
+                value={newProduct.CodigoReferencia}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, CodigoReferencia: e.target.value })
+                }
+                placeholder="Código único del producto"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="tipo">Tipo</Label>
+              <Select
+                value={newProduct.IdTipo.toString()}
+                onValueChange={(value) =>
+                  setNewProduct({ ...newProduct, IdTipo: parseInt(value) })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Servicio</SelectItem>
+                  <SelectItem value="2">Producto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="costo">Costo</Label>
+                <Input
+                  id="costo"
+                  type="number"
+                  step="0.01"
+                  value={newProduct.Costo}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, Costo: e.target.value })
+                  }
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="precioVenta">Precio de Venta</Label>
+                <Input
+                  id="precioVenta"
+                  type="number"
+                  step="0.01"
+                  value={newProduct.PrecioVenta}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, PrecioVenta: e.target.value })
+                  }
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateDialog(false)}
+              disabled={isSaving}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={handleCreateProduct} disabled={isSaving}>
+              {isSaving ? "Guardando..." : "Crear Producto"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
