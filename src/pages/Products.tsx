@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, PlusCircle, Package, Edit, Trash2 } from "lucide-react";
+import { Search, PlusCircle, Package, Edit, Trash2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
 import { useTranslation } from "react-i18next";
@@ -67,11 +67,13 @@ const Products = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [productToView, setProductToView] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState({
     Descripcion: "",
@@ -287,6 +289,18 @@ const Products = () => {
     setShowDeleteDialog(true);
   };
 
+  const handleViewDetails = (product: Product) => {
+    setProductToView(product);
+    setShowDetailsDialog(true);
+  };
+
+  const copyToClipboard = () => {
+    if (productToView) {
+      navigator.clipboard.writeText(JSON.stringify(productToView, null, 2));
+      toast.success("JSON copiado al portapapeles");
+    }
+  };
+
   const confirmDelete = async () => {
     if (deleteConfirmationText !== "ELIMINAR") {
       toast.error("Debes escribir ELIMINAR para confirmar");
@@ -474,7 +488,7 @@ const Products = () => {
                       <th className="px-6 py-4 text-left text-sm font-semibold">{t("products.type")}</th>
                       <th className="px-6 py-4 text-right text-sm font-semibold">{t("products.cost")}</th>
                       <th className="px-6 py-4 text-right text-sm font-semibold">{t("products.salePrice")}</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold">{t("common.actions")}</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold">{t("common.actions")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -513,11 +527,20 @@ const Products = () => {
                           <span className="font-semibold">{formatPrice(product.PrecioVenta)}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleViewDetails(product)}
+                              title="Ver detalles"
+                            >
+                              <Info className="h-4 w-4" />
+                            </Button>
                             <Button 
                               variant="ghost" 
                               size="icon"
                               onClick={() => handleEditProduct(product)}
+                              title="Editar"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -526,6 +549,7 @@ const Products = () => {
                               size="icon"
                               className="text-destructive hover:text-destructive"
                               onClick={() => handleDeleteProduct(product)}
+                              title="Eliminar"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -577,6 +601,15 @@ const Products = () => {
                           </div>
 
                           <div className="flex items-center gap-2 mt-4 pt-3 border-t">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-1 gap-2"
+                              onClick={() => handleViewDetails(product)}
+                            >
+                              <Info className="h-4 w-4" />
+                              Detalles
+                            </Button>
                             <Button 
                               variant="outline" 
                               size="sm" 
@@ -884,6 +917,112 @@ const Products = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Diálogo de detalles */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalles del Producto</DialogTitle>
+          </DialogHeader>
+          {productToView && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                <div>
+                  <p className="text-sm text-muted-foreground">ID</p>
+                  <p className="font-medium">{productToView.Id}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Código Referencia</p>
+                  <p className="font-medium font-mono">{productToView.CodigoReferencia}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Descripción</p>
+                  <p className="font-medium">{productToView.Descripcion}</p>
+                </div>
+                {productToView.DescripcionCorta && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-muted-foreground">Descripción Corta</p>
+                    <p className="font-medium">{productToView.DescripcionCorta}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-muted-foreground">Tipo</p>
+                  <Badge variant="outline">
+                    {productToView.IdTipo === 1 ? "Servicio" : "Producto"}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">ID Empresa</p>
+                  <p className="font-medium">{productToView.IdEmpresa}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Costo</p>
+                  <p className="font-medium">{formatPrice(productToView.Costo)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Último Costo</p>
+                  <p className="font-medium">{formatPrice(productToView.UltimoCosto)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Precio Venta</p>
+                  <p className="font-semibold text-lg">{formatPrice(productToView.PrecioVenta)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">ID Unidad Medida</p>
+                  <p className="font-medium">{productToView.IdUnidadMedida}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">ID Tipo Impuesto</p>
+                  <p className="font-medium">{productToView.IdTipoImpuesto}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cuenta Clientes</p>
+                  <p className="font-medium">{productToView.CuentaClientes || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cuenta Ingreso</p>
+                  <p className="font-medium">{productToView.CuentaIngreso || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cuenta Impuestos</p>
+                  <p className="font-medium">{productToView.CuentaImpuestos || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Sub Centro Costos</p>
+                  <p className="font-medium">{productToView.SubCentroCostos || "N/A"}</p>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <Label>JSON Completo</Label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyToClipboard}
+                  >
+                    Copiar JSON
+                  </Button>
+                </div>
+                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+                  {JSON.stringify(productToView, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDetailsDialog(false);
+                setProductToView(null);
+              }}
+            >
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
