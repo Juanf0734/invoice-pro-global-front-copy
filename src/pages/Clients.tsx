@@ -96,6 +96,7 @@ const Clients = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
   const itemsPerPage = 9; // 3 columns x 3 rows
   
   // Auxiliary lists
@@ -394,11 +395,17 @@ const Clients = () => {
 
   const handleDeleteClient = () => {
     setShowDetailDialog(false);
+    setDeleteConfirmationText("");
     setShowDeleteDialog(true);
   };
 
   const confirmDelete = async () => {
     if (!selectedClient) return;
+
+    if (deleteConfirmationText !== "ELIMINAR") {
+      toast.error("Debes escribir ELIMINAR para confirmar");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("authToken");
@@ -1104,9 +1111,25 @@ const Clients = () => {
               {t("clients.confirmDeleteDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="py-4">
+            <Label htmlFor="deleteConfirmation" className="text-sm font-medium">
+              Escribe <span className="font-bold text-destructive">ELIMINAR</span> para confirmar:
+            </Label>
+            <Input
+              id="deleteConfirmation"
+              value={deleteConfirmationText}
+              onChange={(e) => setDeleteConfirmationText(e.target.value)}
+              placeholder="ELIMINAR"
+              className="mt-2"
+            />
+          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogCancel onClick={() => setDeleteConfirmationText("")}>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              disabled={deleteConfirmationText !== "ELIMINAR"}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
