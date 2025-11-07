@@ -1,7 +1,5 @@
 // API configuration utility
-const API_BASE_URL = import.meta.env.DEV 
-  ? '/api' // Use proxy in development
-  : '/api'; // Use Azure Functions proxy in production
+const API_BASE_URL = 'https://b4e87f0a30e1.ngrok-free.app';
 
 export const getApiUrl = (endpoint: string) => {
   // Asegurar que el endpoint empiece con /
