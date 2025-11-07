@@ -992,22 +992,6 @@ const Products = () => {
                   <p className="font-medium">{productToView.SubCentroCostos || "N/A"}</p>
                 </div>
               </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>JSON Completo</Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={copyToClipboard}
-                  >
-                    Copiar JSON
-                  </Button>
-                </div>
-                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
-                  {JSON.stringify(productToView, null, 2)}
-                </pre>
-              </div>
             </div>
           )}
           <DialogFooter>
