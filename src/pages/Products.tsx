@@ -314,16 +314,12 @@ const Products = () => {
 
     try {
       const response = await fetch(
-        getApiUrl("/Producto/EliminarProducto"),
+        getApiUrl(`/Producto/EliminarProducto?IdProducto=${productToDelete.Id}`),
         {
           method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            Id: productToDelete.Id,
-          }),
         }
       );
 
