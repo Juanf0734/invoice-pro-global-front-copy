@@ -334,6 +334,8 @@
     "selectClient": "Select Existing Client",
     "loadingClients": "Loading clients...",
     "selectClientPlaceholder": "Select a client",
+    "searchClient": "Search client...",
+    "noClientFound": "No client found",
     "newClient": "-- New Client --",
     "personType": "Person Type",
     "selectPersonType": "Select person type",

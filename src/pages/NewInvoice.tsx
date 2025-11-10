@@ -7,10 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, Check, Save } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { ArrowLeft, ArrowRight, Check, Save, ChevronsUpDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 type TipoComprobante = {
   Codigo: number;
@@ -90,6 +93,7 @@ const NewInvoice = () => {
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [selectedClientDetail, setSelectedClientDetail] = useState<ClientDetail | null>(null);
   const [loadingClientDetail, setLoadingClientDetail] = useState(false);
+  const [openClientCombobox, setOpenClientCombobox] = useState(false);
 
   // Listas auxiliares
   const [tiposPersona, setTiposPersona] = useState<ListItem[]>([]);
@@ -847,23 +851,72 @@ const NewInvoice = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="clientSelect">{t("newInvoice.selectClient")}</Label>
-              <Select 
-                value={selectedClientId} 
-                onValueChange={handleClientSelect}
-                disabled={loadingClients}
-              >
-                <SelectTrigger id="clientSelect">
-                  <SelectValue placeholder={loadingClients ? t("newInvoice.loadingClients") : t("newInvoice.selectClientPlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__new__">{t("newInvoice.newClient")}</SelectItem>
-                  {clients.map((client) => (
-                    <SelectItem key={client.Codigo} value={client.Codigo.toString()}>
-                      {client.Descripcion}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={openClientCombobox} onOpenChange={setOpenClientCombobox}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openClientCombobox}
+                    className="w-full justify-between"
+                    disabled={loadingClients}
+                  >
+                    {selectedClientId
+                      ? clients.find((client) => client.Codigo.toString() === selectedClientId)?.Descripcion || t("newInvoice.newClient")
+                      : loadingClients 
+                        ? t("newInvoice.loadingClients") 
+                        : t("newInvoice.selectClientPlaceholder")}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0">
+                  <Command>
+                    <CommandInput placeholder={t("newInvoice.searchClient")} />
+                    <CommandList>
+                      <CommandEmpty>{t("newInvoice.noClientFound")}</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          value="__new__"
+                          onSelect={() => {
+                            handleClientSelect("__new__");
+                            setOpenClientCombobox(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedClientId === "" ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {t("newInvoice.newClient")}
+                        </CommandItem>
+                        {clients.map((client) => (
+                          <CommandItem
+                            key={client.Codigo}
+                            value={`${client.Descripcion} - ${client.InfoAdicional}`}
+                            onSelect={() => {
+                              handleClientSelect(client.Codigo.toString());
+                              setOpenClientCombobox(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedClientId === client.Codigo.toString()
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            <div>
+                              <div className="font-medium">{client.Descripcion}</div>
+                              <div className="text-xs text-muted-foreground">{client.InfoAdicional}</div>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {loadingClientDetail && (
@@ -878,6 +931,7 @@ const NewInvoice = () => {
                 <Select 
                   value={clientData.tipoPersona}
                   onValueChange={(value) => setClientData({...clientData, tipoPersona: value})}
+                  disabled={!!selectedClientId && selectedClientId !== ""}
                 >
                   <SelectTrigger id="tipoPersona">
                     <SelectValue placeholder={t("newInvoice.selectPersonType")} />
@@ -896,6 +950,7 @@ const NewInvoice = () => {
                 <Select 
                   value={clientData.tipoIdentificacion}
                   onValueChange={(value) => setClientData({...clientData, tipoIdentificacion: value})}
+                  disabled={!!selectedClientId && selectedClientId !== ""}
                 >
                   <SelectTrigger id="tipoIdentificacion">
                     <SelectValue placeholder={t("newInvoice.selectIdentificationType")} />
@@ -919,6 +974,7 @@ const NewInvoice = () => {
                   placeholder={t("newInvoice.clientNamePlaceholder")}
                   value={clientData.name}
                   onChange={(e) => setClientData({...clientData, name: e.target.value})}
+                  disabled={!!selectedClientId && selectedClientId !== ""}
                 />
               </div>
               <div className="space-y-2">
@@ -928,6 +984,7 @@ const NewInvoice = () => {
                   placeholder={t("newInvoice.taxIdPlaceholder")}
                   value={clientData.nit}
                   onChange={(e) => setClientData({...clientData, nit: e.target.value})}
+                  disabled={!!selectedClientId && selectedClientId !== ""}
                 />
               </div>
             </div>
@@ -937,6 +994,7 @@ const NewInvoice = () => {
               <Select 
                 value={clientData.regimenFiscal}
                 onValueChange={(value) => setClientData({...clientData, regimenFiscal: value})}
+                disabled={!!selectedClientId && selectedClientId !== ""}
               >
                 <SelectTrigger id="regimenFiscal">
                   <SelectValue placeholder={t("newInvoice.selectTaxRegime")} />
@@ -958,6 +1016,7 @@ const NewInvoice = () => {
                 placeholder={t("newInvoice.addressPlaceholder")}
                 value={clientData.address}
                 onChange={(e) => setClientData({...clientData, address: e.target.value})}
+                disabled={!!selectedClientId && selectedClientId !== ""}
               />
             </div>
 
@@ -971,6 +1030,7 @@ const NewInvoice = () => {
                     setDepartamentos([]);
                     setMunicipios([]);
                   }}
+                  disabled={!!selectedClientId && selectedClientId !== ""}
                 >
                   <SelectTrigger id="clientCountry">
                     <SelectValue />
@@ -992,7 +1052,7 @@ const NewInvoice = () => {
                     setClientData({...clientData, departamento: value, municipio: ""});
                     setMunicipios([]);
                   }}
-                  disabled={!clientData.pais}
+                  disabled={!clientData.pais || (!!selectedClientId && selectedClientId !== "")}
                 >
                   <SelectTrigger id="clientDepartment">
                     <SelectValue placeholder={t("newInvoice.selectDepartment")} />
@@ -1011,7 +1071,7 @@ const NewInvoice = () => {
                 <Select 
                   value={clientData.municipio}
                   onValueChange={(value) => setClientData({...clientData, municipio: value})}
-                  disabled={!clientData.departamento}
+                  disabled={!clientData.departamento || (!!selectedClientId && selectedClientId !== "")}
                 >
                   <SelectTrigger id="clientCity">
                     <SelectValue placeholder={t("newInvoice.selectCity")} />
@@ -1034,6 +1094,7 @@ const NewInvoice = () => {
                 placeholder={t("newInvoice.phonePlaceholder")}
                 value={clientData.phone}
                 onChange={(e) => setClientData({...clientData, phone: e.target.value})}
+                disabled={!!selectedClientId && selectedClientId !== ""}
               />
             </div>
 
@@ -1045,6 +1106,7 @@ const NewInvoice = () => {
                 placeholder={t("newInvoice.emailPlaceholder")}
                 value={clientData.email}
                 onChange={(e) => setClientData({...clientData, email: e.target.value})}
+                disabled={!!selectedClientId && selectedClientId !== ""}
               />
             </div>
           </CardContent>
