@@ -4,9 +4,12 @@ const http = require('http');
 module.exports = async function (context, req) {
   const targetUrl = 'https://ebillpymetest.facturaenlinea.co/api';
   const path = context.bindingData.path || '';
-  // Remove '/api' prefix if present since ngrok endpoint doesn't expect it
-  const cleanPath = path.startsWith('api/') ? path.substring(4) : path;
-  const fullUrl = `${targetUrl}/${cleanPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+  
+  // Log para debug
+  context.log('Original path:', path);
+  
+  // No necesitamos limpiar nada, solo usar el path tal cual
+  const fullUrl = `${targetUrl}/${path}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
 
   context.log('Proxying request to:', fullUrl);
 
