@@ -933,190 +933,194 @@ const NewInvoice = () => {
               </div>
             )}
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="tipoPersona">{t("newInvoice.personType")} {t("newInvoice.required")}</Label>
-                <Select 
-                  value={clientData.tipoPersona}
-                  onValueChange={(value) => setClientData({...clientData, tipoPersona: value})}
-                  disabled={!!selectedClientId && selectedClientId !== ""}
-                >
-                  <SelectTrigger id="tipoPersona">
-                    <SelectValue placeholder={t("newInvoice.selectPersonType")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposPersona.map((tipo) => (
-                      <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
-                        {tipo.Descripcion}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tipoIdentificacion">{t("newInvoice.identificationType")} {t("newInvoice.required")}</Label>
-                <Select 
-                  value={clientData.tipoIdentificacion}
-                  onValueChange={(value) => setClientData({...clientData, tipoIdentificacion: value})}
-                  disabled={!!selectedClientId && selectedClientId !== ""}
-                >
-                  <SelectTrigger id="tipoIdentificacion">
-                    <SelectValue placeholder={t("newInvoice.selectIdentificationType")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposIdentificacion.map((tipo) => (
-                      <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
-                        {tipo.Descripcion}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            {selectedClientId && !loadingClientDetail && (
+              <>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="tipoPersona">{t("newInvoice.personType")} {t("newInvoice.required")}</Label>
+                    <Select 
+                      value={clientData.tipoPersona}
+                      onValueChange={(value) => setClientData({...clientData, tipoPersona: value})}
+                      disabled={!!selectedClientId && selectedClientId !== ""}
+                    >
+                      <SelectTrigger id="tipoPersona">
+                        <SelectValue placeholder={t("newInvoice.selectPersonType")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tiposPersona.map((tipo) => (
+                          <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
+                            {tipo.Descripcion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tipoIdentificacion">{t("newInvoice.identificationType")} {t("newInvoice.required")}</Label>
+                    <Select 
+                      value={clientData.tipoIdentificacion}
+                      onValueChange={(value) => setClientData({...clientData, tipoIdentificacion: value})}
+                      disabled={!!selectedClientId && selectedClientId !== ""}
+                    >
+                      <SelectTrigger id="tipoIdentificacion">
+                        <SelectValue placeholder={t("newInvoice.selectIdentificationType")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tiposIdentificacion.map((tipo) => (
+                          <SelectItem key={tipo.Codigo} value={tipo.Codigo.toString()}>
+                            {tipo.Descripcion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="clientName">{t("newInvoice.clientName")} {t("newInvoice.required")}</Label>
-                <Input 
-                  id="clientName" 
-                  placeholder={t("newInvoice.clientNamePlaceholder")}
-                  value={clientData.name}
-                  onChange={(e) => setClientData({...clientData, name: e.target.value})}
-                  disabled={!!selectedClientId && selectedClientId !== ""}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="clientTax">{t("newInvoice.taxId")} {t("newInvoice.required")}</Label>
-                <Input 
-                  id="clientTax" 
-                  placeholder={t("newInvoice.taxIdPlaceholder")}
-                  value={clientData.nit}
-                  onChange={(e) => setClientData({...clientData, nit: e.target.value})}
-                  disabled={!!selectedClientId && selectedClientId !== ""}
-                />
-              </div>
-            </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="clientName">{t("newInvoice.clientName")} {t("newInvoice.required")}</Label>
+                    <Input 
+                      id="clientName" 
+                      placeholder={t("newInvoice.clientNamePlaceholder")}
+                      value={clientData.name}
+                      onChange={(e) => setClientData({...clientData, name: e.target.value})}
+                      disabled={!!selectedClientId && selectedClientId !== ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="clientTax">{t("newInvoice.taxId")} {t("newInvoice.required")}</Label>
+                    <Input 
+                      id="clientTax" 
+                      placeholder={t("newInvoice.taxIdPlaceholder")}
+                      value={clientData.nit}
+                      onChange={(e) => setClientData({...clientData, nit: e.target.value})}
+                      disabled={!!selectedClientId && selectedClientId !== ""}
+                    />
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="regimenFiscal">{t("newInvoice.taxRegime")} {t("newInvoice.required")}</Label>
-              <Select 
-                value={clientData.regimenFiscal}
-                onValueChange={(value) => setClientData({...clientData, regimenFiscal: value})}
-                disabled={!!selectedClientId && selectedClientId !== ""}
-              >
-                <SelectTrigger id="regimenFiscal">
-                  <SelectValue placeholder={t("newInvoice.selectTaxRegime")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {regimenesFiscales.map((regimen) => (
-                    <SelectItem key={regimen.Codigo} value={regimen.Codigo.toString()}>
-                      {regimen.Descripcion}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="regimenFiscal">{t("newInvoice.taxRegime")} {t("newInvoice.required")}</Label>
+                  <Select 
+                    value={clientData.regimenFiscal}
+                    onValueChange={(value) => setClientData({...clientData, regimenFiscal: value})}
+                    disabled={!!selectedClientId && selectedClientId !== ""}
+                  >
+                    <SelectTrigger id="regimenFiscal">
+                      <SelectValue placeholder={t("newInvoice.selectTaxRegime")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regimenesFiscales.map((regimen) => (
+                        <SelectItem key={regimen.Codigo} value={regimen.Codigo.toString()}>
+                          {regimen.Descripcion}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="clientAddress">{t("newInvoice.address")} {t("newInvoice.required")}</Label>
-              <Input 
-                id="clientAddress" 
-                placeholder={t("newInvoice.addressPlaceholder")}
-                value={clientData.address}
-                onChange={(e) => setClientData({...clientData, address: e.target.value})}
-                disabled={!!selectedClientId && selectedClientId !== ""}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="clientAddress">{t("newInvoice.address")} {t("newInvoice.required")}</Label>
+                  <Input 
+                    id="clientAddress" 
+                    placeholder={t("newInvoice.addressPlaceholder")}
+                    value={clientData.address}
+                    onChange={(e) => setClientData({...clientData, address: e.target.value})}
+                    disabled={!!selectedClientId && selectedClientId !== ""}
+                  />
+                </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="clientCountry">{t("newInvoice.country")} {t("newInvoice.required")}</Label>
-                <Select 
-                  value={clientData.pais}
-                  onValueChange={(value) => {
-                    setClientData({...clientData, pais: value, departamento: "", municipio: ""});
-                    setDepartamentos([]);
-                    setMunicipios([]);
-                  }}
-                  disabled={!!selectedClientId && selectedClientId !== ""}
-                >
-                  <SelectTrigger id="clientCountry">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {paises.map((pais) => (
-                      <SelectItem key={pais.Codigo} value={pais.Codigo.toString()}>
-                        {pais.Descripcion}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="clientDepartment">{t("newInvoice.department")} {t("newInvoice.required")}</Label>
-                <Select 
-                  value={clientData.departamento}
-                  onValueChange={(value) => {
-                    setClientData({...clientData, departamento: value, municipio: ""});
-                    setMunicipios([]);
-                  }}
-                  disabled={!clientData.pais || (!!selectedClientId && selectedClientId !== "")}
-                >
-                  <SelectTrigger id="clientDepartment">
-                    <SelectValue placeholder={t("newInvoice.selectDepartment")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departamentos.map((dept) => (
-                      <SelectItem key={dept.Codigo} value={dept.Codigo.toString()}>
-                        {dept.Descripcion}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="clientCity">{t("newInvoice.city")} {t("newInvoice.required")}</Label>
-                <Select 
-                  value={clientData.municipio}
-                  onValueChange={(value) => setClientData({...clientData, municipio: value})}
-                  disabled={!clientData.departamento || (!!selectedClientId && selectedClientId !== "")}
-                >
-                  <SelectTrigger id="clientCity">
-                    <SelectValue placeholder={t("newInvoice.selectCity")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {municipios.map((mun) => (
-                      <SelectItem key={mun.Codigo} value={mun.Codigo.toString()}>
-                        {mun.Descripcion}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="clientCountry">{t("newInvoice.country")} {t("newInvoice.required")}</Label>
+                    <Select 
+                      value={clientData.pais}
+                      onValueChange={(value) => {
+                        setClientData({...clientData, pais: value, departamento: "", municipio: ""});
+                        setDepartamentos([]);
+                        setMunicipios([]);
+                      }}
+                      disabled={!!selectedClientId && selectedClientId !== ""}
+                    >
+                      <SelectTrigger id="clientCountry">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paises.map((pais) => (
+                          <SelectItem key={pais.Codigo} value={pais.Codigo.toString()}>
+                            {pais.Descripcion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="clientDepartment">{t("newInvoice.department")} {t("newInvoice.required")}</Label>
+                    <Select 
+                      value={clientData.departamento}
+                      onValueChange={(value) => {
+                        setClientData({...clientData, departamento: value, municipio: ""});
+                        setMunicipios([]);
+                      }}
+                      disabled={!clientData.pais || (!!selectedClientId && selectedClientId !== "")}
+                    >
+                      <SelectTrigger id="clientDepartment">
+                        <SelectValue placeholder={t("newInvoice.selectDepartment")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departamentos.map((dept) => (
+                          <SelectItem key={dept.Codigo} value={dept.Codigo.toString()}>
+                            {dept.Descripcion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="clientCity">{t("newInvoice.city")} {t("newInvoice.required")}</Label>
+                    <Select 
+                      value={clientData.municipio}
+                      onValueChange={(value) => setClientData({...clientData, municipio: value})}
+                      disabled={!clientData.departamento || (!!selectedClientId && selectedClientId !== "")}
+                    >
+                      <SelectTrigger id="clientCity">
+                        <SelectValue placeholder={t("newInvoice.selectCity")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {municipios.map((mun) => (
+                          <SelectItem key={mun.Codigo} value={mun.Codigo.toString()}>
+                            {mun.Descripcion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="clientPhone">{t("newInvoice.phone")}</Label>
-              <Input 
-                id="clientPhone" 
-                placeholder={t("newInvoice.phonePlaceholder")}
-                value={clientData.phone}
-                onChange={(e) => setClientData({...clientData, phone: e.target.value})}
-                disabled={!!selectedClientId && selectedClientId !== ""}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="clientPhone">{t("newInvoice.phone")}</Label>
+                  <Input 
+                    id="clientPhone" 
+                    placeholder={t("newInvoice.phonePlaceholder")}
+                    value={clientData.phone}
+                    onChange={(e) => setClientData({...clientData, phone: e.target.value})}
+                    disabled={!!selectedClientId && selectedClientId !== ""}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="clientEmail">{t("newInvoice.email")} {t("newInvoice.required")}</Label>
-              <Input 
-                id="clientEmail" 
-                type="email" 
-                placeholder={t("newInvoice.emailPlaceholder")}
-                value={clientData.email}
-                onChange={(e) => setClientData({...clientData, email: e.target.value})}
-                disabled={!!selectedClientId && selectedClientId !== ""}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="clientEmail">{t("newInvoice.email")} {t("newInvoice.required")}</Label>
+                  <Input 
+                    id="clientEmail" 
+                    type="email" 
+                    placeholder={t("newInvoice.emailPlaceholder")}
+                    value={clientData.email}
+                    onChange={(e) => setClientData({...clientData, email: e.target.value})}
+                    disabled={!!selectedClientId && selectedClientId !== ""}
+                  />
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
