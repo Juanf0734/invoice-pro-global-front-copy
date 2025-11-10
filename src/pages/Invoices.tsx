@@ -52,6 +52,7 @@ type Invoice = {
   documentType: string;
   pdfUrl: string;
   estadoDian: string;
+  rawDate?: string;
 };
 
 const Invoices = () => {
@@ -120,7 +121,16 @@ const Invoices = () => {
             documentType: item.TipoComprobante || "",
             pdfUrl: item.RutaPDF || "",
             estadoDian: item.EstadoDian || "",
+            rawDate: item.FechaExpedicion, // Guardar fecha original para ordenar
           }));
+          
+          // Ordenar por fecha de creación descendente (más reciente primero)
+          mappedInvoices.sort((a, b) => {
+            const dateA = a.rawDate ? new Date(a.rawDate).getTime() : 0;
+            const dateB = b.rawDate ? new Date(b.rawDate).getTime() : 0;
+            return dateB - dateA;
+          });
+          
           setInvoices(mappedInvoices);
         } else {
           setInvoices([]);
