@@ -540,7 +540,7 @@ const NewInvoice = () => {
         return;
       }
 
-      // Obtener parámetros de la empresa para la resolución
+      // Obtener parámetros de la empresa para la resolución y forma de pago
       const paramsResponse = await fetch(getApiUrl(`/Empresa/TraerParametros?IdEmpresa=${companyId}`), {
         headers: { Authorization: `Bearer ${authToken}` },
       });
@@ -549,22 +549,31 @@ const NewInvoice = () => {
       let numAprobacionRes = 0;
       let anoAprobacionRes = new Date().getFullYear();
       let prefijo = "";
+      let formaPagoPorDefecto = "1"; // Valor por defecto si no se encuentra
       
-      if (paramsData.codResponse === 1 && paramsData.basePresentation?.IdResolucion) {
-        const resResponse = await fetch(getApiUrl(`/Empresa/TraerResoluciones?IdEmpresa=${companyId}`), {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        const resData = await resResponse.json();
+      if (paramsData.codResponse === 1 && paramsData.basePresentation) {
+        // Obtener forma de pago por defecto
+        if (paramsData.basePresentation.IdFormaPago) {
+          formaPagoPorDefecto = String(paramsData.basePresentation.IdFormaPago);
+        }
         
-        if (resData.codResponse === 1 && resData.basePresentationList) {
-          const resolucion = resData.basePresentationList.find(
-            (r: any) => r.Codigo === paramsData.basePresentation.IdResolucion
-          );
-          if (resolucion) {
-            numAprobacionRes = parseInt(resolucion.Descripcion) || 0;
-            anoAprobacionRes = parseInt(resolucion.InfoAdicional) || new Date().getFullYear();
-            // Extraer prefijo del InfoAdicional2 (formato: "SETT - ")
-            prefijo = resolucion.InfoAdicional2?.replace(" - ", "").trim() || "";
+        // Obtener resolución si existe
+        if (paramsData.basePresentation.IdResolucion) {
+          const resResponse = await fetch(getApiUrl(`/Empresa/TraerResoluciones?IdEmpresa=${companyId}`), {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+          const resData = await resResponse.json();
+          
+          if (resData.codResponse === 1 && resData.basePresentationList) {
+            const resolucion = resData.basePresentationList.find(
+              (r: any) => r.Codigo === paramsData.basePresentation.IdResolucion
+            );
+            if (resolucion) {
+              numAprobacionRes = parseInt(resolucion.Descripcion) || 0;
+              anoAprobacionRes = parseInt(resolucion.InfoAdicional) || new Date().getFullYear();
+              // Extraer prefijo del InfoAdicional2 (formato: "SETT - ")
+              prefijo = resolucion.InfoAdicional2?.replace(" - ", "").trim() || "";
+            }
           }
         }
       }
@@ -593,7 +602,7 @@ const NewInvoice = () => {
         FV_TDO_Codigo_TipoOperacion: "4",
         FechaExpedicion: formatDate(fechaExp),
         FechaVencimiento: formatDate(fechaVenc),
-        FormaPago: "1",
+        FormaPago: formaPagoPorDefecto,
         InfoAdicional: " ",
         MonedaISO: "COP",
         NumAprobacionRes: String(numAprobacionRes),
