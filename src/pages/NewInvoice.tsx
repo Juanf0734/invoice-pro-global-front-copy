@@ -108,7 +108,7 @@ const NewInvoice = () => {
   const [invoiceData, setInvoiceData] = useState({
     tipoComprobante: "",
     fechaExpedicion: new Date().toISOString().split('T')[0],
-    fechaVencimiento: "",
+    fechaVencimiento: new Date().toISOString().split('T')[0],
     notasInternas: "",
     notasCliente: "",
   });
