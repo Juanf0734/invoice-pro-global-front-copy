@@ -167,6 +167,14 @@ const NewInvoice = () => {
         
         if (data.codResponse === 1 && data.basePresentationList) {
           setTiposComprobante(data.basePresentationList);
+          
+          // Establecer "Factura" como tipo por defecto
+          const factura = data.basePresentationList.find((tipo: TipoComprobante) => 
+            tipo.Descripcion.toLowerCase().includes('factura')
+          );
+          if (factura && !invoiceData.tipoComprobante) {
+            setInvoiceData(prev => ({ ...prev, tipoComprobante: factura.Codigo.toString() }));
+          }
         }
       } catch (error) {
         console.error("Error fetching tipos de comprobante:", error);
