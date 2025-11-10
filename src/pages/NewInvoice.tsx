@@ -94,6 +94,7 @@ const NewInvoice = () => {
   const [selectedClientDetail, setSelectedClientDetail] = useState<ClientDetail | null>(null);
   const [loadingClientDetail, setLoadingClientDetail] = useState(false);
   const [openClientCombobox, setOpenClientCombobox] = useState(false);
+  const [openProductCombobox, setOpenProductCombobox] = useState(false);
 
   // Listas auxiliares
   const [tiposPersona, setTiposPersona] = useState<ListItem[]>([]);
@@ -1135,29 +1136,67 @@ const NewInvoice = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="productSelect">Agregar Producto</Label>
-              <div className="flex gap-2">
-                <Select 
-                  onValueChange={handleAddProductLine}
-                  disabled={loadingProducts}
-                  value=""
-                >
-                  <SelectTrigger id="productSelect" className="flex-1">
-                    <SelectValue placeholder={loadingProducts ? "Cargando productos..." : "Seleccione un producto"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__manual__">-- Producto Manual --</SelectItem>
-                    {products.map((product) => (
-                      <SelectItem key={product.Id} value={product.Id.toString()}>
-                        {product.Descripcion} - {new Intl.NumberFormat("es-CO", {
-                          style: "currency",
-                          currency: "COP",
-                          minimumFractionDigits: 0,
-                        }).format(product.PrecioVenta)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Popover open={openProductCombobox} onOpenChange={setOpenProductCombobox}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openProductCombobox}
+                    className="w-full justify-between"
+                    disabled={loadingProducts}
+                  >
+                    {loadingProducts ? "Cargando productos..." : "Seleccione un producto"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[500px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Buscar producto..." />
+                    <CommandList>
+                      <CommandEmpty>No se encontró ningún producto</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          value="__manual__"
+                          onSelect={() => {
+                            handleAddProductLine("__manual__");
+                            setOpenProductCombobox(false);
+                          }}
+                        >
+                          -- Producto Manual --
+                        </CommandItem>
+                        {products.map((product) => (
+                          <CommandItem
+                            key={product.Id}
+                            value={`${product.Descripcion} ${product.CodigoReferencia}`}
+                            onSelect={() => {
+                              handleAddProductLine(product.Id.toString());
+                              setOpenProductCombobox(false);
+                            }}
+                          >
+                            <div className="flex flex-col w-full">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium">{product.Descripcion}</span>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Intl.NumberFormat("es-CO", {
+                                    style: "currency",
+                                    currency: "COP",
+                                    minimumFractionDigits: 0,
+                                  }).format(product.PrecioVenta)}
+                                </span>
+                              </div>
+                              {product.CodigoReferencia && (
+                                <span className="text-xs text-muted-foreground">
+                                  Código: {product.CodigoReferencia}
+                                </span>
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="overflow-x-auto">
