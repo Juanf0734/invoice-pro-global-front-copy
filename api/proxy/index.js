@@ -2,14 +2,16 @@ const https = require('https');
 const http = require('http');
 
 module.exports = async function (context, req) {
-  const targetUrl = 'https://ebillpymetest.facturaenlinea.co/api';
+  const targetUrl = 'https://ebillpymetest.facturaenlinea.co';
   const path = context.bindingData.path || '';
   
   // Log para debug
   context.log('Original path:', path);
+  context.log('Request method:', req.method);
+  context.log('Request headers:', req.headers);
   
-  // No necesitamos limpiar nada, solo usar el path tal cual
-  const fullUrl = `${targetUrl}/${path}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+  // Construir la URL completa
+  const fullUrl = `${targetUrl}/api/${path}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
 
   context.log('Proxying request to:', fullUrl);
 
