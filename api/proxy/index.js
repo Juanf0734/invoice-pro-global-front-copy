@@ -36,17 +36,34 @@ module.exports = async function (context, req) {
     const protocol = urlObj.protocol === 'https:' ? https : http;
 
     const proxyReq = protocol.request(options, (proxyRes) => {
-      let body = '';
+      const chunks = [];
 
       proxyRes.on('data', (chunk) => {
-        body += chunk;
+        chunks.push(chunk);
       });
 
       proxyRes.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        const contentType = proxyRes.headers['content-type'] || '';
+        
+        // Parse response based on content type
+        let responseBody;
+        if (contentType.includes('application/json')) {
+          responseBody = buffer.toString('utf8');
+        } else {
+          responseBody = buffer.toString('utf8');
+        }
+
+        // Forward response with proper headers
         context.res = {
           status: proxyRes.statusCode,
-          headers: proxyRes.headers,
-          body: body,
+          headers: {
+            'Content-Type': contentType || 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+          body: responseBody,
         };
         resolve();
       });
