@@ -2,12 +2,12 @@
   "routes": [
     {
       "route": "/api/*",
-      "allowedRoles": ["anonymous", "authenticated"]
+      "rewrite": "/api/proxy/{path}"
     }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.woff2"]
+    "exclude": ["/api/*", "/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.woff2"]
   },
   "mimeTypes": {
     ".json": "application/json"
