@@ -1356,13 +1356,19 @@ const NewInvoice = () => {
                 <div>
                   <Label className="text-muted-foreground">Fecha Expedición</Label>
                   <p className="font-medium">
-                    {invoiceData.fechaExpedicion ? new Date(invoiceData.fechaExpedicion).toLocaleDateString('es-CO') : "No especificada"}
+                    {invoiceData.fechaExpedicion ? (() => {
+                      const [year, month, day] = invoiceData.fechaExpedicion.split('-');
+                      return new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString('es-CO');
+                    })() : "No especificada"}
                   </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Vencimiento</Label>
                   <p className="font-medium">
-                    {invoiceData.fechaVencimiento ? new Date(invoiceData.fechaVencimiento).toLocaleDateString('es-CO') : "No especificada"}
+                    {invoiceData.fechaVencimiento ? (() => {
+                      const [year, month, day] = invoiceData.fechaVencimiento.split('-');
+                      return new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString('es-CO');
+                    })() : "No especificada"}
                   </p>
                 </div>
               </div>
