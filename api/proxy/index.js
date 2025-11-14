@@ -2,7 +2,7 @@ const https = require('https');
 const http = require('http');
 
 module.exports = async function (context, req) {
-  const targetUrl = 'https://ebillpymetest.facturaenlinea.co';
+  const targetUrl = 'https://d017b71e8e64.ngrok-free.app';
   const path = context.bindingData.path || '';
   
   // Log para debug
