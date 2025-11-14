@@ -579,17 +579,14 @@ const NewInvoice = () => {
       }
 
       // Formato de fecha sin milisegundos y sin Z
-      const formatDate = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}:00`;
+      const formatDate = (dateString: string) => {
+        // Parsear la fecha sin conversión de zona horaria
+        const [year, month, day] = dateString.split('-');
+        return `${year}-${month}-${day}T12:00:00`;
       };
 
-      const fechaExp = new Date(invoiceData.fechaExpedicion);
-      const fechaVenc = new Date(invoiceData.fechaVencimiento || invoiceData.fechaExpedicion);
+      const fechaExp = invoiceData.fechaExpedicion;
+      const fechaVenc = invoiceData.fechaVencimiento || invoiceData.fechaExpedicion;
 
       // Construir objeto FV_CFDCab - TODOS los valores como strings
       const cabecera = {
