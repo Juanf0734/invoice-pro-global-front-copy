@@ -4,7 +4,7 @@ import { Check, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import ebillLogo from "@/assets/ebill-pro-go-logo.png";
+import ebillLogo from "@/assets/ebill-pro-x-go-logo.png";
 
 const plans = [
   {
