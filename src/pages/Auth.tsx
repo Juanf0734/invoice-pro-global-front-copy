@@ -126,70 +126,99 @@ const Auth = () => {
          }}>
       {/* Animated Background Layers */}
       <div className="absolute inset-0 -z-10">
-        {/* Large Animated Orbs with Gradient - Moving continuously */}
+        {/* Large Animated Orbs with Gradient - More visible */}
         <div className="absolute -top-20 -left-20 h-[600px] w-[600px] rounded-full" 
              style={{ 
-               background: 'radial-gradient(circle, hsl(210 70% 70% / 0.2) 0%, hsl(210 60% 75% / 0.12) 35%, transparent 70%)',
-               animation: 'float-slow 20s ease-in-out infinite, pulse 8s ease-in-out infinite',
-               filter: 'blur(60px)'
+               background: 'radial-gradient(circle, hsl(210 70% 65% / 0.4) 0%, hsl(210 60% 70% / 0.25) 35%, transparent 70%)',
+               animation: 'float-slow 20s ease-in-out infinite',
+               filter: 'blur(40px)'
              }} />
         
         <div className="absolute -bottom-32 -right-32 h-[700px] w-[700px] rounded-full" 
              style={{ 
-               background: 'radial-gradient(circle, hsl(180 80% 70% / 0.22) 0%, hsl(180 70% 75% / 0.15) 35%, transparent 70%)',
-               animation: 'float-reverse 25s ease-in-out infinite, pulse 10s ease-in-out infinite 2s',
-               filter: 'blur(70px)'
+               background: 'radial-gradient(circle, hsl(180 80% 65% / 0.45) 0%, hsl(180 70% 70% / 0.3) 35%, transparent 70%)',
+               animation: 'float-reverse 25s ease-in-out infinite',
+               filter: 'blur(40px)'
              }} />
         
         <div className="absolute top-1/3 right-1/4 h-[500px] w-[500px] rounded-full" 
              style={{ 
-               background: 'radial-gradient(circle, hsl(200 75% 75% / 0.15) 0%, hsl(200 65% 80% / 0.08) 40%, transparent 70%)',
-               animation: 'drift 30s ease-in-out infinite, pulse 12s ease-in-out infinite 4s',
-               filter: 'blur(65px)'
+               background: 'radial-gradient(circle, hsl(200 75% 70% / 0.35) 0%, hsl(200 65% 75% / 0.2) 40%, transparent 70%)',
+               animation: 'drift 30s ease-in-out infinite',
+               filter: 'blur(35px)'
              }} />
         
-        {/* Subtle Grid Pattern */}
-        <div className="absolute inset-0 opacity-30"
+        {/* Diagonal Lines Pattern */}
+        <div className="absolute inset-0 opacity-20"
              style={{
-               backgroundImage: 'linear-gradient(to right, hsl(210 60% 85% / 0.4) 1px, transparent 1px), linear-gradient(to bottom, hsl(210 60% 85% / 0.4) 1px, transparent 1px)',
-               backgroundSize: '60px 60px'
+               backgroundImage: `repeating-linear-gradient(
+                 45deg,
+                 hsl(210 60% 80% / 0.6) 0px,
+                 hsl(210 60% 80% / 0.6) 2px,
+                 transparent 2px,
+                 transparent 20px
+               )`
              }} />
         
-        {/* Floating Gradient Shapes with continuous movement */}
-        <div className="absolute top-1/4 left-1/5 h-32 w-32 rounded-2xl backdrop-blur-sm"
+        {/* Dot Grid Pattern */}
+        <div className="absolute inset-0 opacity-25"
+             style={{
+               backgroundImage: 'radial-gradient(circle, hsl(210 60% 75% / 0.5) 1.5px, transparent 1.5px)',
+               backgroundSize: '40px 40px'
+             }} />
+        
+        {/* Floating Gradient Shapes - More visible */}
+        <div className="absolute top-1/4 left-1/5 h-40 w-40 rounded-2xl"
              style={{ 
-               background: 'linear-gradient(135deg, hsl(210 70% 60% / 0.15), hsl(180 70% 60% / 0.15))',
+               background: 'linear-gradient(135deg, hsl(210 70% 60% / 0.35), hsl(180 70% 60% / 0.35))',
                animation: 'float-diagonal 15s ease-in-out infinite',
-               boxShadow: '0 8px 32px hsl(210 70% 60% / 0.1)'
+               boxShadow: '0 8px 32px hsl(210 70% 60% / 0.2)',
+               backdropFilter: 'blur(8px)'
              }} />
         
-        <div className="absolute bottom-1/3 right-1/5 h-28 w-28 rounded-full backdrop-blur-sm"
+        <div className="absolute bottom-1/3 right-1/5 h-36 w-36 rounded-full"
              style={{ 
-               background: 'linear-gradient(135deg, hsl(180 80% 65% / 0.2), hsl(190 75% 60% / 0.15))',
+               background: 'linear-gradient(135deg, hsl(180 80% 60% / 0.4), hsl(190 75% 55% / 0.35))',
                animation: 'float-circle 18s ease-in-out infinite 2s',
-               boxShadow: '0 8px 32px hsl(180 80% 65% / 0.15)'
+               boxShadow: '0 8px 32px hsl(180 80% 65% / 0.25)',
+               backdropFilter: 'blur(8px)'
              }} />
         
-        <div className="absolute top-2/3 left-1/3 h-36 w-36 rounded-3xl backdrop-blur-sm"
+        <div className="absolute top-2/3 left-1/3 h-44 w-44 rounded-3xl"
              style={{ 
-               background: 'linear-gradient(135deg, hsl(200 75% 65% / 0.12), hsl(210 70% 60% / 0.12))',
+               background: 'linear-gradient(135deg, hsl(200 75% 60% / 0.3), hsl(210 70% 55% / 0.3))',
                animation: 'float-horizontal 22s ease-in-out infinite 4s',
-               boxShadow: '0 8px 32px hsl(200 75% 65% / 0.1)'
+               boxShadow: '0 8px 32px hsl(200 75% 65% / 0.2)',
+               backdropFilter: 'blur(8px)'
              }} />
         
-        {/* Additional moving particles */}
-        <div className="absolute top-1/2 left-1/6 h-20 w-20 rounded-full backdrop-blur-sm"
+        {/* Additional moving particles - More visible */}
+        <div className="absolute top-1/2 left-1/6 h-28 w-28 rounded-full"
              style={{ 
-               background: 'linear-gradient(135deg, hsl(190 70% 70% / 0.18), hsl(200 65% 65% / 0.12))',
+               background: 'linear-gradient(135deg, hsl(190 70% 65% / 0.4), hsl(200 65% 60% / 0.3))',
                animation: 'drift-up 12s ease-in-out infinite',
-               boxShadow: '0 4px 16px hsl(190 70% 70% / 0.12)'
+               boxShadow: '0 4px 16px hsl(190 70% 70% / 0.2)',
+               backdropFilter: 'blur(6px)'
              }} />
         
-        <div className="absolute bottom-1/4 left-2/3 h-24 w-24 rounded-2xl backdrop-blur-sm"
+        <div className="absolute bottom-1/4 left-2/3 h-32 w-32 rounded-2xl"
              style={{ 
-               background: 'linear-gradient(135deg, hsl(210 80% 68% / 0.16), hsl(180 70% 62% / 0.12))',
+               background: 'linear-gradient(135deg, hsl(210 80% 63% / 0.38), hsl(180 70% 57% / 0.3))',
                animation: 'float-bounce 16s ease-in-out infinite 3s',
-               boxShadow: '0 6px 24px hsl(210 80% 68% / 0.1)'
+               boxShadow: '0 6px 24px hsl(210 80% 68% / 0.2)',
+               backdropFilter: 'blur(6px)'
+             }} />
+        
+        {/* Wave Pattern Overlay */}
+        <div className="absolute inset-0 opacity-15"
+             style={{
+               backgroundImage: `repeating-linear-gradient(
+                 0deg,
+                 transparent,
+                 transparent 35px,
+                 hsl(180 70% 75% / 0.4) 35px,
+                 hsl(180 70% 75% / 0.4) 37px
+               )`
              }} />
       </div>
 
