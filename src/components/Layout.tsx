@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ebillLogo from "@/assets/ebill-logo.png";
+import ebillLogo from "@/assets/ebill-pro-go-logo.png";
 import { OnboardingTour } from "./OnboardingTour";
 
 export function Layout({ children }: { children: React.ReactNode }) {
