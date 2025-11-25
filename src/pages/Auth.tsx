@@ -126,27 +126,25 @@ const Auth = () => {
          }}>
       {/* Animated Background Layers */}
       <div className="absolute inset-0 -z-10">
-        {/* Large Animated Orbs with Gradient */}
-        <div className="absolute -top-20 -left-20 h-[600px] w-[600px] rounded-full animate-pulse" 
+        {/* Large Animated Orbs with Gradient - Moving continuously */}
+        <div className="absolute -top-20 -left-20 h-[600px] w-[600px] rounded-full" 
              style={{ 
                background: 'radial-gradient(circle, hsl(210 70% 70% / 0.2) 0%, hsl(210 60% 75% / 0.12) 35%, transparent 70%)',
-               animationDuration: '8s',
+               animation: 'float-slow 20s ease-in-out infinite, pulse 8s ease-in-out infinite',
                filter: 'blur(60px)'
              }} />
         
-        <div className="absolute -bottom-32 -right-32 h-[700px] w-[700px] rounded-full animate-pulse" 
+        <div className="absolute -bottom-32 -right-32 h-[700px] w-[700px] rounded-full" 
              style={{ 
                background: 'radial-gradient(circle, hsl(180 80% 70% / 0.22) 0%, hsl(180 70% 75% / 0.15) 35%, transparent 70%)',
-               animationDuration: '10s',
-               animationDelay: '2s',
+               animation: 'float-reverse 25s ease-in-out infinite, pulse 10s ease-in-out infinite 2s',
                filter: 'blur(70px)'
              }} />
         
-        <div className="absolute top-1/3 right-1/4 h-[500px] w-[500px] rounded-full animate-pulse" 
+        <div className="absolute top-1/3 right-1/4 h-[500px] w-[500px] rounded-full" 
              style={{ 
                background: 'radial-gradient(circle, hsl(200 75% 75% / 0.15) 0%, hsl(200 65% 80% / 0.08) 40%, transparent 70%)',
-               animationDuration: '12s',
-               animationDelay: '4s',
+               animation: 'drift 30s ease-in-out infinite, pulse 12s ease-in-out infinite 4s',
                filter: 'blur(65px)'
              }} />
         
@@ -157,26 +155,41 @@ const Auth = () => {
                backgroundSize: '60px 60px'
              }} />
         
-        {/* Floating Gradient Shapes */}
-        <div className="absolute top-1/4 left-1/5 h-32 w-32 rounded-2xl rotate-45 animate-float backdrop-blur-sm"
+        {/* Floating Gradient Shapes with continuous movement */}
+        <div className="absolute top-1/4 left-1/5 h-32 w-32 rounded-2xl backdrop-blur-sm"
              style={{ 
                background: 'linear-gradient(135deg, hsl(210 70% 60% / 0.15), hsl(180 70% 60% / 0.15))',
-               animation: 'float 8s ease-in-out infinite',
+               animation: 'float-diagonal 15s ease-in-out infinite',
                boxShadow: '0 8px 32px hsl(210 70% 60% / 0.1)'
              }} />
         
-        <div className="absolute bottom-1/3 right-1/5 h-28 w-28 rounded-full animate-float backdrop-blur-sm"
+        <div className="absolute bottom-1/3 right-1/5 h-28 w-28 rounded-full backdrop-blur-sm"
              style={{ 
                background: 'linear-gradient(135deg, hsl(180 80% 65% / 0.2), hsl(190 75% 60% / 0.15))',
-               animation: 'float 10s ease-in-out infinite 2s',
+               animation: 'float-circle 18s ease-in-out infinite 2s',
                boxShadow: '0 8px 32px hsl(180 80% 65% / 0.15)'
              }} />
         
-        <div className="absolute top-2/3 left-1/3 h-36 w-36 rounded-3xl -rotate-12 animate-float backdrop-blur-sm"
+        <div className="absolute top-2/3 left-1/3 h-36 w-36 rounded-3xl backdrop-blur-sm"
              style={{ 
                background: 'linear-gradient(135deg, hsl(200 75% 65% / 0.12), hsl(210 70% 60% / 0.12))',
-               animation: 'float 12s ease-in-out infinite 4s',
+               animation: 'float-horizontal 22s ease-in-out infinite 4s',
                boxShadow: '0 8px 32px hsl(200 75% 65% / 0.1)'
+             }} />
+        
+        {/* Additional moving particles */}
+        <div className="absolute top-1/2 left-1/6 h-20 w-20 rounded-full backdrop-blur-sm"
+             style={{ 
+               background: 'linear-gradient(135deg, hsl(190 70% 70% / 0.18), hsl(200 65% 65% / 0.12))',
+               animation: 'drift-up 12s ease-in-out infinite',
+               boxShadow: '0 4px 16px hsl(190 70% 70% / 0.12)'
+             }} />
+        
+        <div className="absolute bottom-1/4 left-2/3 h-24 w-24 rounded-2xl backdrop-blur-sm"
+             style={{ 
+               background: 'linear-gradient(135deg, hsl(210 80% 68% / 0.16), hsl(180 70% 62% / 0.12))',
+               animation: 'float-bounce 16s ease-in-out infinite 3s',
+               boxShadow: '0 6px 24px hsl(210 80% 68% / 0.1)'
              }} />
       </div>
 
@@ -270,18 +283,55 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Add floating animation keyframe */}
       <style>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          33% {
-            transform: translateY(-20px) rotate(5deg);
-          }
-          66% {
-            transform: translateY(10px) rotate(-5deg);
-          }
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(30px, -40px) scale(1.05); }
+          50% { transform: translate(-20px, -60px) scale(0.95); }
+          75% { transform: translate(40px, -30px) scale(1.02); }
+        }
+        
+        @keyframes float-reverse {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(-40px, 30px) scale(0.95); }
+          50% { transform: translate(20px, 50px) scale(1.05); }
+          75% { transform: translate(-30px, 20px) scale(0.98); }
+        }
+        
+        @keyframes drift {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          33% { transform: translate(50px, -30px) rotate(5deg); }
+          66% { transform: translate(-40px, 40px) rotate(-5deg); }
+        }
+        
+        @keyframes float-diagonal {
+          0%, 100% { transform: translate(0, 0) rotate(45deg); }
+          25% { transform: translate(40px, -50px) rotate(60deg); }
+          50% { transform: translate(-30px, -40px) rotate(30deg); }
+          75% { transform: translate(50px, -20px) rotate(55deg); }
+        }
+        
+        @keyframes float-circle {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(-50px, 40px) scale(1.1); }
+          66% { transform: translate(30px, -30px) scale(0.9); }
+        }
+        
+        @keyframes float-horizontal {
+          0%, 100% { transform: translateX(0) rotate(-12deg); }
+          50% { transform: translateX(60px) rotate(-5deg); }
+        }
+        
+        @keyframes drift-up {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(20px, -80px); }
+        }
+        
+        @keyframes float-bounce {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          25% { transform: translateY(-40px) rotate(8deg); }
+          50% { transform: translateY(-20px) rotate(-4deg); }
+          75% { transform: translateY(-50px) rotate(6deg); }
         }
       `}</style>
     </div>
