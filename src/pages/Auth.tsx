@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import ebillLogo from "@/assets/ebill-logo.png";
+import ebillLogo from "@/assets/ebill-pro-go-logo.png";
 import ebillIcon from "@/assets/ebill-icon.png";
 import { getApiUrl } from "@/lib/api";
 
